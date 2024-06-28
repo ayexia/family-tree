@@ -76,7 +76,7 @@ class GedcomParser
                 $value = isset($columns[2]) ? trim($columns[2]) : ''; //final column is used to retrieve the data corresponding to the tag, whilst removing whitespaces at the start and end
         
                 if ($level === 0 && strpos($tag, '@F') === 0) { //if level is 0 and the tag begins with '@F' (indicating family)
-                    if (isset($id)) { //if family record exists already pass the relevant details to storeRelationship method before moving onto next
+                    if (isset($id)) { //stores previous family record when new one is found
                         $this->storeRelationship(
                             $id,
                             $mother_id ?? null,
@@ -94,28 +94,28 @@ class GedcomParser
                     $child_id = null;
                     $marriageDate = null; //sets marriage date to null
                     $divorceDate = null; //sets divorce date to null
-                } elseif ($level === 1) { //if level is 1
+                } if ($level === 1) { //if level is 1
                  if ($tag === 'MARR') { //if tag equals 'MARR' (indicating marriage)
                     $isMarried = true; //sets isMarried bool to true
-                 } elseif ($tag === 'DIV') { //if tag equals 'DIV' (indicating divorce)
+                 } if ($tag === 'DIV') { //if tag equals 'DIV' (indicating divorce)
                     $isDivorced = true; //sets isDivorced bool to true
-                 } elseif ($tag === 'HUSB') {
-                    $father_id = trim($tag, '@');
-                 } elseif ($tag === 'WIFE') {
-                    $mother_id = trim($tag, '@');
-                 } elseif ($tag === 'CHIL') {
-                    $child_id = trim($tag, '@');
+                 } if ($tag === 'HUSB') {
+                    $father_id = trim($value, '@');
+                 } if ($tag === 'WIFE') {
+                    $mother_id = trim($value, '@');
+                 } if ($tag === 'CHIL') {
+                    $child_id = trim($value, '@');
                  }
-                } elseif ($level === 2 && $tag === 'DATE'){ //if level is 2 and contains the tag 'DATE'
+                } if ($level === 2 && $tag === 'DATE'){ //if level is 2 and contains the tag 'DATE'
                     if (isset($isMarried)) { //if a defined value is found for isMarried (i.e. true)
                     $marriageDate = $this->extractQual($value); //extract marriage date and pass to convertToDate method
                     unset($isMarried); //removes value for isMarried
-                } elseif (isset($isDivorced)) { //if a defined value is found for isDivorced (i.e. true)
+                } if (isset($isDivorced)) { //if a defined value is found for isDivorced (i.e. true)
                     $divorceDate = $this->extractQual($value); //extract divorce date and pass to convertToDate method
                     unset($isDivorced); //removes value for isDivorced
             }
         }
-            if (isset($id)) { //passes all data extracted of new family record to storeRelationship method
+            if (isset($id)) { //passes all data extracted of final family record to storeRelationship method
                 $this->storeRelationship(  
                 $id,
                 $mother_id ?? null,
@@ -162,10 +162,14 @@ class GedcomParser
     private function storeRelationship($gedcomId, $mother_id, $father_id, $child_id, $marriageDate, $marriageDateQualifier, $divorceDate, $divorceDateQualifier)
     {
         if ($mother_id && $father_id){
-        $spouseRelationship = Relationship::updateOrCreate(
+            $mother = Person::where('gedcom_id', $mother_id)->first();
+            $father = Person::where('gedcom_id', $father_id)->first();
+            
+            if ($mother && $father) {
+                $spouseRelationship = Relationship::updateOrCreate(
             ['gedcom_id' => $gedcomId . '_SPOUSE'],
-            [   'person_id' => $mother_id,
-                'relative_id' => $father_id,
+            [   'person_id' => $mother->id,
+                'relative_id' => $father->id,
                 'type' => 'spouse',
                 'marriage_date' => $this->convertToDate($marriageDate),
                 'marriage_date_qualifier' => $marriageDateQualifier,
@@ -173,22 +177,31 @@ class GedcomParser
                 'divorce_date_qualifier' => $divorceDateQualifier
             ]
         );
-    } elseif ($mother_id && $child_id) {
+        }
+    } if ($mother_id && $child_id) {
+        $mother = Person::where('gedcom_id', $mother_id)->first();
+        $child = Person::where('gedcom_id', $child_id)->first();
+        if ($mother && $child){
         $motherAndChildRelationship = Relationship::updateOrCreate(
             ['gedcom_id' => $gedcomId . '_MOTHER-CHILD'],
-            [   'person_id' => $mother_id,
-                'relative_id' => $child_id,
+            [   'person_id' => $mother->id,
+                'relative_id' => $child->id,
                 'type' => 'mother-child'
             ]
         );
-    } elseif ($father_id && $child_id) {
+    }
+    } if ($father_id && $child_id) {
+        $father = Person::where('gedcom_id', $father_id)->first();
+        $child = Person::where('gedcom_id', $child_id)->first();
+        if ($father && $child){
         $fatherAndChildRelationship = Relationship::updateOrCreate(
         ['gedcom_id' => $gedcomId . '_FATHER-CHILD'],
-        [   'person_id' => $father_id,
-            'relative_id' => $child_id,
+        [   'person_id' => $father->id,
+            'relative_id' => $child->id,
             'type' => 'father-child'
         ]
     );
+    }
 }
         try {
         Log::info('Relationship created/updated', ['gedcom_id' => $gedcomId]);
@@ -215,6 +228,7 @@ class GedcomParser
             } //if there is no qualifier date is simply set as the date found
             if (!$qualifier) {
                 $date = $gedcomDate;
+                $qualifier = 'EXACT';
             }
         }
 

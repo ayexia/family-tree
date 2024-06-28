@@ -13,17 +13,15 @@ return new class extends Migration
     {
         Schema::create('relationships', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('person_id')->nullable();
-            $table->unsignedBigInteger('relative_id')->nullable();
-            $table->string('gedcom_id')->nullable();
-            $table->enum('type', ['spouse', 'mother-child', 'father-child'])->nullable();
+            $table->string('gedcom_id')->unique();
+            $table->foreignId('person_id')->nullable()->constrained('people')->onDelete('cascade');
+            $table->foreignId('relative_id')->nullable()->constrained('people')->onDelete('cascade');
+            $table->string('type');
             $table->date('marriage_date')->nullable();
-            $table->enum('marriage_date_qualifier', ['ABT', 'BEF', 'AFT', 'null'])->nullable();
+            $table->string('marriage_date_qualifier')->nullable();
             $table->date('divorce_date')->nullable();
-            $table->enum('divorce_date_qualifier', ['ABT', 'BEF', 'AFT', 'null'])->nullable();
+            $table->string('divorce_date_qualifier')->nullable();
             $table->timestamps();
-            $table->foreign('person_id')->references('id')->on('people')->onDelete('cascade');
-            $table->foreign('relative_id')->references('id')->on('people')->onDelete('cascade');
         });
     }
 

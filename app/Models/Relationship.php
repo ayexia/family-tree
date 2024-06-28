@@ -9,6 +9,8 @@ class Relationship extends Model
 {
     protected $fillable = [
         'gedcom_id',
+        'person_id',
+        'relative_id',
         'type',
         'marriage_date',
         'marriage_date_qualifier',

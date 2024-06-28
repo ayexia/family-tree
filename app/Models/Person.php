@@ -22,15 +22,13 @@ class Person extends Model
         'death_date' => 'date',
     ];
 
-    public function spouses()
+    public function relationships()
     {
-        return $this->hasMany(Relationship::class, 'person_id')
-            ->where('type', 'spouse');
+        return $this->hasMany(Relationship::class, 'person_id');
     }
 
-    public function children()
+    public function relatives()
     {
-        return $this->hasMany(Relationship::class, 'person_id')
-            ->where('type', 'child');
+        return $this->hasMany(Relationship::class, 'relative_id');
     }
 }

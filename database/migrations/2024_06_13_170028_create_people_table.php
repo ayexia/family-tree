@@ -17,9 +17,9 @@ return new class extends Migration
                 $table->string('name');
                 $table->char('gender', 1)->nullable();
                 $table->date('birth_date')->nullable();
-                $table->enum('birth_date_qualifier', ['ABT', 'BEF', 'AFT', 'null'])->nullable();
+                $table->enum('birth_date_qualifier', ['ABT', 'BEF', 'AFT', 'EXACT'])->nullable();
                 $table->date('death_date')->nullable();
-                $table->enum('death_date_qualifier', ['ABT', 'BEF', 'AFT', 'null'])->nullable();
+                $table->enum('death_date_qualifier', ['ABT', 'BEF', 'AFT', 'EXACT'])->nullable();
                 $table->timestamps();
         });
     }

@@ -5,13 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Relationship extends Model
+class Spouse extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'gedcom_id',
-        'person_id',
-        'relative_id',
-        'type',
+        'first_spouse_id',
+        'second_spouse_id',
         'marriage_date',
         'marriage_date_qualifier',
         'divorce_date',
@@ -23,13 +23,14 @@ class Relationship extends Model
         'divorce_date' => 'date',
     ];
 
-    public function person()
+    public function firstSpouse()
     {
-        return $this->belongsTo(Person::class, 'person_id');
+        return $this->belongsTo(Person::class);
     }
 
-    public function relative()
+    public function secondSpouse()
     {
-        return $this->belongsTo(Person::class, 'relative_id');
+        return $this->belongsTo(Person::class);
     }
+
 }

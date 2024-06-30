@@ -13,7 +13,10 @@ namespace App\Services;
 use Gedcom\Parser;
 use App\Models\Person;
 use App\Models\Relationship;
-use Illuminate\Support\Facades\Log;
+use App\Models\Spouse;
+use App\Models\MotherAndChild;
+use App\Models\FatherAndChild;
+use Illuminate\Support\Facades\Session;
 use Carbon\Carbon;
 
 /**
@@ -69,7 +72,7 @@ class GedcomParser
                 $line = trim($line); //removes whitespaces from beginning and end of line
                 if (empty($line)) continue; //skips empty lines
         
-                $columns = explode(' ', $line, 3); //splits each line into 3 columns via spaces
+                $columns = explode(' ', $line, 3); //splits each line into 3 columns via spaces (only first 2 spaces are counted)
                 if (count($columns) < 2) continue; //skips lines which have less than 2 columns
                 $level = (int)$columns[0]; //first column is converted to integer (as each line of GEDCOM files begin with a number)
                 $tag = $columns[1]; //next column is used to retrieve the tag (e.g. 'NAME', 'BIRT', 'MARR')
@@ -77,15 +80,24 @@ class GedcomParser
         
                 if ($level === 0 && strpos($tag, '@F') === 0) { //if level is 0 and the tag begins with '@F' (indicating family)
                     if (isset($id)) { //stores previous family record when new one is found
-                        $this->storeRelationship(
+                        $this->storeSpouses(
                             $id,
                             $mother_id ?? null,
                             $father_id ?? null,
-                            $child_id ?? null, 
                             $marriageDate['date'] ?? null,
                             $marriageDate['qualifier'] ?? null, 
                             $divorceDate['date'] ?? null,
                             $divorceDate['qualifier'] ?? null
+                        );
+                        $this->storeMotherAndChild(
+                            $id,
+                            $mother_id ?? null,
+                            $child_id ?? null
+                        );
+                        $this->storeFatherAndChild(
+                            $id,
+                            $father_id ?? null,
+                            $child_id ?? null
                         );
                     }
                     $id = trim($tag, '@'); //extracts ID and removes '@'
@@ -116,15 +128,24 @@ class GedcomParser
             }
         }
             if (isset($id)) { //passes all data extracted of final family record to storeRelationship method
-                $this->storeRelationship(  
+                $this->storeSpouses(  
                 $id,
                 $mother_id ?? null,
                 $father_id ?? null,
-                $child_id ?? null, 
                 $marriageDate['date'] ?? null,
                 $marriageDate['qualifier'] ?? null, 
                 $divorceDate['date'] ?? null,
                 $divorceDate['qualifier'] ?? null
+            );
+            $this->storeMotherAndChild(
+                $id,
+                $mother_id ?? null,
+                $child_id ?? null
+            );
+            $this->storeFatherAndChild(
+                $id,
+                $father_id ?? null,
+                $child_id ?? null
             );
             }
         }
@@ -150,66 +171,64 @@ class GedcomParser
          * if failed, logs error message and throws exception
          */
         try {
-        Log::info('Person created/updated', ['gedcom_id' => $gedcomId]);
+            Session::flash('success', "Person created/updated: " . $name . "(".$gedcomId.").");
         } catch (\Exception $e) {
-        Log::error('Error storing person', ['gedcom_id' => $gedcomId, 'error' => $e->getMessage()]);
-        throw $e; 
+            Session::flash('error', "Error storing person: " . $name . "(".$gedcomId."). Error - " . $e->getMessage());
         }
     }
     /**
     * Stores the extracted information from the parser into the Relationships table, creating or updating a Relationship record within it.
     */
-    private function storeRelationship($gedcomId, $mother_id, $father_id, $child_id, $marriageDate, $marriageDateQualifier, $divorceDate, $divorceDateQualifier)
-    {
-        if ($mother_id && $father_id){
-            $mother = Person::where('gedcom_id', $mother_id)->first();
-            $father = Person::where('gedcom_id', $father_id)->first();
-            
-            if ($mother && $father) {
-                $spouseRelationship = Relationship::updateOrCreate(
-            ['gedcom_id' => $gedcomId . '_SPOUSE'],
-            [   'person_id' => $mother->id,
-                'relative_id' => $father->id,
-                'type' => 'spouse',
-                'marriage_date' => $this->convertToDate($marriageDate),
-                'marriage_date_qualifier' => $marriageDateQualifier,
-                'divorce_date' => $this->convertToDate($divorceDate),
-                'divorce_date_qualifier' => $divorceDateQualifier
-            ]
-        );
+            private function storeSpouses($gedcomId, $mother_id, $father_id, $marriageDate, $marriageDateQualifier, $divorceDate, $divorceDateQualifier)
+            {
+                if ($mother_id && $father_id){
+                    $mother = Person::where('gedcom_id', $mother_id)->first();
+                    $father = Person::where('gedcom_id', $father_id)->first();
+                    
+                    if ($mother && $father) {
+                        $spouseRelationship = Spouse::updateOrCreate(
+                    ['gedcom_id' => $gedcomId],
+                    [   'first_spouse_id' => $mother->id,
+                        'second_spouse_id' => $father->id,
+                        'marriage_date' => $this->convertToDate($marriageDate),
+                        'marriage_date_qualifier' => $marriageDateQualifier,
+                        'divorce_date' => $this->convertToDate($divorceDate),
+                        'divorce_date_qualifier' => $divorceDateQualifier
+                    ]
+                );
+                }
+            }
         }
-    } if ($mother_id && $child_id) {
-        $mother = Person::where('gedcom_id', $mother_id)->first();
-        $child = Person::where('gedcom_id', $child_id)->first();
-        if ($mother && $child){
-        $motherAndChildRelationship = Relationship::updateOrCreate(
-            ['gedcom_id' => $gedcomId . '_MOTHER-CHILD'],
-            [   'person_id' => $mother->id,
-                'relative_id' => $child->id,
-                'type' => 'mother-child'
-            ]
-        );
-    }
-    } if ($father_id && $child_id) {
-        $father = Person::where('gedcom_id', $father_id)->first();
-        $child = Person::where('gedcom_id', $child_id)->first();
-        if ($father && $child){
-        $fatherAndChildRelationship = Relationship::updateOrCreate(
-        ['gedcom_id' => $gedcomId . '_FATHER-CHILD'],
-        [   'person_id' => $father->id,
-            'relative_id' => $child->id,
-            'type' => 'father-child'
-        ]
-    );
+            private function storeMotherAndChild($gedcomId, $mother_id, $child_id)
+            {
+                if ($mother_id && $child_id) {
+                    $mother = Person::where('gedcom_id', $mother_id)->first();
+                    $child = Person::where('gedcom_id', $child_id)->first();
+                    if ($mother && $child){
+                    $motherAndChildRelationship = MotherAndChild::updateOrCreate(
+                        ['gedcom_id' => $gedcomId],
+                        [   'mother_id' => $mother->id,
+                            'child_id' => $child->id
+                        ]
+                    );
+                }
+            }
+        }
+        private function storeFatherAndChild($gedcomId, $father_id, $child_id)
+        {
+                if ($father_id && $child_id) {
+                $father = Person::where('gedcom_id', $father_id)->first();
+                $child = Person::where('gedcom_id', $child_id)->first();
+                if ($father && $child){
+                $fatherAndChildRelationship = FatherAndChild::updateOrCreate(
+                ['gedcom_id' => $gedcomId],
+                [   'father_id' => $father->id,
+                    'child_id' => $child->id,
+                ]
+            );
+            }
     }
 }
-        try {
-        Log::info('Relationship created/updated', ['gedcom_id' => $gedcomId]);
-        } catch (\Exception $e) {
-        Log::error('Error storing relationship', ['gedcom_id' => $gedcomId, 'error' => $e->getMessage()]);
-        throw $e; 
-        }
-    }
     /**
     * Extracts qualifiers ('ABT', 'BEF', 'AFT') used for approximation of dates from a given date if applicable. Separation of dates and qualifiers is required to allow storing of dates which contain both.
     */
@@ -256,7 +275,7 @@ class GedcomParser
                     return Carbon::parse($date)->format('Y-m-d'); //full date is formatted to year-month-day format
                 }
             } catch (\Exception $e) { //logs error and throws exception if date cannot be parsed/formatted
-                Log::error('Error parsing date', ['gedcom_date' => $date, 'error' => $e->getMessage()]);
+                Session::flash('error', "Error converting date. Error - " . $e->getMessage());
                 return null;
             }
         }

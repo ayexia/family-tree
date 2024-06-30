@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Person extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'gedcom_id', 
         'name', 
@@ -31,4 +32,35 @@ class Person extends Model
     {
         return $this->hasMany(Relationship::class, 'relative_id');
     }
+
+    public function firstSpouses()
+    {
+        return $this->hasMany(Spouse::class, 'first_spouse_id');
+    }
+
+    public function secondSpouses()
+    {
+        return $this->hasMany(Spouse::class, 'second_spouse_id');
+    }
+
+    public function fatherOfChildren()
+    {
+        return $this->hasMany(FatherAndChild::class, 'father_id');
+    }
+
+    public function motherOfChildren()
+    {
+        return $this->hasMany(MotherAndChild::class, 'mother_id');
+    }
+
+    public function childrenofFather()
+    {
+    return $this->hasManyThrough(Person::class, FatherAndChild::class, 'father_id', 'id', 'id', 'child_id');
+    }
+
+    public function childrenofMother()
+    {
+    return $this->hasManyThrough(Person::class, MotherAndChild::class, 'mother_id', 'id', 'id', 'child_id');
+    }
+
 }

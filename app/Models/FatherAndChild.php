@@ -12,6 +12,7 @@ class FatherAndChild extends Model
     'gedcom_id',
     'father_id',
     'child_id',
+    'child_number'
     ];
 
     public function father()

@@ -12,7 +12,6 @@ namespace App\Services;
 
 use Gedcom\Parser;
 use App\Models\Person;
-use App\Models\Relationship;
 use App\Models\Spouse;
 use App\Models\MotherAndChild;
 use App\Models\FatherAndChild;
@@ -92,18 +91,21 @@ class GedcomParser
                         $this->storeMotherAndChild(
                             $id,
                             $mother_id ?? null,
-                            $child_id ?? null
+                            $child_id ?? null,
+                            $child_number ?? null
                         );
                         $this->storeFatherAndChild(
                             $id,
                             $father_id ?? null,
-                            $child_id ?? null
+                            $child_id ?? null,
+                            $child_number ?? null
                         );
                     }
                     $id = trim($tag, '@'); //extracts ID and removes '@'
                     $mother_id = null;
                     $father_id = null;
                     $child_id = null;
+                    $child_number = null;
                     $marriageDate = null; //sets marriage date to null
                     $divorceDate = null; //sets divorce date to null
                 } if ($level === 1) { //if level is 1
@@ -117,6 +119,7 @@ class GedcomParser
                     $mother_id = trim($value, '@');
                  } if ($tag === 'CHIL') {
                     $child_id = trim($value, '@');
+                    $child_number++;
                  }
                 } if ($level === 2 && $tag === 'DATE'){ //if level is 2 and contains the tag 'DATE'
                     if (isset($isMarried)) { //if a defined value is found for isMarried (i.e. true)
@@ -140,12 +143,14 @@ class GedcomParser
             $this->storeMotherAndChild(
                 $id,
                 $mother_id ?? null,
-                $child_id ?? null
+                $child_id ?? null,
+                $child_number ?? null
             );
             $this->storeFatherAndChild(
                 $id,
                 $father_id ?? null,
-                $child_id ?? null
+                $child_id ?? null,
+                $child_number ?? null
             );
             }
         }
@@ -199,31 +204,33 @@ class GedcomParser
                 }
             }
         }
-            private function storeMotherAndChild($gedcomId, $mother_id, $child_id)
+            private function storeMotherAndChild($gedcomId, $mother_id, $child_id, $child_number)
             {
                 if ($mother_id && $child_id) {
                     $mother = Person::where('gedcom_id', $mother_id)->first();
                     $child = Person::where('gedcom_id', $child_id)->first();
                     if ($mother && $child){
                     $motherAndChildRelationship = MotherAndChild::updateOrCreate(
-                        ['gedcom_id' => $gedcomId],
+                        ['gedcom_id' => $gedcomId . '-CHILD '.$child_number],
                         [   'mother_id' => $mother->id,
-                            'child_id' => $child->id
+                            'child_id' => $child->id,
+                            'child_number' => $child_number
                         ]
                     );
                 }
             }
         }
-        private function storeFatherAndChild($gedcomId, $father_id, $child_id)
+        private function storeFatherAndChild($gedcomId, $father_id, $child_id, $child_number)
         {
                 if ($father_id && $child_id) {
                 $father = Person::where('gedcom_id', $father_id)->first();
                 $child = Person::where('gedcom_id', $child_id)->first();
                 if ($father && $child){
                 $fatherAndChildRelationship = FatherAndChild::updateOrCreate(
-                ['gedcom_id' => $gedcomId],
+                ['gedcom_id' => $gedcomId. '-CHILD '.$child_number],
                 [   'father_id' => $father->id,
                     'child_id' => $child->id,
+                    'child_number' => $child_number
                 ]
             );
             }

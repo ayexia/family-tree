@@ -22,17 +22,7 @@ class Person extends Model
         'birth_date' => 'date',
         'death_date' => 'date',
     ];
-
-    public function relationships()
-    {
-        return $this->hasMany(Relationship::class, 'person_id');
-    }
-
-    public function relatives()
-    {
-        return $this->hasMany(Relationship::class, 'relative_id');
-    }
-
+    
     public function firstSpouses()
     {
         return $this->hasMany(Spouse::class, 'first_spouse_id');

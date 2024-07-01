@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('gedcom_id');
             $table->foreignId('mother_id')->nullable()->constrained('people')->onDelete('cascade');
             $table->foreignId('child_id')->nullable()->constrained('people')->onDelete('cascade');
+            $table->integer('child_number')->nullable();
             $table->timestamps();
         });
     }

@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class MotherAndChild extends Model
 {
     use HasFactory;
-    use HasFactory;
     protected $fillable = [
     'gedcom_id',
     'mother_id',
     'child_id',
+    'child_number'
     ];
 
     public function mother()

@@ -53,11 +53,11 @@ class GedcomParser
                 //corresponding information is then passed to storePerson method
                 $this->storePerson(
                     $individual->getId(), //obtains GEDCOM ID for individual (characterised by @Ixxxx@)
-                    $name->getSurn() . ', ' . $name->getGivn(), //obtains and concatenates surname and first name
+                    $name->getGivn() . ' ' . $name->getSurn(), //obtains and concatenates first name and surname
                     $individual->getSex(), //obtains gender
-                    $birthDate['date'], //DOB obtained from getDate
+                    $birthDate['date'], //DOB obtained from extractQual (after conversion via getDate)
                     $birthDate['qualifier'], //qualifier (ABT, BEF, AFT, used when dates are approximate) obtained from extractQual associated with DOB
-                    $deathDate['date'], //DOD obtained from getDate
+                    $deathDate['date'], //DOD obtained from extractQual (after conversion via getDate)
                     $deathDate['qualifier'] //qualifier (ABT, BEF, AFT, used when dates are approximate) obtained from extractQual associated with DOD
                 );
             }
@@ -78,7 +78,7 @@ class GedcomParser
                 $value = isset($columns[2]) ? trim($columns[2]) : ''; //final column is used to retrieve the data corresponding to the tag, whilst removing whitespaces at the start and end
         
                 if ($level === 0 && strpos($tag, '@F') === 0) { //if level is 0 and the tag begins with '@F' (indicating family)
-                    if (isset($id)) { //stores previous family record when new one is found
+                    if (isset($id)) { //stores previous family record when new one is found (spouse, mother-child and father-child info)
                         $this->storeSpouses(
                             $id,
                             $mother_id ?? null,
@@ -102,24 +102,25 @@ class GedcomParser
                         );
                     }
                     $id = trim($tag, '@'); //extracts ID and removes '@'
+                    //initialising variables by setting to null
                     $mother_id = null;
                     $father_id = null;
                     $child_id = null;
                     $child_number = null;
-                    $marriageDate = null; //sets marriage date to null
-                    $divorceDate = null; //sets divorce date to null
+                    $marriageDate = null;
+                    $divorceDate = null;
                 } if ($level === 1) { //if level is 1
                  if ($tag === 'MARR') { //if tag equals 'MARR' (indicating marriage)
                     $isMarried = true; //sets isMarried bool to true
                  } if ($tag === 'DIV') { //if tag equals 'DIV' (indicating divorce)
                     $isDivorced = true; //sets isDivorced bool to true
-                 } if ($tag === 'HUSB') {
-                    $father_id = trim($value, '@');
-                 } if ($tag === 'WIFE') {
-                    $mother_id = trim($value, '@');
-                 } if ($tag === 'CHIL') {
-                    $child_id = trim($value, '@');
-                    $child_number++;
+                 } if ($tag === 'HUSB') { //if tag equals 'HUSB' (indicating husband)
+                    $father_id = trim($value, '@'); //extracts husband's individual ID
+                 } if ($tag === 'WIFE') { //if tag equals 'WIFE' (indicating wife)
+                    $mother_id = trim($value, '@'); //extracts wife's individual ID
+                 } if ($tag === 'CHIL') { //if tag equals 'CHIL' (indicating child)
+                    $child_id = trim($value, '@'); //extracts child's individual ID
+                    $child_number++; //increases number of children by one for families with multiple children
                  }
                 } if ($level === 2 && $tag === 'DATE'){ //if level is 2 and contains the tag 'DATE'
                     if (isset($isMarried)) { //if a defined value is found for isMarried (i.e. true)
@@ -130,7 +131,7 @@ class GedcomParser
                     unset($isDivorced); //removes value for isDivorced
             }
         }
-            if (isset($id)) { //passes all data extracted of final family record to storeRelationship method
+            if (isset($id)) { //passes all data extracted of final family record to storeSpouse, storeMotherAndChild and storeFatherAndChild methods
                 $this->storeSpouses(  
                 $id,
                 $mother_id ?? null,
@@ -171,9 +172,11 @@ class GedcomParser
                 'death_date_qualifier' => $deathDateQualifier,
             ]
         );
-        /**try-catch logs a message through Laravel's logging system (\Facades\Log - Facades are equivalent of wrapper classes for Laravel) indicating 
-         * whether the method was performed successfully or failed.
-         * if failed, logs error message and throws exception
+        /** STILL NEEDS WORKING/TESTING
+         * try-catch flashes a message through Laravel's Session class 
+         *(\Facades\Session - Facades are equivalent of wrapper classes for Laravel, where it instantiates the class and resolves any dependencies behind the scenes) 
+         * indicating whether the method was performed successfully or failed.
+         * if failed, throws exception
          */
         try {
             Session::flash('success', "Person created/updated: " . $name . "(".$gedcomId.").");
@@ -182,15 +185,15 @@ class GedcomParser
         }
     }
     /**
-    * Stores the extracted information from the parser into the Relationships table, creating or updating a Relationship record within it.
+    * Stores the extracted information from the parser into the Spouses table, creating or updating a Spouse record within it.
     */
             private function storeSpouses($gedcomId, $mother_id, $father_id, $marriageDate, $marriageDateQualifier, $divorceDate, $divorceDateQualifier)
             {
-                if ($mother_id && $father_id){
+                if ($mother_id && $father_id){ //if mother_id and father_id were extracted searches for respective GEDCOM IDs in People table and obtains details
                     $mother = Person::where('gedcom_id', $mother_id)->first();
                     $father = Person::where('gedcom_id', $father_id)->first();
                     
-                    if ($mother && $father) {
+                    if ($mother && $father) { //if mother's and father's details are available through matching IDs will update/create Spouse record with corresponding information for each column in Spouses table
                         $spouseRelationship = Spouse::updateOrCreate(
                     ['gedcom_id' => $gedcomId],
                     [   'first_spouse_id' => $mother->id,
@@ -204,14 +207,17 @@ class GedcomParser
                 }
             }
         }
+    /**
+    * Stores the extracted information from the parser into the MotherAndChildren table, creating or updating a Mother/Child record within it.
+    */
             private function storeMotherAndChild($gedcomId, $mother_id, $child_id, $child_number)
             {
-                if ($mother_id && $child_id) {
+                if ($mother_id && $child_id) { //if mother_id and child_id were extracted searches for respective GEDCOM IDs in People table and obtains details
                     $mother = Person::where('gedcom_id', $mother_id)->first();
                     $child = Person::where('gedcom_id', $child_id)->first();
-                    if ($mother && $child){
+                    if ($mother && $child){ //if mother's and child's details are available through matching IDs will update/create Mother/Child record with corresponding information for each column in MotherAndChildren table
                     $motherAndChildRelationship = MotherAndChild::updateOrCreate(
-                        ['gedcom_id' => $gedcomId . '-CHILD '.$child_number],
+                        ['gedcom_id' => $gedcomId . '-CHILD '.$child_number], //concatenates the family GEDCOM ID with "-CHILD" string and the child's number (appropriate for families with multiple children as only the last child is stored otherwise due to overwriting the same GEDCOM ID)
                         [   'mother_id' => $mother->id,
                             'child_id' => $child->id,
                             'child_number' => $child_number
@@ -220,12 +226,15 @@ class GedcomParser
                 }
             }
         }
+    /**
+    * Stores the extracted information from the parser into the FatherAndChildren table, creating or updating a Father/Child record within it.
+    */
         private function storeFatherAndChild($gedcomId, $father_id, $child_id, $child_number)
         {
-                if ($father_id && $child_id) {
+                if ($father_id && $child_id) { //if father_id and child_id were extracted searches for respective GEDCOM IDs in People table and obtains details
                 $father = Person::where('gedcom_id', $father_id)->first();
                 $child = Person::where('gedcom_id', $child_id)->first();
-                if ($father && $child){
+                if ($father && $child){ //if father's and child's details are available through matching IDs will update/create Father/Child record with corresponding information for each column in FatherAndChildren table
                 $fatherAndChildRelationship = FatherAndChild::updateOrCreate(
                 ['gedcom_id' => $gedcomId. '-CHILD '.$child_number],
                 [   'father_id' => $father->id,
@@ -248,7 +257,7 @@ class GedcomParser
             foreach ($qualifiers as $qual) { //loops through each qualifier
                 if (strpos($gedcomDate, $qual) === 0) { //if any of the qualifiers are found at the beginning of a date sets that specific qualifier to qualifier variable
                     $qualifier = $qual;
-                    $date = trim(str_replace($qual, '', $gedcomDate)); //extracts the date by removing the qualifier, replacing with space
+                    $date = trim(str_replace($qual, '', $gedcomDate)); //extracts the date by removing the qualifier, replacing with space, then removing the space
                     break;
                 }
             } //if there is no qualifier date is simply set as the date found
@@ -258,7 +267,7 @@ class GedcomParser
             }
         }
 
-        //returns an array containing the date (converted via convertToDate) and qualifier
+        //returns array containing the date (converted via convertToDate) and qualifier
         return [
             'date' => $this->convertToDate($date),
             'qualifier' => $qualifier
@@ -281,7 +290,7 @@ class GedcomParser
                 } else { //otherwise the full date is found
                     return Carbon::parse($date)->format('Y-m-d'); //full date is formatted to year-month-day format
                 }
-            } catch (\Exception $e) { //logs error and throws exception if date cannot be parsed/formatted
+            } catch (\Exception $e) { //flashes error and throws exception if date cannot be parsed/formatted - STILL IN PROGRESS
                 Session::flash('error', "Error converting date. Error - " . $e->getMessage());
                 return null;
             }

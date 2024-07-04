@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\GedcomController;
+use App\Http\Controllers\FamilyTreeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -18,7 +19,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/upload', [GedcomController::class, 'showUploadForm'])->name('upload.form');
 Route::post('/upload', [GedcomController::class, 'upload'])->name('upload');
+
+
+Route::get('/family-tree', [FamilyTreeController:: class, 'displayFamilyTree'])->name('family.tree');
 
 require __DIR__.'/auth.php';

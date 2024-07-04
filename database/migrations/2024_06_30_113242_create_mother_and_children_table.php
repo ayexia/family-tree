@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('mother_and_children', function (Blueprint $table) {
             $table->id();
-            $table->string('gedcom_id');
+            $table->string('gedcom_id')->unique()->nullable();
             $table->foreignId('mother_id')->nullable()->constrained('people')->onDelete('cascade');
             $table->foreignId('child_id')->nullable()->constrained('people')->onDelete('cascade');
             $table->integer('child_number')->nullable();

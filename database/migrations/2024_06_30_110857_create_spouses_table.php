@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('spouses', function (Blueprint $table) {
             $table->id();
-            $table->string('gedcom_id');
+            $table->string('gedcom_id')->unique()->nullable();
             $table->foreignId('first_spouse_id')->nullable()->constrained('people')->onDelete('cascade');
             $table->foreignId('second_spouse_id')->nullable()->constrained('people')->onDelete('cascade');
             $table->date('marriage_date')->nullable();

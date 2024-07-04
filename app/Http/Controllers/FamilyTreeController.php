@@ -320,7 +320,7 @@ class FamilyTreeController extends Controller
     public function show($id){
         //TODO: code for showing individuals
         $person = Person::findOrFail($id);
-        
-        return view('person.show', compact('persons'));
+
+        return view('person.show', compact('person'));
     }
 }

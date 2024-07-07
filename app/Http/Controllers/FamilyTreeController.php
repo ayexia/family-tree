@@ -126,30 +126,41 @@ class FamilyTreeController extends Controller
     public function displayFamilyTree(Request $request){
         //initialises query by ensuring results will be displayed in order of DOB
         $requestedPerson = Person::query()->orderBy('birth_date');
-        //sets variables desiredUserId and desiredName to take user's input
-        $desiredUserId = $request->input('desiredUserId');
         $desiredName = $request->input('desiredName');
-    
-        if ($desiredUserId) { //retrieves person based on ID
-            $requestedPerson->where('id', $desiredUserId);
-        }
-        elseif ($desiredName) { //retrieves people based on name(s)
+
+        //CURRENT PROBLEMS: searches retrieved but all information related to matching names are "Unknown"/blank, remove timestamp and format date
+
+        if ($desiredName) { //retrieves people based on name(s)
             $requestedPerson->where('name', 'like', '%' . $desiredName . '%');
         }
         
         //retrieves people fitting the query criteria
-        $persons = $requestedPerson->get();
+        $allPersons = $requestedPerson->get();
+
+        $allPersonsIds = $allPersons->pluck('id');
 
         //retrieves all mother-child, father-child and spouse relationships from respective Models (DB)
-        $motherAndChildRelationships = MotherAndChild::all();
-        $fatherAndChildRelationships = FatherAndChild::all();
-        $marriages = Spouse::all();
+        
+        $motherAndChildRelationships = MotherAndChild::whereIn('mother_id', $allPersonsIds)->orWhereIn('child_id', $allPersonsIds)->get();
+        $fatherAndChildRelationships = FatherAndChild::whereIn('father_id', $allPersonsIds)->orWhereIn('child_id', $allPersonsIds)->get();
+        $marriages = Spouse::whereIn('first_spouse_id', $allPersonsIds)->orWhereIn('second_spouse_id', $allPersonsIds)->get();
+
+        $relativeIds = $allPersonsIds
+        ->merge($motherAndChildRelationships->pluck('mother_id'))
+        ->merge($motherAndChildRelationships->pluck('child_id'))
+        ->merge($fatherAndChildRelationships->pluck('father_id'))
+        ->merge($fatherAndChildRelationships->pluck('child_id'))
+        ->merge($marriages->pluck('first_spouse_id'))
+        ->merge($marriages->pluck('second_spouse_id'))
+        ->unique();
+
+        $relatives = Person::whereIn('id', $relativeIds)->get();
 
         //initialises family tree structure
         $familyTree = [];
 
         //iterates through each person creating nodes for them
-        foreach ($persons as $person){
+        foreach ($allPersons as $person){
             $familyTree[$person->id] = [
                 'name' => $person->name,
                 'children' => [],
@@ -174,9 +185,9 @@ class FamilyTreeController extends Controller
         }
         
         //prints a display of the structure for debugging purposes - will remove later
-        print_r($familyTree);
+        // print_r($familyTree);
         //returns the appropriate View, passing the data necessary for it
-        return view('tree.index', compact('persons', 'familyTree', 'desiredName', 'desiredUserId'));
+        return view('tree.index', compact('allPersons', 'familyTree', 'desiredName', 'relatives'));
     }
 
     /**
@@ -318,7 +329,7 @@ class FamilyTreeController extends Controller
     }
 
     public function show($id){
-        //TODO: code for showing individuals
+        //TODO: code for showing individuals, page to display person, modifications if necessary
         $person = Person::findOrFail($id);
 
         return view('person.show', compact('person'));

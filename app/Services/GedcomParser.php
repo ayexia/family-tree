@@ -38,8 +38,8 @@ class GedcomParser
         foreach ($gedcom->getIndi() as $individual) {
             //getName used to obtain names ('NAME' tag is used for names)
             $names = $individual->getName();
-            if (!empty($names)) { //if names array is not empty (as it comprises of first and surnames)
-                $name = reset($names); //retrieves first name associated with individual
+            if (!empty($names)) { //if names array is not empty (individual may have multiple names/aliases)
+                $name = reset($names); //retrieves first name of individual
                 $birth = $individual->getBirt(); //retrieves birth information via getBirt ('BIRT' tag is used for this)
                 $death = $individual->getDeat(); //retrieves death information via getDeat ('DEAT' tag is used for this)
                 
@@ -109,24 +109,26 @@ class GedcomParser
                     $child_number = null;
                     $marriageDate = null;
                     $divorceDate = null;
-                } if ($level === 1) { //if level is 1
+                } elseif ($level === 1) { //if level is 1
                  if ($tag === 'MARR') { //if tag equals 'MARR' (indicating marriage)
                     $isMarried = true; //sets isMarried bool to true
-                 } if ($tag === 'DIV') { //if tag equals 'DIV' (indicating divorce)
+                 } elseif ($tag === 'DIV') { //if tag equals 'DIV' (indicating divorce)
                     $isDivorced = true; //sets isDivorced bool to true
-                 } if ($tag === 'HUSB') { //if tag equals 'HUSB' (indicating husband)
+                 } elseif ($tag === 'HUSB') { //if tag equals 'HUSB' (indicating husband)
                     $father_id = trim($value, '@'); //extracts husband's individual ID
-                 } if ($tag === 'WIFE') { //if tag equals 'WIFE' (indicating wife)
+                 } elseif ($tag === 'WIFE') { //if tag equals 'WIFE' (indicating wife)
                     $mother_id = trim($value, '@'); //extracts wife's individual ID
-                 } if ($tag === 'CHIL') { //if tag equals 'CHIL' (indicating child)
+                 } elseif ($tag === 'CHIL') { //if tag equals 'CHIL' (indicating child)
                     $child_id = trim($value, '@'); //extracts child's individual ID
                     $child_number++; //increases number of children by one for families with multiple children
+                 } else {
+                    echo "Tag not found";
                  }
-                } if ($level === 2 && $tag === 'DATE'){ //if level is 2 and contains the tag 'DATE'
+                } elseif ($level === 2 && $tag === 'DATE'){ //if level is 2 and contains the tag 'DATE'
                     if (isset($isMarried)) { //if a defined value is found for isMarried (i.e. true)
                     $marriageDate = $this->extractQual($value); //extract marriage date and pass to convertToDate method
                     unset($isMarried); //removes value for isMarried
-                } if (isset($isDivorced)) { //if a defined value is found for isDivorced (i.e. true)
+                } elseif (isset($isDivorced)) { //if a defined value is found for isDivorced (i.e. true)
                     $divorceDate = $this->extractQual($value); //extract divorce date and pass to convertToDate method
                     unset($isDivorced); //removes value for isDivorced
             }
@@ -255,7 +257,7 @@ class GedcomParser
 
         if ($gedcomDate) { //if date exists in GEDCOM file
             foreach ($qualifiers as $qual) { //loops through each qualifier
-                if (strpos($gedcomDate, $qual) === 0) { //if any of the qualifiers are found at the beginning of a date sets that specific qualifier to qualifier variable
+                if (strpos($gedcomDate, $qual) === 0) { //if any of the qualifiers are found at the beginning of a date, sets that specific qualifier to qualifier variable
                     $qualifier = $qual;
                     $date = trim(str_replace($qual, '', $gedcomDate)); //extracts the date by removing the qualifier, replacing with space, then removing the space
                     break;

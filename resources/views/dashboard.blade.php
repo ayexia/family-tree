@@ -48,5 +48,7 @@
                 </form>
             </div>
         </div>
+             <br><div><a href="{{ route('family.tree') }}" class="btn btn-secondary"><u>View Family Tree</u></a></br>
+        </div>
     </div>
 </x-app-layout>

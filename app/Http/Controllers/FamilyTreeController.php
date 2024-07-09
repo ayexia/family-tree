@@ -115,6 +115,8 @@ class FamilyTreeController extends Controller
             ->with('success', 'Family member created successfully.');
     }
 
+
+
     /**
      * IN PROGRESS - function to display the family tree in standard pedigree tree format.
      * This involves processing all of the relationships between people (spouse, parent and child), storing them in adjacency list format.
@@ -122,13 +124,14 @@ class FamilyTreeController extends Controller
      * Currently working on: 
      * - a search function which allows users to search a person in the tree (by name/ID - TBC), and being able to select a level of relationships they wish to view revolving the chosen person.
      * - being able to traverse the graph (most likely via recursion), removing duplicate info and calculating root and leaf nodes, to be structured in the appropriate manner when displayed.
+     * - refactoring to use more OOP principles (neater, more organised and understandable code)
      */
     public function displayFamilyTree(Request $request){
         //initialises query by ensuring results will be displayed in order of DOB
         $requestedPerson = Person::query()->orderBy('birth_date');
         $desiredName = $request->input('desiredName');
 
-        //CURRENT PROBLEMS: searches retrieved but all information related to matching names are "Unknown"/blank, remove timestamp and format date
+        //CURRENT PROBLEMS: searches retrieved but all information related to matching names are "Unknown"/blank in tree display, remove timestamp and format date
 
         if ($desiredName) { //retrieves people based on name(s)
             $requestedPerson->where('name', 'like', '%' . $desiredName . '%');
@@ -184,10 +187,41 @@ class FamilyTreeController extends Controller
             $familyTree[$fatherAndChild['child_id']]['parents'][] = $fatherAndChild['father_id'];
         }
         
+        $trees = [];
+        foreach ($allPersons as $person) {
+            $trees[] = $this->buildFamilyTree($person->id, $familyTree);
+        }
+
         //prints a display of the structure for debugging purposes - will remove later
         // print_r($familyTree);
         //returns the appropriate View, passing the data necessary for it
-        return view('tree.index', compact('allPersons', 'familyTree', 'desiredName', 'relatives'));
+        return view('tree.index', compact('allPersons', 'familyTree', 'desiredName', 'relatives', 'trees'));
+    }
+
+    private function buildFamilyTree($id, $familyTree, $prefix = ""){
+        if (!isset($familyTree[$id])) {
+            return [];
+        }
+    
+        $root = $familyTree[$id];
+    
+        if (!isset($root['name'])) {
+            $root['name'] = 'Unknown Person';
+        }
+        $parents = [$root['name']];
+        if (isset($root['spouses'])) {
+        foreach ($root['spouses'] as $spouse){
+            $spouseName = $familyTree[$spouse]['name'] ?? 'Unknown Spouse';
+            $parents[] = $spouseName;
+        }
+    }
+        $tree = [$prefix . implode(" & ", $parents)];
+        if (isset($root['children'])) {
+        foreach ($root['children'] as $child) {
+            $tree = array_merge($tree, $this->buildFamilyTree($child, $familyTree, $prefix . "----"));
+        }
+    }
+        return $tree;
     }
 
     /**

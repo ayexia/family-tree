@@ -162,7 +162,7 @@ class FamilyTreeController extends Controller
         //initialises family tree structure
         $familyTree = [];
 
-        //iterates through each person creating nodes for them
+        //iterates through each person creating nodes for them, using their ID as key and value as an array of details
         foreach ($allPersons as $person){
             $familyTree[$person->id] = [
                 'name' => $person->name,
@@ -189,7 +189,7 @@ class FamilyTreeController extends Controller
         
         $trees = [];
         foreach ($allPersons as $person) {
-            $trees[] = $this->buildFamilyTree($person->id, $familyTree);
+            $trees[] = $this->buildFamilyTree($person->id, $familyTree, $relatives);
         }
 
         //prints a display of the structure for debugging purposes - will remove later
@@ -198,27 +198,27 @@ class FamilyTreeController extends Controller
         return view('tree.index', compact('allPersons', 'familyTree', 'desiredName', 'relatives', 'trees'));
     }
 
-    private function buildFamilyTree($id, $familyTree, $prefix = ""){
+    private function buildFamilyTree($id, $familyTree, $relatives, $prefix = ""){
         if (!isset($familyTree[$id])) {
             return [];
         }
     
         $root = $familyTree[$id];
-    
-        if (!isset($root['name'])) {
-            $root['name'] = 'Unknown Person';
-        }
-        $parents = [$root['name']];
+  
+        $rootName = $relatives->where('id', $id)->first()->name ?? 'Unknown Person';
+
+        $parents = [$rootName];
+
         if (isset($root['spouses'])) {
         foreach ($root['spouses'] as $spouse){
-            $spouseName = $familyTree[$spouse]['name'] ?? 'Unknown Spouse';
-            $parents[] = $spouseName;
-        }
-    }
+          $spouseName = $relatives->where('id', $spouse)->first()->name ?? 'Unknown Spouse';
+          $parents[] = $spouseName;
+      }
+  }
         $tree = [$prefix . implode(" & ", $parents)];
         if (isset($root['children'])) {
         foreach ($root['children'] as $child) {
-            $tree = array_merge($tree, $this->buildFamilyTree($child, $familyTree, $prefix . "----"));
+            $tree = array_merge($tree, $this->buildFamilyTree($child, $familyTree, $relatives, $prefix . "----"));
         }
     }
         return $tree;

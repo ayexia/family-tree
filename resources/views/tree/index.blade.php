@@ -106,8 +106,7 @@
             @endforeach
         </ul>
     @endif
-    <div class="family-tree-display">
-        <h2>Tree Display:</h2>
+    <h2>Tree Display:</h2>
         <ul class="family-tree">
             @foreach($trees as $tree)
                 @foreach($tree as $entry)

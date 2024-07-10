@@ -8,6 +8,7 @@ use App\Models\Person;
 use App\Models\FatherAndChild;
 use App\Models\MotherAndChild;
 use App\Models\Spouse;
+use App\Services\Node;
 
 class FamilyTreeController extends Controller
 {
@@ -123,15 +124,14 @@ class FamilyTreeController extends Controller
      * This consists of each person being a node, with details such as their name and containing lists of their parents, spouse(s) and children.
      * Currently working on: 
      * - a search function which allows users to search a person in the tree (by name/ID - TBC), and being able to select a level of relationships they wish to view revolving the chosen person.
-     * - being able to traverse the graph (most likely via recursion), removing duplicate info and calculating root and leaf nodes, to be structured in the appropriate manner when displayed.
-     * - refactoring to use more OOP principles (neater, more organised and understandable code)
+     * - removing duplicate info
      */
     public function displayFamilyTree(Request $request){
         //initialises query by ensuring results will be displayed in order of DOB
         $requestedPerson = Person::query()->orderBy('birth_date');
         $desiredName = $request->input('desiredName');
 
-        //CURRENT PROBLEMS: searches retrieved but all information related to matching names are "Unknown"/blank in tree display, remove timestamp and format date
+        //CURRENT PROBLEMS: remove timestamp and format date
 
         if ($desiredName) { //retrieves people based on name(s)
             $requestedPerson->where('name', 'like', '%' . $desiredName . '%');
@@ -164,32 +164,34 @@ class FamilyTreeController extends Controller
 
         //iterates through each person creating nodes for them, using their ID as key and value as an array of details
         foreach ($allPersons as $person){
-            $familyTree[$person->id] = [
-                'name' => $person->name,
-                'children' => [],
-                'spouses' => [],
-                'parents' => [],
-            ];
+            $familyTree[$person->id] = new Node($person->id, $person->name, $person->birth_date, $person->death_date);
         }
         //iterates through spouse relationships and adds spouse data to the nodes
         foreach ($marriages as $marriage){
-            $familyTree[$marriage['first_spouse_id']]['spouses'][] = $marriage['second_spouse_id'];
-            $familyTree[$marriage['second_spouse_id']]['spouses'][] = $marriage['first_spouse_id'];
+          if (isset($familyTree[$marriage['first_spouse_id']]) && isset($familyTree[$marriage['second_spouse_id']])) {
+            $familyTree[$marriage['first_spouse_id']]->addSpouse($familyTree[$marriage['second_spouse_id']]);
+            $familyTree[$marriage['second_spouse_id']]->addSpouse($familyTree[$marriage['first_spouse_id']]);
         }
+      }
 
         //iterates through parent-child relationships and adds parent and children information to nodes
         foreach ($motherAndChildRelationships as $motherAndChild){
-            $familyTree[$motherAndChild['mother_id']]['children'][] = $motherAndChild['child_id'];
-            $familyTree[$motherAndChild['child_id']]['parents'][] = $motherAndChild['mother_id'];
+          if (isset($familyTree[$motherAndChild['mother_id']]) && isset($familyTree[$motherAndChild['child_id']])) {
+           
+            $familyTree[$motherAndChild['mother_id']]->addChild($familyTree[$motherAndChild['child_id']]);
+            $familyTree[$motherAndChild['child_id']]->addParent($familyTree[$motherAndChild['mother_id']]);
         }
+      }
         foreach ($fatherAndChildRelationships as $fatherAndChild){
-            $familyTree[$fatherAndChild['father_id']]['children'][] = $fatherAndChild['child_id'];
-            $familyTree[$fatherAndChild['child_id']]['parents'][] = $fatherAndChild['father_id'];
+          if (isset($familyTree[$fatherAndChild['father_id']]) && isset($familyTree[$fatherAndChild['child_id']])) {
+            $familyTree[$fatherAndChild['father_id']]->addChild($familyTree[$fatherAndChild['child_id']]);
+            $familyTree[$fatherAndChild['child_id']]->addParent($familyTree[$fatherAndChild['father_id']]);
         }
+      }
         
         $trees = [];
         foreach ($allPersons as $person) {
-            $trees[] = $this->buildFamilyTree($person->id, $familyTree, $relatives);
+            $trees[] = $this->buildFamilyTree($familyTree[$person->id]);
         }
 
         //prints a display of the structure for debugging purposes - will remove later
@@ -198,29 +200,15 @@ class FamilyTreeController extends Controller
         return view('tree.index', compact('allPersons', 'familyTree', 'desiredName', 'relatives', 'trees'));
     }
 
-    private function buildFamilyTree($id, $familyTree, $relatives, $prefix = ""){
-        if (!isset($familyTree[$id])) {
-            return [];
-        }
-    
-        $root = $familyTree[$id];
-  
-        $rootName = $relatives->where('id', $id)->first()->name ?? 'Unknown Person';
-
-        $parents = [$rootName];
-
-        if (isset($root['spouses'])) {
-        foreach ($root['spouses'] as $spouse){
-          $spouseName = $relatives->where('id', $spouse)->first()->name ?? 'Unknown Spouse';
-          $parents[] = $spouseName;
+    private function buildFamilyTree(Node $person, $prefix = ""){
+        $parents = [$person->name];
+        foreach ($person->spouses as $spouse){
+          $parents[] = $spouse->name;
       }
-  }
         $tree = [$prefix . implode(" & ", $parents)];
-        if (isset($root['children'])) {
-        foreach ($root['children'] as $child) {
-            $tree = array_merge($tree, $this->buildFamilyTree($child, $familyTree, $relatives, $prefix . "----"));
+        foreach ($person->children as $child) {
+            $tree = array_merge($tree, $this->buildFamilyTree($child, $prefix . "----"));
         }
-    }
         return $tree;
     }
 

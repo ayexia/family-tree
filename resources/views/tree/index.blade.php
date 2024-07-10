@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Family Tree</title>
     <style>
-        
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -44,59 +43,54 @@
     <h1>Family Tree</h1>
 
     <form method="GET" action="{{ route('family.tree') }}">
-        <label for="desiredUserId"></label>
+        <label for="desiredName">Name:</label>
         <input type="text" id="desiredName" name="desiredName" value="{{ request('desiredName') }}">
-
         <button type="submit">Search</button>
     </form>
-
-    @if (isset($desiredUserId) && !$allPersons->contains('id', $desiredUserId))
-        <div>No person found with that ID.</div>
-    @endif
 
     @if ($allPersons->isEmpty())
         <div>No results found for the given query.</div>
     @else
         <ul class="family-tree">
             @foreach($allPersons as $person)
-                @if(array_key_exists($person->id, $familyTree))
+                @if(isset($familyTree[$person->id]))
+                    @php
+                        $node = $familyTree[$person->id];
+                    @endphp
                     <li class="person">
-                        <strong>{{ $person->name }}</strong> ({{ $person->birth_date }} - {{ $person->death_date }})
+                        <strong>{{ $node->name }}</strong> ({{ $node->birth_date }} - {{ $node->death_date }})
 
-                        
-                        @if (!empty($familyTree[$person->id]['parents']))
+                        @if (!empty($node->getParents()))
                             <ul>
                                 <li><strong>Parents:</strong></li>
-                                @foreach ($familyTree[$person->id]['parents'] as $parentId)
+                                @foreach ($node->getParents() as $parent)
                                     <li>
-                                        {{ $relatives->firstWhere('id', $parentId)->name ?? 'Unknown Parent' }}
-                                        ({{ $relatives->firstWhere('id', $parentId)->birth_date ?? 'Unknown' }} - {{ $relatives->firstWhere('id', $parentId)->death_date ?? 'Unknown' }})
+                                        {{ $parent->name }}
+                                        ({{ $parent->birth_date }} - {{ $parent->death_date }})
                                     </li>
                                 @endforeach
                             </ul>
                         @endif
 
-                        
-                        @if (!empty($familyTree[$person->id]['spouses']))
+                        @if (!empty($node->getSpouses()))
                             <ul>
                                 <li><strong>Spouse(s):</strong></li>
-                                @foreach ($familyTree[$person->id]['spouses'] as $spouseId)
+                                @foreach ($node->getSpouses() as $spouse)
                                     <li>
-                                        {{ $relatives->firstWhere('id', $spouseId)->name ?? 'Unknown Spouse' }}
-                                        ({{ $relatives->firstWhere('id', $spouseId)->birth_date ?? 'Unknown' }} - {{ $relatives->firstWhere('id', $spouseId)->death_date ?? 'Unknown' }})
+                                        {{ $spouse->name }}
+                                        ({{ $spouse->birth_date }} - {{ $spouse->death_date }})
                                     </li>
                                 @endforeach
                             </ul>
                         @endif
 
-                        
-                        @if (!empty($familyTree[$person->id]['children']))
+                        @if (!empty($node->getChildren()))
                             <ul>
                                 <li><strong>Children:</strong></li>
-                                @foreach ($familyTree[$person->id]['children'] as $childId)
+                                @foreach ($node->getChildren() as $child)
                                     <li>
-                                        {{ $relatives->firstWhere('id', $childId)->name ?? 'Unknown Child' }}
-                                        ({{ $relatives->firstWhere('id', $childId)->birth_date ?? 'Unknown' }} - {{ $relatives->firstWhere('id', $childId)->death_date ?? 'Unknown' }})
+                                        {{ $child->name }}
+                                        ({{ $child->birth_date }} - {{ $child->death_date }})
                                     </li>
                                 @endforeach
                             </ul>
@@ -106,14 +100,14 @@
             @endforeach
         </ul>
     @endif
+
     <h2>Tree Display:</h2>
-        <ul class="family-tree">
-            @foreach($trees as $tree)
-                @foreach($tree as $entry)
-                    <li>{{ $entry }}</li>
-                @endforeach
+    <ul class="family-tree">
+        @foreach($trees as $tree)
+            @foreach($tree as $entry)
+                <li>{{ $entry }}</li>
             @endforeach
-        </ul>
-    </div>
+        @endforeach
+    </ul>
 </body>
 </html>

@@ -122,13 +122,12 @@ class FamilyTreeController extends Controller
      * This consists of each person being a node, with details such as their name and containing lists of their parents, spouse(s) and children.
      * Currently working on: 
      * - a search function which allows users to search a person in the tree (by name/ID - TBC), and being able to select a level of relationships they wish to view revolving the chosen person.
-     * - removing duplicate info
      */
     public function displayFamilyTree(Request $request){
         //initialises query by ensuring results will be displayed in order of DOB
-        $requestedPerson = Person::query()->orderBy('birth_date');
         $desiredName = $request->input('desiredName');
-
+        
+        $requestedPerson = Person::query()->orderBy('birth_date');
         //CURRENT PROBLEMS: remove timestamp and format date
 
         if ($desiredName) { //retrieves people based on name(s)
@@ -161,8 +160,8 @@ class FamilyTreeController extends Controller
         $familyTree = [];
 
         //iterates through each person creating nodes for them, using their ID as key and value as an array of details
-        foreach ($allPersons as $person){
-            $familyTree[$person->id] = new Node($person->id, $person->name, $person->birth_date, $person->death_date);
+        foreach ($relatives as $relative){
+            $familyTree[$relative->id] = new Node($relative->id, $relative->name, $relative->birth_date, $relative->death_date);
         }
         //iterates through spouse relationships and adds spouse data to the nodes
         foreach ($marriages as $marriage){
@@ -185,8 +184,7 @@ class FamilyTreeController extends Controller
             $familyTree[$fatherAndChild['father_id']]->addChild($familyTree[$fatherAndChild['child_id']]);
             $familyTree[$fatherAndChild['child_id']]->addParent($familyTree[$fatherAndChild['father_id']]);
         }
-      }
-        
+      }        
         $trees = [];
         $visited = [];
         foreach ($allPersons as $person) {

@@ -116,8 +116,6 @@ class FamilyTreeController extends Controller
             ->with('success', 'Family member created successfully.');
     }
 
-
-
     /**
      * IN PROGRESS - function to display the family tree in standard pedigree tree format.
      * This involves processing all of the relationships between people (spouse, parent and child), storing them in adjacency list format.
@@ -190,9 +188,12 @@ class FamilyTreeController extends Controller
       }
         
         $trees = [];
+        $visited = [];
         foreach ($allPersons as $person) {
-            $trees[] = $this->buildFamilyTree($familyTree[$person->id]);
+          if(!in_array($person->id, $visited)){
+            $trees[] = $this->buildFamilyTree($familyTree[$person->id], $visited);
         }
+      }
 
         //prints a display of the structure for debugging purposes - will remove later
         // print_r($familyTree);
@@ -200,15 +201,21 @@ class FamilyTreeController extends Controller
         return view('tree.index', compact('allPersons', 'familyTree', 'desiredName', 'relatives', 'trees'));
     }
 
-    private function buildFamilyTree(Node $person, $prefix = ""){
+    private function buildFamilyTree(Node $person, &$visited, $prefix = ""){
+        $visited[] = $person->id;
         $parents = [$person->name];
         foreach ($person->spouses as $spouse){
+          if(!in_array($spouse->id, $visited)){
           $parents[] = $spouse->name;
+          $visited[] = $spouse->id;
       }
+    }
         $tree = [$prefix . implode(" & ", $parents)];
         foreach ($person->children as $child) {
-            $tree = array_merge($tree, $this->buildFamilyTree($child, $prefix . "----"));
+          if(!in_array($child->id, $visited)){
+            $tree = array_merge($tree, $this->buildFamilyTree($child, $visited, $prefix . "----"));
         }
+      }
         return $tree;
     }
 

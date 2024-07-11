@@ -122,12 +122,15 @@ class FamilyTreeController extends Controller
      * This consists of each person being a node, with details such as their name and containing lists of their parents, spouse(s) and children.
      * Currently working on: 
      * - a search function which allows users to search a person in the tree (by name/ID - TBC), and being able to select a level of relationships they wish to view revolving the chosen person.
+     * - searching should allow parents to be shown of the queried person in their tree?
      */
     public function displayFamilyTree(Request $request){
-        //initialises query by ensuring results will be displayed in order of DOB
+        //initialises query by ensuring results will be displayed in order of DOB - issue: people without DOB appear standalone disrupting the family tree structure
+        
+        $requestedPerson = Person::query()->orderByRaw('birth_date IS NULL, birth_date ASC');
+
         $desiredName = $request->input('desiredName');
         
-        $requestedPerson = Person::query()->orderBy('birth_date');
         //CURRENT PROBLEMS: remove timestamp and format date
 
         if ($desiredName) { //retrieves people based on name(s)
@@ -151,8 +154,7 @@ class FamilyTreeController extends Controller
         ->merge($fatherAndChildRelationships->pluck('father_id'))
         ->merge($fatherAndChildRelationships->pluck('child_id'))
         ->merge($marriages->pluck('first_spouse_id'))
-        ->merge($marriages->pluck('second_spouse_id'))
-        ->unique();
+        ->merge($marriages->pluck('second_spouse_id'));
 
         $relatives = Person::whereIn('id', $relativeIds)->get();
 
@@ -201,15 +203,15 @@ class FamilyTreeController extends Controller
 
     private function buildFamilyTree(Node $person, &$visited, $prefix = ""){
         $visited[] = $person->id;
-        $parents = [$person->name];
-        foreach ($person->spouses as $spouse){
+        $partners = [$person->name];
+        foreach ($person->getSpouses() as $spouse){
           if(!in_array($spouse->id, $visited)){
-          $parents[] = $spouse->name;
+          $partners[] = $spouse->name;
           $visited[] = $spouse->id;
       }
     }
-        $tree = [$prefix . implode(" & ", $parents)];
-        foreach ($person->children as $child) {
+        $tree = [$prefix . implode(" & ", $partners)];
+        foreach ($person->getChildren() as $child) {
           if(!in_array($child->id, $visited)){
             $tree = array_merge($tree, $this->buildFamilyTree($child, $visited, $prefix . "----"));
         }

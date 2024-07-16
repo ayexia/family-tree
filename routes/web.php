@@ -23,5 +23,8 @@ Route::post('/upload', [GedcomController::class, 'upload'])->name('upload');
 
 
 Route::get('/family-tree', [FamilyTreeController:: class, 'displayFamilyTree'])->name('family.tree');
+Route::get('/test', function () {
+    return view('test');
+});
 
 require __DIR__.'/auth.php';

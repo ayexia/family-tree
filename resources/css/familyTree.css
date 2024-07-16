@@ -1,0 +1,23 @@
+.link {
+  fill: none;
+  stroke: #555;
+  stroke-width: 1.5px;
+}
+
+.spouse-link {
+  fill: none;
+  stroke: #f00;
+  stroke-width: 1.5px;
+  stroke-dasharray: 5,5;
+}
+  
+  .node circle {
+    fill: #999;
+  }
+  
+  .node text {
+    font: 10px sans-serif;
+  
+  }
+
+  

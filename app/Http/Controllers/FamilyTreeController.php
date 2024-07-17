@@ -203,12 +203,48 @@ class FamilyTreeController extends Controller
           $trees[] = $this->buildFamilyTree($familyTree[$person->id], $visited);
       }
     }
-      //returns the appropriate View, passing the data necessary for it
+     //if request end route contains "api", convert the family tree data to an acceptable JSON format by iterating through all people and building nested arrays in a recursive manner, and store in jsonResponse array
       if ($request->is('api/*')) {
-        return response()->json($trees);
+        $jsonResponse = [];
+        foreach ($allPersons as $person) {
+            $jsonResponse[] = $this->convertToJson($familyTree[$person->id]);
+        }
+          return response()->json($jsonResponse);
+      }
+      //otherwise returns the appropriate View, passing the data necessary for it
+      return view('tree.index', compact('allPersons', 'familyTree', 'desiredName', 'relatives', 'trees'));
+  }
+    
+  //Converts family tree data to accepted JSON format to send as response to frontend (nested arrays in hierarchical manner)
+    private function convertToJson(Node $person)
+    {
+      //makes array of person (node with information, array of spouses and children)
+        $data = [
+            'name' => $person->name,
+            'birthDate' => $person->birth_date,
+            'deathDate' => $person->death_date,
+            'spouses' => [],
+            'children' => []
+        ];
+        //retrieves spouse info and stores in spouses array
+        foreach ($node->getSpouses() as $spouse) {
+            $data['spouses'][] = [
+                'name' => $spouse->name,
+                'birthDate' => $spouse->birth_date,
+                'deathDate' => $spouse->death_date
+            ];
+        }
+        //recursively passes child's data to the function and retrieves their info, storing in children array
+        foreach ($person->getChildren() as $child) {
+            $childData = $this->convertToJson($child);
+            if ($childData) {
+                $data['children'][] = $childData;
+            }
+        }
+
+        return $data;
     }
-    return view('tree.index', compact('allPersons', 'familyTree', 'desiredName', 'relatives', 'trees'));
-}
+    
   private function buildFamilyTree(Node $person, &$visited, $prefix = ""){
       $visited[] = $person->id; //adds current person to visited array to mark them as visited
       $partners = [$person->name]; //retrieves current person's name and adds to "partners" array

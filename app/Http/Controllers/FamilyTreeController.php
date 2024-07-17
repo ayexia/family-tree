@@ -227,7 +227,7 @@ class FamilyTreeController extends Controller
             'children' => []
         ];
         //retrieves spouse info and stores in spouses array
-        foreach ($node->getSpouses() as $spouse) {
+        foreach ($person->getSpouses() as $spouse) {
             $data['spouses'][] = [
                 'name' => $spouse->name,
                 'birthDate' => $spouse->birth_date,

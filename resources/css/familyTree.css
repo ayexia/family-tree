@@ -1,1 +1,34 @@
-/* TODO: ADD NEW CSS */
+.tree-container {
+  margin: 0 auto;
+  overflow: auto;
+}
+
+.node--person circle {
+  fill: #fff;
+  stroke: #555;
+  stroke-width: 2px;
+}
+
+.node--spouse circle {
+  fill: #ff9900; 
+  stroke: #555;
+  stroke-width: 2px;
+}
+
+.link {
+  fill: none;
+  stroke: #555;
+  stroke-width: 2px;
+}
+
+.spouse-link {
+  fill: none;
+  stroke: #f00;
+  stroke-width: 2px;
+  stroke-dasharray: 5,5;
+}
+.child-link {
+  stroke: #555;  
+  stroke-width: 2px;
+}
+

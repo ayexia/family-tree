@@ -215,34 +215,43 @@ class FamilyTreeController extends Controller
       return view('tree.index', compact('allPersons', 'familyTree', 'desiredName', 'relatives', 'trees'));
   }
     
-  //Converts family tree data to accepted JSON format to send as response to frontend (nested arrays in hierarchical manner)
+  //Converts family tree data to accepted JSON format to send as response to frontend
     private function convertToJson(Node $person)
     {
-      //makes array of person (node with information, array of spouses and children)
-        $data = [
-            'name' => $person->name,
-            'birthDate' => $person->birth_date,
-            'deathDate' => $person->death_date,
-            'spouses' => [],
+      $names = [$person->name];
+      $birth_dates = [$person->birth_date];
+      $death_dates = [$person->death_date];
+
+      foreach ($person->getSpouses() as $spouse) {
+        if ($spouse){
+              $names[] = $spouse->name;
+              $birth_dates[] = $spouse->birth_date;
+              $death_dates[] = $spouse->death_date;
+        }
+      }
+
+      $parentsNames = 'Name: ' . implode(' | Spouse: ', $names);
+      $parentsBirthDates = implode(' | DOB: ', $birth_dates);
+      $parentsDeathDates = implode(' | DOD: ', $death_dates);
+
+
+      $parents = [
+      'name' => $parentsNames,
+      'attributes' => [
+          'DOB' => $parentsBirthDates,
+          'DOD' => $parentsDeathDates
+          ],
             'children' => []
         ];
-        //retrieves spouse info and stores in spouses array
-        foreach ($person->getSpouses() as $spouse) {
-            $data['spouses'][] = [
-                'name' => $spouse->name,
-                'birthDate' => $spouse->birth_date,
-                'deathDate' => $spouse->death_date
-            ];
-        }
         //recursively passes child's data to the function and retrieves their info, storing in children array
         foreach ($person->getChildren() as $child) {
             $childData = $this->convertToJson($child);
             if ($childData) {
-                $data['children'][] = $childData;
+                $parents['children'][] = $childData;
             }
         }
 
-        return $data;
+        return $parents;
     }
     
   private function buildFamilyTree(Node $person, &$visited, $prefix = ""){

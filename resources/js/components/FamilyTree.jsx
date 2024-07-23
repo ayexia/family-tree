@@ -137,6 +137,7 @@ import axios from 'axios'; //used to fetch api data through making http requests
 
 const FamilyTree = () => {
   const [treeData, setTreeData] = useState(null); //initialises variable treeData
+  const [images, setImages] = useState({});
 
   useEffect(() => {
     fetchFamilyTreeData(); //after component is mounted calls this function which retrieves the family tree data from the api through http requests
@@ -150,27 +151,58 @@ const FamilyTree = () => {
       console.error('Error fetching family tree data:', error); //if any issues with retrieving data will print error message
     }
   };
+
+  const uploadImage = (event, node) => {
+    const selectedFile = event.target.files[0];
+    const reader = new FileReader();
+    if (selectedFile) {
+      reader.onloadend = function (e) {
+        setImages((prevImages) => ({
+          ...prevImages,
+          [node]: reader.result,
+        }));
+      };
+    reader.readAsDataURL(selectedFile);
+    }
+  };
+
   const renderCustomNode = ({ nodeDatum }) => {
+    const selectedImage = images[nodeDatum.id];
+    const defaultImage = '/images/user.png';
     const isMale = nodeDatum.attributes.gender === 'M';
     const isFemale = nodeDatum.attributes.gender === 'F';
     const nodeStyle = {
-      fill: isMale ? '#97EBE6' : isFemale ? '#EB97CF': '#EBC097',
-      stroke: 'black',
-      strokeWidth: 1.5,
+      stroke: isMale ? '#97EBE6' : isFemale ? '#EB97CF': '#EBC097',
+      fill: 'none',
+      strokeWidth: 4,
     };
-
+ 
     return (
       <g>
-        <circle r={15} style={nodeStyle} />
-        <text fill="black" x="20" y="-5">
+        <circle r={25} style={nodeStyle} />
+        <image
+          href={selectedImage || defaultImage}
+          x="-15"
+          y="-15"
+          width="30"
+          height="30"
+        />
+        <text fill="black" x="35" y="-5">
           {nodeDatum.name}
         </text>
-        <text fill="black" x="20" y="15">
+        <text fill="black" x="35" y="15">
           {nodeDatum.attributes.DOB}
         </text>
-        <text fill="black" x="20" y="35">
+        <text fill="black" x="35" y="35">
           {nodeDatum.attributes.DOD}
         </text>
+        <foreignObject x="-50" y="40" width="90" height="50">
+          <input
+            type="file"
+            onChange={(event) => uploadImage(event, nodeDatum.id)}
+            style={{ width: '90px' }}
+          />
+        </foreignObject>
       </g>
     );
   };

@@ -230,12 +230,14 @@ class FamilyTreeController extends Controller
         }
 
         $parentsNames = 'Name: ' . implode(' | Spouse: ', $names);
-        $parentsBirthDates = implode(' | DOB: ', $birth_dates);
-        $parentsDeathDates = implode(' | DOD: ', $death_dates);
+        $parentsBirthDates = 'DOB: ' . implode(' | DOB: ', $birth_dates);
+        $parentsDeathDates = 'DOD: ' . implode(' | DOD: ', $death_dates);
 
         $parents = [
+        'id' => $person->id,
         'name' => $parentsNames,
         'attributes' => [
+            'gender' => $person->gender,
             'DOB' => $parentsBirthDates,
             'DOD' => $parentsDeathDates
             ],

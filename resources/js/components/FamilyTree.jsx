@@ -150,11 +150,34 @@ const FamilyTree = () => {
       console.error('Error fetching family tree data:', error); //if any issues with retrieving data will print error message
     }
   };
+  const renderCustomNode = ({ nodeDatum }) => {
+    const isMale = nodeDatum.attributes.gender === 'M';
+    const isFemale = nodeDatum.attributes.gender === 'F';
+    const nodeStyle = {
+      fill: isMale ? '#97EBE6' : isFemale ? '#EB97CF': '#EBC097',
+      stroke: 'black',
+      strokeWidth: 1.5,
+    };
 
-  if (!treeData) {
-    return <div>Loading...</div>; //alternate display if no tree data is available
-  }
+    return (
+      <g>
+        <circle r={15} style={nodeStyle} />
+        <text fill="black" x="20" y="-5">
+          {nodeDatum.name}
+        </text>
+        <text fill="black" x="20" y="15">
+          {nodeDatum.attributes.DOB}
+        </text>
+        <text fill="black" x="20" y="35">
+          {nodeDatum.attributes.DOD}
+        </text>
+      </g>
+    );
+  };
 
+    if (!treeData) {
+      return <div>Loading...</div>; //alternate display if no tree data is available
+    }
   return ( //utilises react-d3-tree library to set parameters for tree display
     //sets width and height of display, the data to be used, the orientation of the tree and style of links/branches, positioning of tree and spacing between sibling and non-sibling nodes
     <div style={{ width: '100%', height: '100vh' }}>
@@ -164,6 +187,7 @@ const FamilyTree = () => {
         pathFunc="step"
         translate={{ x: 300, y: 50 }}
         separation={{ siblings: 4.8, nonSiblings: 3 }}
+        renderCustomNodeElement={renderCustomNode}
       />
     </div>
   );

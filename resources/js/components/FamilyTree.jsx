@@ -132,7 +132,7 @@
 // export default FamilyTree;
 
 import React, { useState, useEffect } from 'react'; //react modules handling states and effects of components
-import Tree from 'react-d3-tree'; //Uses react-d3-tree package for visual representatin of tree structure
+import Tree from 'react-d3-tree'; //Uses react-d3-tree package for visual representation of tree structure
 import axios from 'axios'; //used to fetch api data through making http requests
 
 const FamilyTree = () => {

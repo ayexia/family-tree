@@ -166,8 +166,8 @@ class FamilyTreeController extends Controller
   
       //iterates through each person creating Node objects for them, then assigned to familyTree array using their ID as key
       foreach ($relatives as $relative){
-          $familyTree[$relative->id] = new Node($relative->id, $relative->name, $relative->birth_date, $relative->death_date);
-      }
+        $familyTree[$relative->id] = new Node($relative->id, $relative->name, $relative->birth_date, $relative->death_date, $relative->gender, $relative->father_id, $relative->mother_id);
+    }
   
       //iterates through spouse relationships, checks if both spouses exist in the familyTree array
       foreach ($marriages as $marriage){
@@ -207,7 +207,7 @@ class FamilyTreeController extends Controller
       if ($request->is('api/*')) {
         $jsonResponse = [];
         foreach ($allPersons as $person) {
-            $jsonResponse[] = $this->convertToJson($familyTree[$person->id]);
+            $jsonResponse[] = $this->convertToJsonTree($familyTree[$person->id]);
         }
           return response()->json($jsonResponse);
       }
@@ -215,45 +215,44 @@ class FamilyTreeController extends Controller
       return view('tree.index', compact('allPersons', 'familyTree', 'desiredName', 'relatives', 'trees'));
   }
     
-  //Converts family tree data to accepted JSON format to send as response to frontend
-    private function convertToJson(Node $person)
-    {
-      $names = [$person->name];
-      $birth_dates = [$person->birth_date];
-      $death_dates = [$person->death_date];
+  //Converts family tree data to accepted JSON format to send as response to frontend - tree structure with spouses in one node
+    private function convertToJsonTree(Node $person) {
+        $names = [$person->name];
+        $birth_dates = [$person->birth_date];
+        $death_dates = [$person->death_date];
 
-      foreach ($person->getSpouses() as $spouse) {
-        if ($spouse){
-              $names[] = $spouse->name;
-              $birth_dates[] = $spouse->birth_date;
-              $death_dates[] = $spouse->death_date;
+        foreach ($person->getSpouses() as $spouse) {
+          if ($spouse){
+                $names[] = $spouse->name;
+                $birth_dates[] = $spouse->birth_date;
+                $death_dates[] = $spouse->death_date;
+          }
         }
+
+        $parentsNames = 'Name: ' . implode(' | Spouse: ', $names);
+        $parentsBirthDates = implode(' | DOB: ', $birth_dates);
+        $parentsDeathDates = implode(' | DOD: ', $death_dates);
+
+        $parents = [
+        'name' => $parentsNames,
+        'attributes' => [
+            'DOB' => $parentsBirthDates,
+            'DOD' => $parentsDeathDates
+            ],
+              'children' => []
+          ];
+          //recursively passes child's data to the function and retrieves their info, storing in children array
+          foreach ($person->getChildren() as $child) {
+              $childData = $this->convertToJsonTree($child);
+              if ($childData) {
+                  $parents['children'][] = $childData;
+              }
+          }
+          return $parents;
       }
 
-      $parentsNames = 'Name: ' . implode(' | Spouse: ', $names);
-      $parentsBirthDates = implode(' | DOB: ', $birth_dates);
-      $parentsDeathDates = implode(' | DOD: ', $death_dates);
+  //TODO: method to convert to JSON for graph structure and testing graph packages
 
-
-      $parents = [
-      'name' => $parentsNames,
-      'attributes' => [
-          'DOB' => $parentsBirthDates,
-          'DOD' => $parentsDeathDates
-          ],
-            'children' => []
-        ];
-        //recursively passes child's data to the function and retrieves their info, storing in children array
-        foreach ($person->getChildren() as $child) {
-            $childData = $this->convertToJson($child);
-            if ($childData) {
-                $parents['children'][] = $childData;
-            }
-        }
-
-        return $parents;
-    }
-    
   private function buildFamilyTree(Node $person, &$visited, $prefix = ""){
       $visited[] = $person->id; //adds current person to visited array to mark them as visited
       $partners = [$person->name]; //retrieves current person's name and adds to "partners" array

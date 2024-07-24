@@ -166,7 +166,7 @@ const FamilyTree = () => {
     }
   };
 
-  const renderCustomNode = ({ nodeDatum }) => {
+  const CustomNode = ({ nodeDatum }) => {
     const selectedImage = images[nodeDatum.id];
     const defaultImage = '/images/user.png';
     const isMale = nodeDatum.attributes.gender === 'M';
@@ -176,27 +176,30 @@ const FamilyTree = () => {
       fill: 'none',
       strokeWidth: 4,
     };
- 
+
+    const toolTip = `${nodeDatum.name}\nDOB: ${nodeDatum.attributes.DOB}\nDOD: ${nodeDatum.attributes.DOD}`;
+
     return (
       <g>
-        <circle r={25} style={nodeStyle} />
+      <title>{toolTip}</title>
+        <circle r={50} style={nodeStyle} />
         <image
           href={selectedImage || defaultImage}
-          x="-15"
-          y="-15"
-          width="30"
-          height="30"
+          x="-35"
+          y="-35"
+          width="70"
+          height="70"
         />
-        <text fill="black" x="35" y="-5">
+        <text fill="black" x="60" y="-5" style={{ fontSize: '24px', fontFamily: 'Times New Roman' }}>
           {nodeDatum.name}
         </text>
-        <text fill="black" x="35" y="15">
+        <text fill="black" x="60" y="15" style={{ fontSize: '20px' }}>
           {nodeDatum.attributes.DOB}
         </text>
-        <text fill="black" x="35" y="35">
+        <text fill="black" x="60" y="35" style={{ fontSize: '20px' }}>
           {nodeDatum.attributes.DOD}
         </text>
-        <foreignObject x="-50" y="40" width="90" height="50">
+        <foreignObject x="-45" y="55" width="90" height="50">
           <input
             type="file"
             onChange={(event) => uploadImage(event, nodeDatum.id)}
@@ -218,8 +221,9 @@ const FamilyTree = () => {
         orientation="vertical"
         pathFunc="step"
         translate={{ x: 300, y: 50 }}
-        separation={{ siblings: 4.8, nonSiblings: 3 }}
-        renderCustomNodeElement={renderCustomNode}
+        separation={{ siblings: 4.8, nonSiblings: 5}}
+        nodeSize={{ x: 175, y: 300 }}
+        renderCustomNodeElement={CustomNode}
       />
     </div>
   );

@@ -1,6 +1,6 @@
 {
-  "_module.esm-D9XZ3ilB.js": {
-    "file": "assets/module.esm-D9XZ3ilB.js",
+  "_module.esm-DrQJRkB9.js": {
+    "file": "assets/module.esm-DrQJRkB9.js",
     "name": "module.esm"
   },
   "resources/css/app.css": {
@@ -9,21 +9,24 @@
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-Df8-CJ3i.js",
+    "file": "assets/app-ufk3twxi.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
-      "_module.esm-D9XZ3ilB.js"
+      "_module.esm-DrQJRkB9.js"
     ]
   },
   "resources/js/app.jsx": {
-    "file": "assets/app-CYVHnnyQ.js",
+    "file": "assets/app-CNZ1Y9LN.js",
     "name": "app",
     "src": "resources/js/app.jsx",
     "isEntry": true,
     "imports": [
-      "_module.esm-D9XZ3ilB.js"
+      "_module.esm-DrQJRkB9.js"
+    ],
+    "css": [
+      "assets/app-CPkfPft9.css"
     ]
   }
 }

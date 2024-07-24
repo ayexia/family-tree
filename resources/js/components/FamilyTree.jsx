@@ -1,7 +1,7 @@
 // import React, { useEffect, useState, useRef } from 'react'; //react modules handling states and effects of components, and accessing DOM elements (e.g. HTML elements such as div, body etc)
 // import axios from 'axios';
 // import * as d3 from 'd3';
-// import "../../css/familyTree.css";
+// import "../../css/treeCustomisation.css";
 
 // function FamilyTree() {
 //   const [treeData, setTreeData] = useState(null);
@@ -106,14 +106,15 @@
 //       .attr('transform', d => `translate(${d.y},${d.x})`); //positions each node
   
 //     node.append('circle') //styles node shape (circle)
-//       .attr('r', 5)
+//       .attr('r', 10)
 //       .style('fill', '#fff')
 //       .style('stroke', '#f80')
 //       .style('stroke-width', '5px');
   
 //     node.append('text') //styles text with positioning and sets text to display
 //       .attr('dy', '0.32em')
-//       .attr('x', d => d.children ? -10 : 10) //leaf node text position and alignment on right, non-leaf on left
+//       .attr('x', d => d.children ? 100 : -10) //leaf node text position and alignment on right, non-leaf on left
+//       .attr('y', -20)
 //       .style('text-anchor', d => d.children ? 'end' : 'start')
 //       .text(d => d.data.name)
 //       .style('font-size', '12px')
@@ -134,7 +135,9 @@
 import React, { useState, useEffect } from 'react'; //react modules handling states and effects of components
 import Tree from 'react-d3-tree'; //Uses react-d3-tree package for visual representation of tree structure
 import axios from 'axios'; //used to fetch api data through making http requests
-
+import Tippy from '@tippyjs/react';
+import 'tippy.js/dist/tippy.css';
+import "../../css/treeCustomisation.css";
 const FamilyTree = () => {
   const [treeData, setTreeData] = useState(null); //initialises variable treeData
   const [images, setImages] = useState({});
@@ -177,12 +180,23 @@ const FamilyTree = () => {
       strokeWidth: 4,
     };
 
-    const toolTip = `${nodeDatum.name}\nDOB: ${nodeDatum.attributes.DOB}\nDOD: ${nodeDatum.attributes.DOD}`;
+    const toolTip = (
+      <div style={{ 
+        padding: '10px', 
+        background: 'linear-gradient(135deg, #92B08E, #6C9661, #37672F)',
+        color: '#fff', 
+        borderRadius: '5px' 
+      }}>
+        <strong>{nodeDatum.name}</strong><br />
+        {nodeDatum.attributes.DOB}<br />
+        {nodeDatum.attributes.DOD}
+      </div>
+    );
 
     return (
-      <g>
-      <title>{toolTip}</title>
-        <circle r={50} style={nodeStyle} />
+      <Tippy content={toolTip}>
+        <g>
+          <circle r={50} style={nodeStyle} />
         <image
           href={selectedImage || defaultImage}
           x="-35"
@@ -207,6 +221,7 @@ const FamilyTree = () => {
           />
         </foreignObject>
       </g>
+      </Tippy>
     );
   };
 

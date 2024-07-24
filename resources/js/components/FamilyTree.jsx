@@ -138,9 +138,13 @@ import axios from 'axios'; //used to fetch api data through making http requests
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 import "../../css/treeCustomisation.css";
+import Sidebar from './Sidebar';
+
 const FamilyTree = () => {
   const [treeData, setTreeData] = useState(null); //initialises variable treeData
   const [images, setImages] = useState({});
+  const [ isSidebarOpened, setIsSidebarOpened ] = useState( false );
+  const [selectedNode, setSelectedNode] = useState(null);
 
   useEffect(() => {
     fetchFamilyTreeData(); //after component is mounted calls this function which retrieves the family tree data from the api through http requests
@@ -169,6 +173,17 @@ const FamilyTree = () => {
     }
   };
 
+  const openSidebar = (node) => {
+      setSelectedNode(node);
+      setIsSidebarOpened(true); 
+    };
+
+  const closeSidebar = () => {
+      setIsSidebarOpened(false);
+      setSelectedNode(null); 
+    };
+
+
   const customNode = ({ nodeDatum }) => {
     const selectedImage = images[nodeDatum.id];
     const defaultImage = '/images/user.png';
@@ -180,22 +195,22 @@ const FamilyTree = () => {
       strokeWidth: 4,
     };
 
-    const toolTip = (
+  const toolTip = (
       <div style={{ 
         padding: '10px', 
         background: 'linear-gradient(135deg, #92B08E, #6C9661, #37672F)',
         color: '#fff', 
         borderRadius: '10px' 
       }}>
-        <strong style={{ fontSize: '20px', fontFamily: 'Times New Roman' }}>{nodeDatum.name}</strong><br />
+      <strong style={{ fontSize: '20px', fontFamily: 'Times New Roman' }}>{nodeDatum.name}</strong><br />
         {nodeDatum.attributes.marriage}<br />
         {nodeDatum.attributes.divorce}
-      </div>
-    );
+    </div>
+  );
 
     return (
-      <Tippy content={toolTip}>
-        <g>
+      <Tippy content={toolTip}>        
+        <g onClick={() => openSidebar(nodeDatum)}>
           <circle r={50} style={nodeStyle} />
         <image
           href={selectedImage || defaultImage}
@@ -240,6 +255,7 @@ const FamilyTree = () => {
         nodeSize={{ x: 175, y: 300 }}
         renderCustomNodeElement={customNode}
       />
+      {isSidebarOpened && <Sidebar node={selectedNode} onClose={closeSidebar} />}
     </div>
   );
 };

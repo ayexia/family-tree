@@ -16,6 +16,7 @@ class Person extends Model
         'birth_date_qualifier',
         'death_date',
         'death_date_qualifier',
+        'image',
     ];
 
     protected $casts = [

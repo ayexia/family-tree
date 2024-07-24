@@ -1,0 +1,30 @@
+.link {
+    stroke: #ccc;
+    stroke-width: 2px;
+  }
+  
+  .node--internal circle {
+    fill: #fff;
+    stroke: #000;
+    stroke-width: 2px;
+  }
+  
+  .node--leaf circle {
+    fill: #fff;
+    stroke: #000;
+    stroke-width: 2px;
+  }
+  
+  .node text {
+    font-size: 12px;
+    fill: #333;
+  }
+  
+  .tree-container {
+    overflow: auto;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  

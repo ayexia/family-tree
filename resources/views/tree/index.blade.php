@@ -80,8 +80,8 @@
                                 <li><strong>Spouse(s):</strong></li>
                                 @foreach ($node->getSpouses() as $spouse)
                                     <li>
-                                        {{ $spouse->name }}
-                                        ({{ $spouse->birth_date }} - {{ $spouse->death_date }})
+                                        {{ $spouse['node']->name }}
+                                        ({{ $spouse['node']->birth_date }} - {{ $spouse['node']->death_date }})
                                     </li>
                                 @endforeach
                             </ul>

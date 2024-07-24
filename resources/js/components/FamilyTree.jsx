@@ -169,7 +169,7 @@ const FamilyTree = () => {
     }
   };
 
-  const CustomNode = ({ nodeDatum }) => {
+  const customNode = ({ nodeDatum }) => {
     const selectedImage = images[nodeDatum.id];
     const defaultImage = '/images/user.png';
     const isMale = nodeDatum.attributes.gender === 'M';
@@ -185,11 +185,11 @@ const FamilyTree = () => {
         padding: '10px', 
         background: 'linear-gradient(135deg, #92B08E, #6C9661, #37672F)',
         color: '#fff', 
-        borderRadius: '5px' 
+        borderRadius: '10px' 
       }}>
-        <strong>{nodeDatum.name}</strong><br />
-        {nodeDatum.attributes.DOB}<br />
-        {nodeDatum.attributes.DOD}
+        <strong style={{ fontSize: '20px', fontFamily: 'Times New Roman' }}>{nodeDatum.name}</strong><br />
+        {nodeDatum.attributes.marriage}<br />
+        {nodeDatum.attributes.divorce}
       </div>
     );
 
@@ -238,7 +238,7 @@ const FamilyTree = () => {
         translate={{ x: 300, y: 50 }}
         separation={{ siblings: 4.8, nonSiblings: 5}}
         nodeSize={{ x: 175, y: 300 }}
-        renderCustomNodeElement={CustomNode}
+        renderCustomNodeElement={customNode}
       />
     </div>
   );

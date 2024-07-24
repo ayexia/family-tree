@@ -30,8 +30,12 @@ class Node {
         $this->children[$child->id] = $child;
     }
 
-    public function addSpouse(Node $spouse) {
-        $this->spouses[$spouse->id] = $spouse;
+    public function addSpouse(Node $spouse, $marriage_date = null, $divorce_date = null) {
+        $this->spouses[] = [
+            'node' => $spouse,
+            'marriage_date' => $marriage_date ? Carbon::parse($marriage_date)->format('Y-m-d') : 'Unknown date',
+            'divorce_date' => $divorce_date ? Carbon::parse($divorce_date)->format('Y-m-d') : 'Unknown date'
+        ];
     }
 
     public function addParent(Node $parent) {

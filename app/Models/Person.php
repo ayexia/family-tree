@@ -12,6 +12,7 @@ class Person extends Model
         'gedcom_id', 
         'name', 
         'gender', 
+        'surname',
         'birth_date', 
         'birth_date_qualifier',
         'death_date',

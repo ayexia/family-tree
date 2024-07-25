@@ -15,9 +15,10 @@ class Node {
     public $mother_id;
     public $gender;
 
-    public function __construct($id, $name, $birth_date, $death_date, $gender, $father_id = null, $mother_id = null, $image = null) {
+    public function __construct($id, $name, $surname, $birth_date, $death_date, $gender, $father_id = null, $mother_id = null, $image = null) {
         $this->id = $id;
         $this->name = $name;
+        $this->surname = $surname;
         //formats dates via Carbon in year-month-date format, removing timestamp. if DOB/DOD is null replaces value with arbitrary "unknown date"
         $this->birth_date = $birth_date ? Carbon::parse($birth_date)->format('Y-m-d') : 'Unknown date'; 
         $this->death_date = $death_date ? Carbon::parse($death_date)->format('Y-m-d') : 'Unknown date';

@@ -54,6 +54,7 @@ class GedcomParser
                 $this->storePerson(
                     $individual->getId(), //obtains GEDCOM ID for individual (characterised by @Ixxxx@)
                     $name->getGivn() . ' ' . $name->getSurn(), //obtains and concatenates first name and surname
+                    $name->getSurn(),
                     $individual->getSex(), //obtains gender
                     $birthDate['date'], //DOB obtained from extractQual (after conversion via getDate)
                     $birthDate['qualifier'], //qualifier (ABT, BEF, AFT, used when dates are approximate) obtained from extractQual associated with DOB
@@ -161,13 +162,14 @@ class GedcomParser
     /**
     * Stores the extracted information from the parser into the People table, creating or updating a Person record within it.
     */
-    private function storePerson($gedcomId, $name, $gender, $birth, $birthDateQualifier, $death, $deathDateQualifier)
+    private function storePerson($gedcomId, $name, $surname, $gender, $birth, $birthDateQualifier, $death, $deathDateQualifier)
     {
         $person = Person::updateOrCreate( //updates/creates Person record with corresponding information for each column in People table
             ['gedcom_id' => $gedcomId],
             [
                 'name' => $name,
                 'gender' => $gender,
+                'surname' => $surname,
                 'birth_date' => $this->convertToDate($birth),
                 'birth_date_qualifier' => $birthDateQualifier,
                 'death_date' => $this->convertToDate($death),

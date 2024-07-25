@@ -146,23 +146,33 @@ const FamilyTree = () => {
   const [isSidebarOpened, setIsSidebarOpened] = useState( false );
   const [selectedNode, setSelectedNode] = useState(null);
   const [query, setQuery] = useState('');
+  const [hasSearched, setHasSearched] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     fetchFamilyTreeData(); //after component is mounted calls this function which retrieves the family tree data from the api through http requests
   }, []);
 
-  const fetchFamilyTreeData = async (name= '') => {
+  const fetchFamilyTreeData = async (surname= '') => {
     try {
       const response = await axios.get('/api/family-tree-json', {
-        params: { desiredName: name }
+        params: { desiredSurname: surname }
       }); //uses axios library to make http request to fetch api data, which is then parsed as JSON
+      if (response.data.length === 0) {
+        setErrorMessage('No results found for the given surname.');
+        setTreeData(null);
+      } else {
       setTreeData(response.data); //the fetched data is stored in treeData variable
+      setErrorMessage('');
+      }
     } catch (error) {
-      console.error('Error fetching family tree data:', error); //if any issues with retrieving data will print error message
+       setErrorMessage('An error occurred while fetching data.');
     }
   };
-  
+ 
   const search = () => {
+    setErrorMessage('');
+    setHasSearched(true);
     fetchFamilyTreeData(query);
   };
 
@@ -258,8 +268,18 @@ const FamilyTree = () => {
     );
   };
 
-    if (!treeData) {
-      return <div>Loading...</div>; //alternate display if no tree data is available
+    if (!treeData) { //alternate display if no tree data is available
+      return <div>{errorMessage}
+      <div style={{ margin: '10px', width: '100%', height: '100vh' }}>
+      <input 
+        type="text" 
+        value={query} 
+        onChange={(e) => setQuery(e.target.value)} 
+        placeholder="Search a bloodline (surname)"
+      />
+      <button onClick={search}>Search</button>
+      </div>
+      </div>
     }
   return ( //utilises react-d3-tree library to set parameters for tree display
     //sets width and height of display, the data to be used, the orientation of the tree and style of links/branches, positioning of tree and spacing between sibling and non-sibling nodes
@@ -268,9 +288,11 @@ const FamilyTree = () => {
         type="text" 
         value={query} 
         onChange={(e) => setQuery(e.target.value)} 
-        placeholder="Search"
+        placeholder="Search a bloodline (surname)"
       />
       <button onClick={search}>Search</button>
+
+      {hasSearched && treeData && !errorMessage && (
       <Tree
         data={treeData}
         orientation="vertical"
@@ -280,6 +302,7 @@ const FamilyTree = () => {
         nodeSize={{ x: 190, y: 300 }}
         renderCustomNodeElement={customNode}
       />
+    )}
       {isSidebarOpened && <Sidebar node={selectedNode} onClose={closeSidebar} />}
     </div>
   );

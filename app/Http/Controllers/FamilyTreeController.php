@@ -134,11 +134,15 @@ class FamilyTreeController extends Controller
       $requestedPerson = Person::query()->orderByRaw('birth_date IS NULL, birth_date ASC'); 
   
       $desiredName = $request->input('desiredName');
+      $desiredSurname = $request->input('desiredSurname');
   
       if ($desiredName) { //retrieves people based on name(s)
           $requestedPerson->where('name', 'like', '%' . $desiredName . '%');
       }
-      
+      if ($desiredSurname) { 
+        $requestedPerson->where('surname', 'like', '%' . $desiredSurname . '%');
+    }
+
       //retrieves people fitting the query criteria
       $allPersons = $requestedPerson->get();
   
@@ -166,7 +170,7 @@ class FamilyTreeController extends Controller
   
       //iterates through each person creating Node objects for them, then assigned to familyTree array using their ID as key
       foreach ($relatives as $relative){
-        $familyTree[$relative->id] = new Node($relative->id, $relative->name, $relative->birth_date, $relative->death_date, $relative->gender, $relative->father_id, $relative->mother_id, $relative->image);
+        $familyTree[$relative->id] = new Node($relative->id, $relative->name, $relative->surname, $relative->birth_date, $relative->death_date, $relative->gender, $relative->father_id, $relative->mother_id, $relative->image);
     }
   
       //iterates through spouse relationships, checks if both spouses exist in the familyTree array

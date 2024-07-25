@@ -135,89 +135,89 @@
 import React, { useState, useEffect } from 'react'; //react modules handling states and effects of components
 import Tree from 'react-d3-tree'; //Uses react-d3-tree package for visual representation of tree structure
 import axios from 'axios'; //used to fetch api data through making http requests
-import Tippy from '@tippyjs/react';
+import Tippy from '@tippyjs/react'; //uses tippyjs package to customise tooltip
 import 'tippy.js/dist/tippy.css';
 import "../../css/treeCustomisation.css";
 import Sidebar from './Sidebar';
 
 const FamilyTree = () => {
-  const [treeData, setTreeData] = useState(null); //initialises variable treeData
-  const [setImages] = useState({});
-  const [isSidebarOpened, setIsSidebarOpened] = useState( false );
-  const [selectedNode, setSelectedNode] = useState(null);
-  const [query, setQuery] = useState('');
-  const [hasSearched, setHasSearched] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [treeData, setTreeData] = useState(null); //initialises variable treeData to store fetched family tree data
+  const [setImages] = useState({}); //initialises setter method for storing image paths
+  const [isSidebarOpened, setIsSidebarOpened] = useState( false ); //initialises, checks and sets visibility of sidebar (boolean)
+  const [selectedNode, setSelectedNode] = useState(null); //initialises node selection state
+  const [query, setQuery] = useState(''); //initialises search function to store query 
+  const [hasSearched, setHasSearched] = useState(false); //initialises and checks if search has been performed (boolean)
+  const [errorMessage, setErrorMessage] = useState(''); //initialises errorMessage variable to store error messages
 
   useEffect(() => {
     fetchFamilyTreeData(); //after component is mounted calls this function which retrieves the family tree data from the api through http requests
   }, []);
 
-  const fetchFamilyTreeData = async (surname= '') => {
+  const fetchFamilyTreeData = async (surname= '') => { 
     try {
       const response = await axios.get('/api/family-tree-json', {
         params: { desiredSurname: surname }
-      }); //uses axios library to make http request to fetch api data, which is then parsed as JSON
+      }); //uses axios library to make http request to fetch api data, which is then parsed as JSON. this retrieves data for a queried surname in particular
       if (response.data.length === 0) {
-        setErrorMessage('No results found for the given surname.');
+        setErrorMessage('No results found for the given surname.'); //if no results found prints error message
         setTreeData(null);
       } else {
       setTreeData(response.data); //the fetched data is stored in treeData variable
-      setErrorMessage('');
+      setErrorMessage(''); //clears error message
       }
     } catch (error) {
-       setErrorMessage('An error occurred while fetching data.');
+       setErrorMessage('An error occurred while fetching data.'); //error message if any issues with fetching data
     }
   };
  
-  const search = () => {
+  const search = () => { //search function
     setErrorMessage('');
-    setHasSearched(true);
-    fetchFamilyTreeData(query);
+    setHasSearched(true); //sets hasSearched to true, thus allowing the tree data to be shown (or an error message if nothing is found)
+    fetchFamilyTreeData(query); //calls function to retrieve the family tree data for queried surname
   };
 
-  const uploadImage = async (event, node) => {
-    const selectedFile = event.target.files[0];
-    if (!selectedFile) return;
+  const uploadImage = async (event, node) => { //function for uploading images
+    const selectedFile = event.target.files[0]; //sets the selectedFile as the first file the user selects
+    if (!selectedFile) return; //if no file has been selected do nothing
   
-    const formData = new FormData();
-    formData.append('image', selectedFile);
-    formData.append('id', node);
+    const formData = new FormData(); //new formdata object is created (used for build the data needed to pass to the server)
+    formData.append('image', selectedFile); //adds the selected file as a value for key "image" for formdata
+    formData.append('id', node); //adds the selected node's id as a value for key "id" for formdata (used to associate the image with the correct node)
   
-    try {
+    try { //sends request to upload-image endpoint with formdata as the data
       const response = await axios.post('/upload-image', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'multipart/form-data', //necessary for file uploads
         },
       });
-      setImages((prevImages) => ({ ...prevImages, [node]: response.data.imagePath }));
+      setImages({ [node]: response.data.imagePath }); //updates state with new image and sets it to node
     } catch (error) {
-      console.error('Error uploading image:', error);
+      setErrorMessage('Image could not be uploaded.'); //error message if image cannot be uploaded for any reason
     }
   };
   
-  const openSidebar = (node) => {
+  const openSidebar = (node) => { //if user clicks a node, sets that as selectedNode and sets sideBar opened to true, opening it and displaying information for that node
       setSelectedNode(node);
       setIsSidebarOpened(true); 
     };
 
-  const closeSidebar = () => {
+  const closeSidebar = () => { //if user closes sidebar, closes the sidebar and deselects the node (thus setting selectedNode to null)
       setIsSidebarOpened(false);
       setSelectedNode(null); 
     };
 
 
-  const customNode = ({ nodeDatum }) => {
-    const selectedImage = nodeDatum.attributes.image || '/images/user.png';
-    const isMale = nodeDatum.attributes.gender === 'M';
+  const customNode = ({ nodeDatum }) => { //customises nodes in family tree based on particular properties
+    const selectedImage = nodeDatum.attributes.image || '/images/user.png'; //node's image is either the image selected by user or default image
+    const isMale = nodeDatum.attributes.gender === 'M'; //checks if node's gender is male or female (for spouses, only main person's gender is counted)
     const isFemale = nodeDatum.attributes.gender === 'F';
     const nodeStyle = {
-      stroke: isMale ? '#97EBE6' : isFemale ? '#EB97CF': '#EBC097',
+      stroke: isMale ? '#97EBE6' : isFemale ? '#EB97CF': '#EBC097', //changes outline colour of node depending on gender (alternative colour if neither or unknown)
       fill: 'none',
       strokeWidth: 10,
     };
 
-  const toolTip = (
+  const toolTip = ( //customises tooltip, containing names and marriage info (if applicable)
       <div style={{ 
         padding: '10px', 
         background: 'linear-gradient(135deg, #92B08E, #6C9661, #37672F)',
@@ -230,7 +230,10 @@ const FamilyTree = () => {
     </div>
   );
 
-    return (
+    return ( //returns custom node features: tooltip with desired information and appearance, 
+      //onClick function which calls openSidebar on a node to display its details, provided the user clicks any of the properties of that specific node,
+      //styles the node to contain an image in a circular fashion, with the image filling its contents (any extra is clipped off),
+      //contains the names, DOBs and DODs for the people of that specific node and a button for users to upload images to their node of choice
       <Tippy content={toolTip}>        
         <g onClick={() => openSidebar(nodeDatum)}>
         <circle r={50} style={nodeStyle} />
@@ -268,7 +271,7 @@ const FamilyTree = () => {
     );
   };
 
-    if (!treeData) { //alternate display if no tree data is available
+    if (!treeData) { //alternate display if no tree data is available - error message and search bar
       return <div>{errorMessage}
       <div style={{ margin: '10px', width: '100%', height: '100vh' }}>
       <input 
@@ -282,7 +285,9 @@ const FamilyTree = () => {
       </div>
     }
   return ( //utilises react-d3-tree library to set parameters for tree display
-    //sets width and height of display, the data to be used, the orientation of the tree and style of links/branches, positioning of tree and spacing between sibling and non-sibling nodes
+    //sets width and height of display, places search bar, the data to be used, any node customisations the orientation of the tree and style of links/branches, positioning of tree and spacing between sibling and non-sibling nodes
+    //only appears if the user has searched a bloodline/surname where family tree data is available, and no errors were given
+    //also ensures sidebar is only opened if isSidebarOpened is true, and if so will display the data of a selected node and also close if user selects to do this
     <div style={{ width: '100%', height: '100vh' }}>
       <input 
         type="text" 

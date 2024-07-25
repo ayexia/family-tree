@@ -20,12 +20,12 @@ class UploadController extends Controller
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
-            $path = $file->store('images', 'public');
-            $fullPath = asset('storage/' . $path);
-            $person->update(['image' => $fullPath]);
+            $path = $file->store('images', 'public'); //stores image in public directory
+            $fullPath = asset('storage/' . $path); //creates whole link path for image
+            $person->update(['image' => $fullPath]); //stores image path in DB for associated person
         }
 
-        return response()->json(['imagePath' => $fullPath]);
+        return response()->json(['imagePath' => $fullPath]); //returns image path to be displayed in React frontend
     }
 
 }

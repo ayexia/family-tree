@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\GedcomController;
 use App\Http\Controllers\FamilyTreeController;
+use App\Http\Controllers\UploadController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -26,5 +27,8 @@ Route::get('/family-tree', [FamilyTreeController:: class, 'displayFamilyTree'])-
 Route::get('/test', function () {
     return view('test');
 });
+
+
+Route::post('/upload-image', [UploadController::class, 'uploadImage']);
 
 require __DIR__.'/auth.php';

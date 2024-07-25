@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Person;
+use Illuminate\Support\Facades\Storage;
+
 
 class UploadController extends Controller
 {
@@ -22,8 +24,10 @@ class UploadController extends Controller
             $path = $file->store('images', 'public');
 
             $person->update(['image' => $path]);
+            $fullPath = asset('storage/' . $path);
         }
 
-        return response()->json(['success' => 'Image uploaded successfully']);
+        return response()->json(['imagePath' => $fullPath]);
     }
+
 }

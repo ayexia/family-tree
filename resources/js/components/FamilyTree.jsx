@@ -159,20 +159,26 @@ const FamilyTree = () => {
     }
   };
 
-  const uploadImage = (event, node) => {
+  const uploadImage = async (event, node) => {
     const selectedFile = event.target.files[0];
-    const reader = new FileReader();
-    if (selectedFile) {
-      reader.onloadend = function (e) {
-        setImages((prevImages) => ({
-          ...prevImages,
-          [node]: reader.result,
-        }));
-      };
-    reader.readAsDataURL(selectedFile);
+    if (!selectedFile) return;
+  
+    const formData = new FormData();
+    formData.append('image', selectedFile);
+    formData.append('id', node);
+  
+    try {
+      const response = await axios.post('/upload-image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      setImages((prevImages) => ({ ...prevImages, [node]: response.data.imagePath }));
+    } catch (error) {
+      console.error('Error uploading image:', error);
     }
   };
-
+  
   const openSidebar = (node) => {
       setSelectedNode(node);
       setIsSidebarOpened(true); 
@@ -185,8 +191,7 @@ const FamilyTree = () => {
 
 
   const customNode = ({ nodeDatum }) => {
-    const selectedImage = images[nodeDatum.id];
-    const defaultImage = '/images/user.png';
+    const selectedImage = images[nodeDatum.id] || '/images/user.png';
     const isMale = nodeDatum.attributes.gender === 'M';
     const isFemale = nodeDatum.attributes.gender === 'F';
     const nodeStyle = {
@@ -213,7 +218,7 @@ const FamilyTree = () => {
         <g onClick={() => openSidebar(nodeDatum)}>
           <circle r={50} style={nodeStyle} />
         <image
-          href={selectedImage || defaultImage}
+          href={selectedImage}
           x="-35"
           y="-35"
           width="70"

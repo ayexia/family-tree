@@ -143,20 +143,27 @@ import Sidebar from './Sidebar';
 const FamilyTree = () => {
   const [treeData, setTreeData] = useState(null); //initialises variable treeData
   const [setImages] = useState({});
-  const [ isSidebarOpened, setIsSidebarOpened ] = useState( false );
+  const [isSidebarOpened, setIsSidebarOpened] = useState( false );
   const [selectedNode, setSelectedNode] = useState(null);
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     fetchFamilyTreeData(); //after component is mounted calls this function which retrieves the family tree data from the api through http requests
   }, []);
 
-  const fetchFamilyTreeData = async () => {
+  const fetchFamilyTreeData = async (name= '') => {
     try {
-      const response = await axios.get('/api/family-tree-json'); //uses axios library to make http request to fetch api data, which is then parsed as JSON
+      const response = await axios.get('/api/family-tree-json', {
+        params: { desiredName: name }
+      }); //uses axios library to make http request to fetch api data, which is then parsed as JSON
       setTreeData(response.data); //the fetched data is stored in treeData variable
     } catch (error) {
       console.error('Error fetching family tree data:', error); //if any issues with retrieving data will print error message
     }
+  };
+  
+  const search = () => {
+    fetchFamilyTreeData(query);
   };
 
   const uploadImage = async (event, node) => {
@@ -257,6 +264,13 @@ const FamilyTree = () => {
   return ( //utilises react-d3-tree library to set parameters for tree display
     //sets width and height of display, the data to be used, the orientation of the tree and style of links/branches, positioning of tree and spacing between sibling and non-sibling nodes
     <div style={{ width: '100%', height: '100vh' }}>
+      <input 
+        type="text" 
+        value={query} 
+        onChange={(e) => setQuery(e.target.value)} 
+        placeholder="Search"
+      />
+      <button onClick={search}>Search</button>
       <Tree
         data={treeData}
         orientation="vertical"

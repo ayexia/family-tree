@@ -142,7 +142,7 @@ import Sidebar from './Sidebar';
 
 const FamilyTree = () => {
   const [treeData, setTreeData] = useState(null); //initialises variable treeData
-  const [images, setImages] = useState({});
+  const [setImages] = useState({});
   const [ isSidebarOpened, setIsSidebarOpened ] = useState( false );
   const [selectedNode, setSelectedNode] = useState(null);
 
@@ -191,7 +191,7 @@ const FamilyTree = () => {
 
 
   const customNode = ({ nodeDatum }) => {
-    const selectedImage = images[nodeDatum.id] || '/images/user.png';
+    const selectedImage = nodeDatum.attributes.image || '/images/user.png';
     const isMale = nodeDatum.attributes.gender === 'M';
     const isFemale = nodeDatum.attributes.gender === 'F';
     const nodeStyle = {

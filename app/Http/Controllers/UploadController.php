@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use App\Models\Person;
 use Illuminate\Support\Facades\Storage;
 
-
 class UploadController extends Controller
 {
     public function uploadImage(Request $request)
@@ -22,9 +21,8 @@ class UploadController extends Controller
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $path = $file->store('images', 'public');
-
-            $person->update(['image' => $path]);
             $fullPath = asset('storage/' . $path);
+            $person->update(['image' => $fullPath]);
         }
 
         return response()->json(['imagePath' => $fullPath]);

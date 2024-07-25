@@ -166,7 +166,7 @@ class FamilyTreeController extends Controller
   
       //iterates through each person creating Node objects for them, then assigned to familyTree array using their ID as key
       foreach ($relatives as $relative){
-        $familyTree[$relative->id] = new Node($relative->id, $relative->name, $relative->birth_date, $relative->death_date, $relative->gender, $relative->father_id, $relative->mother_id);
+        $familyTree[$relative->id] = new Node($relative->id, $relative->name, $relative->birth_date, $relative->death_date, $relative->gender, $relative->father_id, $relative->mother_id, $relative->image);
     }
   
       //iterates through spouse relationships, checks if both spouses exist in the familyTree array
@@ -254,7 +254,8 @@ class FamilyTreeController extends Controller
             'DOB' => $parentsBirthDates,
             'DOD' => $parentsDeathDates,
             'marriage' => $parentsMarriageDates,
-            'divorce' => $parentsDivorceDates
+            'divorce' => $parentsDivorceDates,
+            'image' => $person->image
             ],
               'children' => []
           ];

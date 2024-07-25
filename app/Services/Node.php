@@ -15,7 +15,7 @@ class Node {
     public $mother_id;
     public $gender;
 
-    public function __construct($id, $name, $birth_date, $death_date, $gender, $father_id = null, $mother_id = null) {
+    public function __construct($id, $name, $birth_date, $death_date, $gender, $father_id = null, $mother_id = null, $image = null) {
         $this->id = $id;
         $this->name = $name;
         //formats dates via Carbon in year-month-date format, removing timestamp. if DOB/DOD is null replaces value with arbitrary "unknown date"
@@ -24,6 +24,7 @@ class Node {
         $this->gender = $gender;
         $this->father_id = $father_id;
         $this->mother_id = $mother_id;
+        $this->image = $image;
     }
 
     public function addChild(Node $child) {

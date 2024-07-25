@@ -197,7 +197,7 @@ const FamilyTree = () => {
     const nodeStyle = {
       stroke: isMale ? '#97EBE6' : isFemale ? '#EB97CF': '#EBC097',
       fill: 'none',
-      strokeWidth: 4,
+      strokeWidth: 10,
     };
 
   const toolTip = (
@@ -216,21 +216,27 @@ const FamilyTree = () => {
     return (
       <Tippy content={toolTip}>        
         <g onClick={() => openSidebar(nodeDatum)}>
-          <circle r={50} style={nodeStyle} />
+        <circle r={50} style={nodeStyle} />
         <image
           href={selectedImage}
-          x="-35"
-          y="-35"
-          width="70"
-          height="70"
+          x="-50"
+          y="-50"
+          width="100"
+          height="100"
+          clipPath="url(#clipCircle)"
         />
-        <text fill="black" x="60" y="-5" style={{ fontSize: '24px', fontFamily: 'Times New Roman' }}>
+        <defs>
+          <clipPath id="clipCircle">
+            <circle cx="0" cy="0" r="50" />
+          </clipPath>
+        </defs>
+        <text fill="#B2BEB5" stroke="none" x="60" y="-5" style={{ fontSize: '24px', fontFamily: 'Times New Roman' }}>
           {nodeDatum.name}
         </text>
-        <text fill="black" x="60" y="15" style={{ fontSize: '20px' }}>
+        <text fill="#B2BEB5" stroke="none" x="60" y="15" style={{ fontSize: '20px' }}>
           {nodeDatum.attributes.DOB}
         </text>
-        <text fill="black" x="60" y="35" style={{ fontSize: '20px' }}>
+        <text fill="#B2BEB5" stroke="none" x="60" y="35" style={{ fontSize: '20px' }}>
           {nodeDatum.attributes.DOD}
         </text>
         <foreignObject x="-45" y="55" width="90" height="50">
@@ -257,7 +263,7 @@ const FamilyTree = () => {
         pathFunc="step"
         translate={{ x: 300, y: 50 }}
         separation={{ siblings: 4.8, nonSiblings: 5}}
-        nodeSize={{ x: 175, y: 300 }}
+        nodeSize={{ x: 190, y: 300 }}
         renderCustomNodeElement={customNode}
       />
       {isSidebarOpened && <Sidebar node={selectedNode} onClose={closeSidebar} />}

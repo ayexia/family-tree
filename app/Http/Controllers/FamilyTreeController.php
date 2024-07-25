@@ -229,22 +229,24 @@ class FamilyTreeController extends Controller
         $death_dates = [$person->death_date];
         $marriage_dates = [];
         $divorce_dates = [];
+        $spouseNumber = 1;
 
         foreach ($person->getSpouses() as $spouse) {
           if ($spouse){
-                $names[] = $spouse['node']->name;
-                $birth_dates[] = $spouse['node']->birth_date;
-                $death_dates[] = $spouse['node']->death_date;
-                $marriage_dates[] = $spouse['marriage_date'];
-                $divorce_dates[] = $spouse['divorce_date'];
+                $names[] = "Spouse $spouseNumber: " . $spouse['node']->name;
+                $birth_dates[] = "Spouse $spouseNumber: " . $spouse['node']->birth_date;
+                $death_dates[] = "Spouse $spouseNumber: " .$spouse['node']->death_date;
+                $marriage_dates[] = "Spouse $spouseNumber: " .$spouse['marriage_date'];
+                $divorce_dates[] = "Spouse $spouseNumber: " . $spouse['divorce_date'];
+                $spouseNumber++;
           }
         }
 
-        $parentsNames = 'Name: ' . implode(' | Spouse: ', $names);
-        $parentsBirthDates = 'DOB: ' . implode(' | DOB: ', $birth_dates);
-        $parentsDeathDates = 'DOD: ' . implode(' | DOD: ', $death_dates);
-        $parentsMarriageDates = 'Marriage: ' . implode(' | Marriage: ', $marriage_dates);
-        $parentsDivorceDates = 'Divorce: ' . implode(' | Divorce: ', $divorce_dates);
+        $parentsNames = 'Name: ' . implode(' | ', $names);
+        $parentsBirthDates = 'DOB: ' . implode(' | ', $birth_dates);
+        $parentsDeathDates = 'DOD: ' . implode(' | ', $death_dates);
+        $parentsMarriageDates = 'Marriage: ' . implode(' | ', $marriage_dates);
+        $parentsDivorceDates = 'Divorce: ' . implode(' | ', $divorce_dates);
 
         $parents = [
         'id' => $person->id,

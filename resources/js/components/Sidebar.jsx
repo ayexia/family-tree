@@ -32,11 +32,11 @@ const Sidebar = ({ node, onClose }) => {
       </button>
       <div style={{ padding: '20px' }}>
         <h3>{node.name}</h3>
-        <p><strong>Gender:</strong> {node.attributes.gender}</p>
-        <p><strong>DOB:</strong> {node.attributes.DOB}</p>
-        <p><strong>DOD:</strong> {node.attributes.DOD}</p>
-        <p><strong>Marriage:</strong> {node.attributes.marriage}</p>
-        <p><strong>Divorce:</strong> {node.attributes.divorce}</p>
+        <p><img src={node.attributes.image}></img></p>
+        <p>{node.attributes.DOB}</p>
+        <p>{node.attributes.DOD}</p>
+        <p>{node.attributes.marriage}</p>
+        <p>{node.attributes.divorce}</p>
       </div>
     </div>
   );

@@ -226,7 +226,7 @@ class FamilyTreeController extends Controller
       return view('tree.index', compact('allPersons', 'familyTree', 'desiredName', 'relatives', 'trees'));
   }
     
-  //Converts family tree data to accepted JSON format to send as response to frontend - tree structure with spouses in one node
+  //Converts family tree data to accepted JSON format to send as response to frontend - tree structure with separate spouses
   private function convertToJsonTree(Node $person) {
     $personData = [
         'id' => $person->id,

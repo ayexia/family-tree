@@ -87,6 +87,8 @@ const FamilyTree = () => {
     const spouses = nodeDatum.spouses || [];
     const spouseSpacing = 400; 
     const verticalSpacing = 55;
+    const nodeRadius = 50;
+    const line = nodeRadius + 10;
 
   const toolTip = (node) => (//customises tooltip, containing names and marriage info (if applicable)
       <div style={{ 
@@ -116,123 +118,107 @@ const FamilyTree = () => {
       //onClick function which calls openSidebar on a node to display its details, provided the user clicks any of the properties of that specific node,
       //styles the node to contain an image in a circular fashion, with the image filling its contents (any extra is clipped off),
       //contains the names, DOBs and DODs for the people of that specific node and a button for users to upload images to their node of choice
-    return (<> 
-<Tippy content={tooltipContent()} arrow={false}>
-  <g>
-  <g onClick={() => openSidebar(nodeDatum)}
-    onMouseEnter={() => nodeHover(nodeDatum)}
-    onMouseLeave={() => setHoveredNode(null)}>
-    <circle r={50} style={nodeStyle} />
-    <image
-      href={selectedImage}
-      x="-50"
-      y="-50"
-      width="100"
-      height="100"
-      clipPath="url(#clipCircle)"
-    />
-    <defs>
-      <clipPath id="clipCircle">
-        <circle cx="0" cy="0" r="50" />
-      </clipPath>
-    </defs>
-    <text fill="#37672F" stroke="none" x="60" y="-5" style={{ fontSize: '24px', fontFamily: 'Times New Roman' }}>
-      {nodeDatum.name}
-    </text>
-    <text fill="#37672F" stroke="none" x="60" y="15" style={{ fontSize: '20px' }}>
-      {nodeDatum.attributes.DOB}
-    </text>
-    <text fill="#37672F" stroke="none" x="60" y="35" style={{ fontSize: '20px' }}>
-      {nodeDatum.attributes.DOD}
-    </text>
-    <foreignObject x="-45" y="55" width="90" height="50">
-      <input
-        type="file"
-        onChange={(event) => uploadImage(event, nodeDatum.id)}
-        style={{ width: '90px' }}
-      />
-    </foreignObject>
-    </g>
-    {spouses.length > 0 && (
-      <g>
-        <line
-          x1={60}
-          y1={0}
-          x2={spouseSpacing - 50}
-          y2={0}
-          stroke="black"
-          strokeWidth={2}
-          strokeDasharray="5,5"
-        />
-        {spouses.length > 1 && (
-          <line
-            x1={spouseSpacing - 50}
-            y1={-verticalSpacing / 3}
-            x2={spouseSpacing - 50}
-            y2={(spouses.length + 1.2) * verticalSpacing}
-            stroke="black"
-            strokeWidth={2}
-            strokeDasharray="5,5"
-          />
-        )}
-        {spouses.map((spouse, index) => (
-          <g 
-          key={spouse.id}
-          transform={`translate(${spouseSpacing}, ${index * verticalSpacing * 3})`}
-          onMouseEnter={(e) => {
-            e.stopPropagation();
-            nodeHover(spouse, true);
-          }}
-          onMouseLeave={() => setHoveredNode(null)}
-          onClick={(e) => {
-            e.stopPropagation();
-            openSidebar(spouse);
-          }}
-        >
-            <line
-              x1={0}
-              y1={0}
-              x2={0}
-              y2={0}
-              stroke="black"
-              strokeWidth={2}
-            />
-            <circle r={50} style={{
-              stroke: spouse.attributes.gender === 'M' ? '#97EBE6' : spouse.attributes.gender === 'F' ? '#EB97CF' : '#EBC097',
-              fill: 'none',
-              strokeWidth: 10,
-            }} />
-            <image
-              href={spouse.attributes.image || '/images/user.png'}
-              x="-50"
-              y="-50"
-              width="100"
-              height="100"
-              clipPath="url(#clipCircle)"
-              ></image>
+      return (<>
+          <Tippy content={tooltipContent()} arrow={false}>
+            <g>
+              <g onClick={() => openSidebar(nodeDatum)}
+                onMouseEnter={() => nodeHover(nodeDatum)}
+                onMouseLeave={() => setHoveredNode(null)}>
+                <circle r={nodeRadius} style={nodeStyle} />
+                <image
+                  href={selectedImage}
+                  x="-50"
+                  y="-50"
+                  width="100"
+                  height="100"
+                  clipPath="url(#clipCircle)"
+                />
                 <defs>
                   <clipPath id="clipCircle">
-                    <circle cx="0" cy="0" r="50" />
+                    <circle cx="0" cy="0" r={nodeRadius} />
                   </clipPath>
                 </defs>
-               <text fill="#37672F" stroke="none" x="60" y="-5" style={{ fontSize: '24px', fontFamily: 'Times New Roman' }}>
-                {spouse.name}
-              </text>
-              <text fill="#37672F" stroke="none" x="60" y="15" style={{ fontSize: '20px' }}>
-              {spouse.attributes.DOB}
-             </text>
-              <text fill="#37672F" stroke="none" x="60" y="35" style={{ fontSize: '20px' }}>
-              {spouse.attributes.DOD}
-              </text>
+                <text fill="#37672F" stroke="none" x="60" y="-5" style={{ fontSize: '24px', fontFamily: 'Times New Roman' }}>
+                  {nodeDatum.name}
+                </text>
+                <text fill="#37672F" stroke="none" x="60" y="15" style={{ fontSize: '20px' }}>
+                  {nodeDatum.attributes.DOB}
+                </text>
+                <text fill="#37672F" stroke="none" x="60" y="35" style={{ fontSize: '20px' }}>
+                  {nodeDatum.attributes.DOD}
+                </text>
+                <foreignObject x="-45" y="55" width="90" height="50">
+                  <input
+                    type="file"
+                    onChange={(event) => uploadImage(event, nodeDatum.id)}
+                    style={{ width: '90px' }}
+                  />
+                </foreignObject>
+              </g>
+              {spouses.length > 0 && (
+                <g>
+                  {spouses.map((spouse, index) => {
+                    const isLeft = index % 2 === 0;
+                    const isFirstRow = index < 2;
+                    return (
+                      <g key={spouse.id}
+                        transform={`translate(${isFirstRow ? (isLeft ? -spouseSpacing : spouseSpacing) : 0}, ${isFirstRow ? 0 : (index - 1) * verticalSpacing})`}
+                        onMouseEnter={(e) => {
+                          e.stopPropagation();
+                          nodeHover(spouse, true);
+                        }}
+                        onMouseLeave={() => setHoveredNode(null)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openSidebar(spouse);
+                        }}
+                      >
+                        <line
+                          x1={isFirstRow ? (isLeft ? spouseSpacing - line : -spouseSpacing + line) : 0}
+                          y1={0}
+                          x2={isLeft ? 40 : -40}
+                          y2={0}
+                          stroke="black"
+                          strokeWidth={2}
+                          strokeDasharray="5,5"
+                        />
+                        <circle r={nodeRadius} style={{
+                          stroke: spouse.attributes.gender === 'M' ? '#97EBE6' : spouse.attributes.gender === 'F' ? '#EB97CF' : '#EBC097',
+                          fill: 'none',
+                          strokeWidth: 10,
+                        }} />
+                        <image
+                          href={spouse.attributes.image || '/images/user.png'}
+                          x="-50"
+                          y="-50"
+                          width="100"
+                          height="100"
+                          clipPath="url(#clipCircle)"
+                        ></image>
+                        <defs>
+                          <clipPath id="clipCircle">
+                            <circle cx="0" cy="0" r={nodeRadius} />
+                          </clipPath>
+                        </defs>
+                        <text fill="#37672F" stroke="none" x="60" y="-5" style={{ fontSize: '24px', fontFamily: 'Times New Roman' }}>
+                          {spouse.name}
+                        </text>
+                        <text fill="#37672F" stroke="none" x="60" y="15" style={{ fontSize: '20px' }}>
+                          {spouse.attributes.DOB}
+                        </text>
+                        <text fill="#37672F" stroke="none" x="60" y="35" style={{ fontSize: '20px' }}>
+                          {spouse.attributes.DOD}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </g>
+              )}
             </g>
-            ))}
-          </g>
-          )}
-       </g>
-     </Tippy>
-    </>
-    );
-  };
+          </Tippy>
+        </>
+      );
+    };
 
     if (!treeData) { //alternate display if no tree data is available - error message and search bar
       return <div>{errorMessage}

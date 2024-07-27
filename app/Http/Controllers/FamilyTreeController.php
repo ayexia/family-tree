@@ -227,54 +227,47 @@ class FamilyTreeController extends Controller
   }
     
   //Converts family tree data to accepted JSON format to send as response to frontend - tree structure with spouses in one node
-    private function convertToJsonTree(Node $person) {
-        $names = [$person->name];
-        $birth_dates = [$person->birth_date];
-        $death_dates = [$person->death_date];
-        $marriage_dates = [];
-        $divorce_dates = [];
-        $spouseNumber = 1;
-
-        foreach ($person->getSpouses() as $spouse) {
-          if ($spouse){
-                $names[] = "Spouse $spouseNumber: " . $spouse['node']->name;
-                $birth_dates[] = "Spouse $spouseNumber: " . $spouse['node']->birth_date;
-                $death_dates[] = "Spouse $spouseNumber: " .$spouse['node']->death_date;
-                $marriage_dates[] = "Spouse $spouseNumber: " .$spouse['marriage_date'];
-                $divorce_dates[] = "Spouse $spouseNumber: " . $spouse['divorce_date'];
-                $spouseNumber++;
-          }
-        }
-
-        $parentsNames = 'Name: ' . implode(' | ', $names);
-        $parentsBirthDates = 'DOB: ' . implode(' | ', $birth_dates);
-        $parentsDeathDates = 'DOD: ' . implode(' | ', $death_dates);
-        $parentsMarriageDates = 'Marriage: ' . implode(' | ', $marriage_dates);
-        $parentsDivorceDates = 'Divorce: ' . implode(' | ', $divorce_dates);
-
-        $parents = [
+  private function convertToJsonTree(Node $person) {
+    $personData = [
         'id' => $person->id,
-        'name' => $parentsNames,
+        'name' => $person->name,
         'attributes' => [
             'gender' => $person->gender,
-            'DOB' => $parentsBirthDates,
-            'DOD' => $parentsDeathDates,
-            'marriage' => $parentsMarriageDates,
-            'divorce' => $parentsDivorceDates,
-            'image' => $person->image
-            ],
-              'children' => []
-          ];
-          //recursively passes child's data to the function and retrieves their info, storing in children array
-          foreach ($person->getChildren() as $child) {
-              $childData = $this->convertToJsonTree($child);
-              if ($childData) {
-                  $parents['children'][] = $childData;
-              }
-          }
-          return $parents;
-      }
+            'DOB' => $person->birth_date,
+            'DOD' => $person->death_date,
+            'image' => $person->image,
+        ],
+        'children' => [],
+        'spouses' => []
+    ];
 
+    foreach ($person->getSpouses() as $spouse) {
+        if ($spouse) {
+            $spouseData = [
+                'id' => $spouse['node']->id,
+                'name' => $spouse['node']->name,
+                'attributes' => [
+                    'gender' => $spouse['node']->gender,
+                    'DOB' => $spouse['node']->birth_date,
+                    'DOD' => $spouse['node']->death_date,
+                    'marriage' => $spouse['marriage_date'],
+                    'divorce' => $spouse['divorce_date'],
+                    'image' => $spouse['node']->image,
+                ],
+            ];
+            $personData['spouses'][] = $spouseData;
+        }
+    }
+
+    foreach ($person->getChildren() as $child) {
+        $childData = $this->convertToJsonTree($child);
+        if ($childData) {
+            $personData['children'][] = $childData;
+        }
+    }
+
+    return $personData;
+}
   //TODO: method to convert to JSON for graph structure and testing graph packages
 
   private function buildFamilyTree(Node $person, &$visited, $prefix = ""){

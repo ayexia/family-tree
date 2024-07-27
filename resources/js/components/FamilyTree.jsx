@@ -14,6 +14,7 @@ const FamilyTree = () => {
   const [query, setQuery] = useState(''); //initialises search function to store query 
   const [hasSearched, setHasSearched] = useState(false); //initialises and checks if search has been performed (boolean)
   const [errorMessage, setErrorMessage] = useState(''); //initialises errorMessage variable to store error messages
+  const [hoveredNode, setHoveredNode] = useState(null);
 
   useEffect(() => {
     fetchFamilyTreeData(); //after component is mounted calls this function which retrieves the family tree data from the api through http requests
@@ -87,22 +88,28 @@ const FamilyTree = () => {
     const spouseSpacing = 400; 
     const verticalSpacing = 55;
 
-  const toolTip = ( //customises tooltip, containing names and marriage info (if applicable)
+  const toolTip = (node) => (//customises tooltip, containing names and marriage info (if applicable)
       <div style={{ 
         padding: '10px', 
         background: 'linear-gradient(135deg, #92B08E, #6C9661, #37672F)',
         color: '#fff', 
         borderRadius: '10px' 
       }}>
-      <strong style={{ fontSize: '20px', fontFamily: 'Times New Roman' }}>{nodeDatum.name}</strong><br />
-        {nodeDatum.attributes.marriage}<br />
-        {nodeDatum.attributes.divorce}
+      <strong style={{ fontSize: '20px', fontFamily: 'Times New Roman' }}>{node.name}</strong><br />
+        {node.attributes.marriage}<br />
+        {node.attributes.divorce}
     </div>
   );
 
-  const handleSpouseClick = (event, spouse) => {
-    event.stopPropagation();
-    openSidebar(spouse);
+  const nodeHover = (node, isSpouse = false) => {
+    setHoveredNode({ node, isSpouse });
+  };
+
+  const tooltipContent = () => {
+    if (hoveredNode) {
+      return hoveredNode.isSpouse ? toolTip(hoveredNode.node) : toolTip(nodeDatum);
+    }
+    return null;
   };
 
 //returns custom node features: tooltip with desired information and appearance, 
@@ -110,8 +117,11 @@ const FamilyTree = () => {
       //styles the node to contain an image in a circular fashion, with the image filling its contents (any extra is clipped off),
       //contains the names, DOBs and DODs for the people of that specific node and a button for users to upload images to their node of choice
     return (<> 
-<Tippy content={toolTip}>
-  <g onClick={() => openSidebar(nodeDatum)}>
+<Tippy content={tooltipContent()} arrow={false}>
+  <g>
+  <g onClick={() => openSidebar(nodeDatum)}
+    onMouseEnter={() => nodeHover(nodeDatum)}
+    onMouseLeave={() => setHoveredNode(null)}>
     <circle r={50} style={nodeStyle} />
     <image
       href={selectedImage}
@@ -142,6 +152,7 @@ const FamilyTree = () => {
         style={{ width: '90px' }}
       />
     </foreignObject>
+    </g>
     {spouses.length > 0 && (
       <g>
         <line
@@ -165,8 +176,19 @@ const FamilyTree = () => {
           />
         )}
         {spouses.map((spouse, index) => (
-          <Tippy key={spouse.id} content={toolTip}>
-          <g transform={`translate(${spouseSpacing}, ${index * verticalSpacing * 3})`} onClick={(event) => handleSpouseClick(event, spouse)}>
+          <g 
+          key={spouse.id}
+          transform={`translate(${spouseSpacing}, ${index * verticalSpacing * 3})`}
+          onMouseEnter={(e) => {
+            e.stopPropagation();
+            nodeHover(spouse, true);
+          }}
+          onMouseLeave={() => setHoveredNode(null)}
+          onClick={(e) => {
+            e.stopPropagation();
+            openSidebar(spouse);
+          }}
+        >
             <line
               x1={0}
               y1={0}
@@ -203,7 +225,6 @@ const FamilyTree = () => {
               {spouse.attributes.DOD}
               </text>
             </g>
-          </Tippy>
             ))}
           </g>
           )}

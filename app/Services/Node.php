@@ -14,6 +14,10 @@ class Node {
     public $father_id;
     public $mother_id;
     public $gender;
+    public $image;
+    
+    public $marriage_dates = [];
+    public $divorce_dates = [];
 
     public function __construct($id, $name, $surname, $birth_date, $death_date, $gender, $father_id = null, $mother_id = null, $image = null) {
         $this->id = $id;
@@ -27,17 +31,17 @@ class Node {
         $this->mother_id = $mother_id;
         $this->image = $image;
     }
+    public function setMarriageDates($marriage_date, $divorce_date) {
+        $this->marriage_dates[] = $marriage_date ? Carbon::parse($marriage_date)->format('Y-m-d') : 'Unknown date'; 
+        $this->divorce_dates[] = $divorce_date ? Carbon::parse($divorce_date)->format('Y-m-d') : 'Unknown date'; 
+    }
 
     public function addChild(Node $child) {
         $this->children[$child->id] = $child;
     }
 
-    public function addSpouse(Node $spouse, $marriage_date = null, $divorce_date = null) {
-        $this->spouses[] = [
-            'node' => $spouse,
-            'marriage_date' => $marriage_date ? Carbon::parse($marriage_date)->format('Y-m-d') : 'Unknown date',
-            'divorce_date' => $divorce_date ? Carbon::parse($divorce_date)->format('Y-m-d') : 'Unknown date'
-        ];
+    public function addSpouse(Node $spouse) {
+        $this->spouses[] = $spouse;
     }
 
     public function addParent(Node $parent) {

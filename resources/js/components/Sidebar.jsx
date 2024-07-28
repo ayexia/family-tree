@@ -32,11 +32,15 @@ const Sidebar = ({ node, onClose }) => {
       </button>
       <div style={{ padding: '20px' }}>
         <h3>{node.name}</h3>
-        <p><img src={node.attributes.image}></img></p>
-        <p>{node.attributes.DOB}</p>
-        <p>{node.attributes.DOD}</p>
-        <p>{node.attributes.marriage}</p>
-        <p>{node.attributes.divorce}</p>
+        <p><img src={node.attributes.image ||'/images/user.png'} height={250} width={250}></img></p>
+        <p>DOB: {node.attributes.DOB}</p>
+        <p>DOD: {node.attributes.DOD}</p>
+        {node.attributes.marriages.map((marriage, index) => (
+          <div key={index}>
+            <p>Marriage {index + 1}: {marriage.marriage_date}</p>
+            <p>Divorce {index + 1}: {marriage.divorce_date}</p>
+          </div>
+        ))}
       </div>
     </div>
   );

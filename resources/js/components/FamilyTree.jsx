@@ -98,10 +98,14 @@ const FamilyTree = () => {
         borderRadius: '10px' 
       }}>
       <strong style={{ fontSize: '20px', fontFamily: 'Times New Roman' }}>{node.name}</strong><br />
-        {node.attributes.marriage}<br />
-        {node.attributes.divorce}
-    </div>
-  );
+      {node.attributes.marriages.map((marriage, index) => (
+          <div key={index}>
+            Marriage {index + 1}: {marriage.marriage_date}<br />
+            Divorce {index + 1}: {marriage.divorce_date}
+          </div>
+        ))}
+      </div>
+    );
 
   const nodeHover = (node, isSpouse = false) => {
     setHoveredNode({ node, isSpouse });
@@ -118,7 +122,7 @@ const FamilyTree = () => {
       //onClick function which calls openSidebar on a node to display its details, provided the user clicks any of the properties of that specific node,
       //styles the node to contain an image in a circular fashion, with the image filling its contents (any extra is clipped off),
       //contains the names, DOBs and DODs for the people of that specific node and a button for users to upload images to their node of choice
-      return (<>
+      return (<> 
           <Tippy content={tooltipContent()} arrow={false}>
             <g>
               <g onClick={() => openSidebar(nodeDatum)}
@@ -142,10 +146,10 @@ const FamilyTree = () => {
                   {nodeDatum.name}
                 </text>
                 <text fill="#37672F" stroke="none" x="60" y="15" style={{ fontSize: '20px' }}>
-                  {nodeDatum.attributes.DOB}
+                  DOB: {nodeDatum.attributes.DOB}
                 </text>
                 <text fill="#37672F" stroke="none" x="60" y="35" style={{ fontSize: '20px' }}>
-                  {nodeDatum.attributes.DOD}
+                  DOD: {nodeDatum.attributes.DOD}
                 </text>
                 <foreignObject x="-45" y="55" width="90" height="50">
                   <input
@@ -204,10 +208,10 @@ const FamilyTree = () => {
                           {spouse.name}
                         </text>
                         <text fill="#37672F" stroke="none" x="60" y="15" style={{ fontSize: '20px' }}>
-                          {spouse.attributes.DOB}
+                          DOB: {spouse.attributes.DOB}
                         </text>
                         <text fill="#37672F" stroke="none" x="60" y="35" style={{ fontSize: '20px' }}>
-                          {spouse.attributes.DOD}
+                          DOD: {spouse.attributes.DOD}
                         </text>
                       </g>
                     );

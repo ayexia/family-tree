@@ -177,15 +177,11 @@ class FamilyTreeController extends Controller
       foreach ($marriages as $marriage){
           if (isset($familyTree[$marriage['first_spouse_id']]) && isset($familyTree[$marriage['second_spouse_id']])) {
               // adds spouse data to the nodes' list of spouses
-              $familyTree[$marriage['first_spouse_id']]->
-              addSpouse($familyTree[$marriage['second_spouse_id']], 
-              $marriage->marriage_date,
-              $marriage->divorce_date);
+              $familyTree[$marriage['first_spouse_id']]->addSpouse($familyTree[$marriage['second_spouse_id']]);
+              $familyTree[$marriage['first_spouse_id']]->setMarriageDates($marriage['marriage_date'], $marriage['divorce_date']);
 
-              $familyTree[$marriage['second_spouse_id']]->
-              addSpouse($familyTree[$marriage['first_spouse_id']],
-              $marriage->marriage_date,
-              $marriage->divorce_date);
+              $familyTree[$marriage['second_spouse_id']]->addSpouse($familyTree[$marriage['first_spouse_id']]);
+              $familyTree[$marriage['second_spouse_id']]->setMarriageDates($marriage['marriage_date'], $marriage['divorce_date']);
           }
       }
   
@@ -235,26 +231,38 @@ class FamilyTreeController extends Controller
             'gender' => $person->gender,
             'DOB' => $person->birth_date,
             'DOD' => $person->death_date,
+            'marriages' => [],
             'image' => $person->image,
         ],
         'children' => [],
         'spouses' => []
     ];
+    foreach ($person->marriage_dates as $index => $marriage_date) {
+      $personData['attributes']['marriages'][] = [
+          'marriage_date' => $marriage_date,
+          'divorce_date' => $person->divorce_dates[$index]
+      ];
+  }
 
     foreach ($person->getSpouses() as $spouse) {
         if ($spouse) {
             $spouseData = [
-                'id' => $spouse['node']->id,
-                'name' => $spouse['node']->name,
+                'id' => $spouse->id,
+                'name' => $spouse->name,
                 'attributes' => [
-                    'gender' => $spouse['node']->gender,
-                    'DOB' => $spouse['node']->birth_date,
-                    'DOD' => $spouse['node']->death_date,
-                    'marriage' => $spouse['marriage_date'],
-                    'divorce' => $spouse['divorce_date'],
-                    'image' => $spouse['node']->image,
+                    'gender' => $spouse->gender,
+                    'DOB' => $spouse->birth_date,
+                    'DOD' => $spouse->death_date,
+                    'marriages' => [],
+                    'image' => $spouse->image,
                 ],
             ];
+            foreach ($spouse->marriage_dates as $index => $marriage_date) {
+              $spouseData['attributes']['marriages'][] = [
+                  'marriage_date' => $marriage_date,
+                  'divorce_date' => $spouse->divorce_dates[$index]
+              ];
+          }
             $personData['spouses'][] = $spouseData;
         }
     }
@@ -266,6 +274,12 @@ class FamilyTreeController extends Controller
         }
     }
 
+    if (empty($personData['attributes']['marriages'])) {
+      $personData['attributes']['marriages'][] = [
+          'marriage_date' => 'Unknown date',
+          'divorce_date' => 'Unknown date'
+      ];
+  }
     return $personData;
 }
   //TODO: method to convert to JSON for graph structure and testing graph packages
@@ -274,9 +288,9 @@ class FamilyTreeController extends Controller
       $visited[] = $person->id; //adds current person to visited array to mark them as visited
       $partners = [$person->name]; //retrieves current person's name and adds to "partners" array
       foreach ($person->getSpouses() as $spouse){ //retrieves all spouses for current person
-        $partners[] = $spouse['node']->name; //adds spouse's name to partners array
-        if(!in_array($spouse['node']->id, $visited)){ //if the spouse has not been visited add them to visited
-        $visited[] = $spouse['node']->id;
+        $partners[] = $spouse->name; //adds spouse's name to partners array
+        if(!in_array($spouse->id, $visited)){ //if the spouse has not been visited add them to visited
+        $visited[] = $spouse->id;
     }
   }
       $tree = [$prefix . implode(" & ", $partners)]; //creates the tree, adding spouses from partners array and concatenating their names using "&"

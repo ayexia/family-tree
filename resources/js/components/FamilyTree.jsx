@@ -104,6 +104,7 @@ const FamilyTree = () => {
             Divorce {index + 1}: {marriage.divorce_date}
           </div>
         ))}
+        Parents: {node.attributes.parents.join(', ')}<br />
       </div>
     );
 

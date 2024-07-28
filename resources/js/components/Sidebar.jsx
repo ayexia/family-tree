@@ -41,6 +41,7 @@ const Sidebar = ({ node, onClose }) => {
             <p>Divorce {index + 1}: {marriage.divorce_date}</p>
           </div>
         ))}
+        Parents: {node.attributes.parents.join(', ')}<br />
       </div>
     </div>
   );

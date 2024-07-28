@@ -233,6 +233,7 @@ class FamilyTreeController extends Controller
             'DOD' => $person->death_date,
             'marriages' => [],
             'image' => $person->image,
+            'parents' => []
         ],
         'children' => [],
         'spouses' => []
@@ -244,6 +245,15 @@ class FamilyTreeController extends Controller
       ];
   }
 
+    foreach ($person->getParents() as $parent) {
+      if ($parent) {
+          $personData['attributes']['parents'][] = $parent->name;
+      }
+  }
+    while (count($personData['attributes']['parents']) < 2) {
+      $personData['attributes']['parents'][] = 'Unknown person';
+  }
+  
     foreach ($person->getSpouses() as $spouse) {
         if ($spouse) {
             $spouseData = [
@@ -255,18 +265,27 @@ class FamilyTreeController extends Controller
                     'DOD' => $spouse->death_date,
                     'marriages' => [],
                     'image' => $spouse->image,
+                    'parents' => []
                 ],
             ];
-            foreach ($spouse->marriage_dates as $index => $marriage_date) {
-              $spouseData['attributes']['marriages'][] = [
-                  'marriage_date' => $marriage_date,
-                  'divorce_date' => $spouse->divorce_dates[$index]
-              ];
-          }
-            $personData['spouses'][] = $spouseData;
-        }
+            
+      foreach ($spouse->marriage_dates as $index => $marriage_date) {
+        $spouseData['attributes']['marriages'][] = [
+            'marriage_date' => $marriage_date,
+            'divorce_date' => $spouse->divorce_dates[$index]
+        ];
     }
-
+    foreach ($spouse->getParents() as $parent) {
+      if ($parent) {
+          $spouseData['attributes']['parents'][] = $parent->name;
+      }
+    }
+      while (count($spouseData['attributes']['parents']) < 2) {
+        $spouseData['attributes']['parents'][] = 'Unknown person';
+    }
+      $personData['spouses'][] = $spouseData;
+    }
+  }  
     foreach ($person->getChildren() as $child) {
         $childData = $this->convertToJsonTree($child);
         if ($childData) {

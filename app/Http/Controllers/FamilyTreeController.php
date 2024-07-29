@@ -155,10 +155,10 @@ class FamilyTreeController extends Controller
   
       $allPersonsIds = $allPersons->pluck('id'); //extracts IDs of the queried people
   
-      //retrieves all mother-child, father-child and spouse relationships of queried people from respective Models (DB)
-      $motherAndChildRelationships = MotherAndChild::whereIn('mother_id', $allPersonsIds)->orWhereIn('child_id', $allPersonsIds)->get();
-      $fatherAndChildRelationships = FatherAndChild::whereIn('father_id', $allPersonsIds)->orWhereIn('child_id', $allPersonsIds)->get();
-      $marriages = Spouse::whereIn('first_spouse_id', $allPersonsIds)->orWhereIn('second_spouse_id', $allPersonsIds)->get();
+      //retrieves all mother-child, father-child and spouse relationships from respective Models (DB)
+      $marriages = Spouse::all();
+      $motherAndChildRelationships = MotherAndChild::all();
+      $fatherAndChildRelationships = FatherAndChild::all();
   
       //extracts IDs of relatives and merges with IDs of queried people to form a list of all relatives
       $relativeIds = $allPersonsIds
@@ -180,7 +180,6 @@ class FamilyTreeController extends Controller
       foreach ($relatives as $relative){
         $familyTree[$relative->id] = new Node($relative->id, $relative->name, $relative->surname, $relative->birth_date, $relative->death_date, $relative->gender, $relative->father_id, $relative->mother_id, $relative->image);
     }
-  
       //iterates through spouse relationships, checks if both spouses exist in the familyTree array
       foreach ($marriages as $marriage){
           if (isset($familyTree[$marriage['first_spouse_id']]) && isset($familyTree[$marriage['second_spouse_id']])) {
@@ -194,6 +193,7 @@ class FamilyTreeController extends Controller
       }
   
       //iterates through parent-child relationships, checks if both parent and child exist in familyTree array and adds their data to nodes' list of parents and children
+      
       foreach ($motherAndChildRelationships as $motherAndChild){
           if (isset($familyTree[$motherAndChild['mother_id']]) && isset($familyTree[$motherAndChild['child_id']])) {
               $familyTree[$motherAndChild['mother_id']]->addChild($familyTree[$motherAndChild['child_id']]);
@@ -253,14 +253,15 @@ class FamilyTreeController extends Controller
       ];
   }
 
-    foreach ($person->getParents() as $parent) {
-      if ($parent) {
-          $personData['attributes']['parents'][] = $parent->name;
+      $parents = $person->getParents();
+      foreach ($parents as $parent) {
+          if ($parent) {
+              $personData['attributes']['parents'][] = [
+                  'id' => $parent->id,
+                  'name' => $parent->name
+              ];
+          }
       }
-  }
-    while (count($personData['attributes']['parents']) < 2) {
-      $personData['attributes']['parents'][] = 'Unknown person';
-  }
   
     foreach ($person->getSpouses() as $spouse) {
         if ($spouse) {
@@ -283,14 +284,15 @@ class FamilyTreeController extends Controller
             'divorce_date' => $spouse->divorce_dates[$index]
         ];
     }
-    foreach ($spouse->getParents() as $parent) {
-      if ($parent) {
-          $spouseData['attributes']['parents'][] = $parent->name;
-      }
-    }
-      while (count($spouseData['attributes']['parents']) < 2) {
-        $spouseData['attributes']['parents'][] = 'Unknown person';
-    }
+        $spouseParents = $spouse->getParents();
+        foreach ($spouseParents as $parent) {
+            if ($parent) {
+                $spouseData['attributes']['parents'][] = [
+                    'id' => $parent->id,
+                    'name' => $parent->name
+                ];
+            }
+        }
       $personData['spouses'][] = $spouseData;
     }
   }  

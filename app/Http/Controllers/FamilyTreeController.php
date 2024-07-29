@@ -131,7 +131,14 @@ class FamilyTreeController extends Controller
     
      public function displayFamilyTree(Request $request){
       //initialises query by ensuring results will be displayed in order of DOB, null values first
-      $requestedPerson = Person::query()->orderByRaw('birth_date IS NULL, birth_date ASC'); 
+      $requestedPerson = Person::query()
+      ->leftJoin('father_and_children', 'people.id', '=', 'father_and_children.child_id')
+      ->leftJoin('mother_and_children', 'people.id', '=', 'mother_and_children.child_id')
+      ->select('people.*')
+      ->selectRaw('CASE WHEN father_and_children.father_id IS NULL AND mother_and_children.mother_id IS NULL THEN 0 ELSE 1 END as has_parents')
+      ->orderByRaw('has_parents ASC')
+      ->orderByRaw('CASE WHEN birth_date IS NULL THEN 1 ELSE 0 END')
+      ->orderBy('birth_date', 'ASC');
   
       $desiredName = $request->input('desiredName');
       $desiredSurname = $request->input('desiredSurname');
@@ -160,7 +167,8 @@ class FamilyTreeController extends Controller
           ->merge($fatherAndChildRelationships->pluck('father_id'))
           ->merge($fatherAndChildRelationships->pluck('child_id'))
           ->merge($marriages->pluck('first_spouse_id'))
-          ->merge($marriages->pluck('second_spouse_id'));
+          ->merge($marriages->pluck('second_spouse_id'))
+          ->unique();
   
       //retrieves all people whose IDs are in the list of all relatives formed
       $relatives = Person::whereIn('id', $relativeIds)->get();

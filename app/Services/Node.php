@@ -36,21 +36,26 @@ class Node {
         $this->divorce_dates[] = $divorce_date ? Carbon::parse($divorce_date)->format('Y-m-d') : 'Unknown date'; 
     }
 
-    public function addChild(Node $child) {
-        $this->children[$child->id] = $child;
-    }
-
     public function addSpouse(Node $spouse) {
         $this->spouses[] = $spouse;
     }
 
+    public function addChild(Node $child) {
+        $this->children[$child->id] = $child;
+        if ($this->gender === 'M') {
+            $child->father_id = $this->id;
+        } else {
+            $child->mother_id = $this->id;
+        }
+    }
+
     public function addParent(Node $parent) {
-        $this->parents[$parent->id] = $parent;
         if ($parent->gender === 'M') {
             $this->father_id = $parent->id;
         } else {
             $this->mother_id = $parent->id;
         }
+        $this->parents[$parent->id] = $parent;
     }
 
     public function getChildren() {

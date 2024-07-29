@@ -1,8 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const Sidebar = ({ node, onClose }) => {
+  
+const [setImages] = useState({}); //initialises setter method for storing image paths
+const [errorMessage, setErrorMessage] = useState('');
+
   if (!node) return null;
 
+  const uploadImage = async (event, node) => { //function for uploading images
+    const selectedFile = event.target.files[0]; //sets the selectedFile as the first file the user selects
+    if (!selectedFile) return; //if no file has been selected do nothing
+  
+    const formData = new FormData(); //new formdata object is created (used for build the data needed to pass to the server)
+    formData.append('image', selectedFile); //adds the selected file as a value for key "image" for formdata
+    formData.append('id', node); //adds the selected node's id as a value for key "id" for formdata (used to associate the image with the correct node)
+  
+    try { //sends request to upload-image endpoint with formdata as the data
+      const response = await axios.post('/upload-image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data', //necessary for file uploads
+        },
+      });
+      setImages({ [node]: response.data.imagePath }); //updates state with new image and sets it to node
+    } catch (error) {
+      setErrorMessage('Image could not be uploaded.'); //error message if image cannot be uploaded for any reason
+    }
+  };
+  
   return (
     <div style={{
       width: '300px',
@@ -33,6 +57,19 @@ const Sidebar = ({ node, onClose }) => {
       <div style={{ padding: '20px' }}>
         <h3>{node.name}</h3>
         <p><img src={node.attributes.image ||'/images/user.png'} height={250} width={250}></img></p>
+        <div style={{ marginTop: '10px'}}>
+          <label htmlFor="upload-button" style={{
+            backgroundColor: '#37672F',
+            color: 'white',
+            padding: '10px',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            display: 'inline-block'
+          }}>
+            Upload Image
+          </label>
+          <input id="upload-button" type="file" onChange={(event) => uploadImage(event, node.id)} style={{ display: 'none' }} />
+          </div>
         <p>DOB: {node.attributes.DOB}</p>
         <p>DOD: {node.attributes.DOD}</p>
         {node.attributes.marriages.map((marriage, index) => (

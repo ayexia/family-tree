@@ -8,7 +8,6 @@ import Sidebar from './Sidebar';
 
 const FamilyTree = () => {
   const [treeData, setTreeData] = useState(null); //initialises variable treeData to store fetched family tree data
-  const [setImages] = useState({}); //initialises setter method for storing image paths
   const [isSidebarOpened, setIsSidebarOpened] = useState( false ); //initialises, checks and sets visibility of sidebar (boolean)
   const [selectedNode, setSelectedNode] = useState(null); //initialises node selection state
   const [query, setQuery] = useState(''); //initialises search function to store query 
@@ -43,26 +42,6 @@ const FamilyTree = () => {
     fetchFamilyTreeData(query); //calls function to retrieve the family tree data for queried surname
   };
 
-  const uploadImage = async (event, node) => { //function for uploading images
-    const selectedFile = event.target.files[0]; //sets the selectedFile as the first file the user selects
-    if (!selectedFile) return; //if no file has been selected do nothing
-  
-    const formData = new FormData(); //new formdata object is created (used for build the data needed to pass to the server)
-    formData.append('image', selectedFile); //adds the selected file as a value for key "image" for formdata
-    formData.append('id', node); //adds the selected node's id as a value for key "id" for formdata (used to associate the image with the correct node)
-  
-    try { //sends request to upload-image endpoint with formdata as the data
-      const response = await axios.post('/upload-image', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data', //necessary for file uploads
-        },
-      });
-      setImages({ [node]: response.data.imagePath }); //updates state with new image and sets it to node
-    } catch (error) {
-      setErrorMessage('Image could not be uploaded.'); //error message if image cannot be uploaded for any reason
-    }
-  };
-  
   const openSidebar = (node) => { //if user clicks a node, sets that as selectedNode and sets sideBar opened to true, opening it and displaying information for that node
       setSelectedNode(node);
       setIsSidebarOpened(true); 
@@ -152,13 +131,6 @@ const FamilyTree = () => {
                 <text fill="#37672F" stroke="none" x="60" y="35" style={{ fontSize: '20px' }}>
                   DOD: {nodeDatum.attributes.DOD}
                 </text>
-                <foreignObject x="-45" y="55" width="90" height="50">
-                  <input
-                    type="file"
-                    onChange={(event) => uploadImage(event, nodeDatum.id)}
-                    style={{ width: '90px' }}
-                  />
-                </foreignObject>
               </g>
               {spouses.length > 0 && (
                 <g>

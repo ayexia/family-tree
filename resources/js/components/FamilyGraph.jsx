@@ -8,19 +8,46 @@ import ReactFlow, {
   Handle,
   Position 
 } from 'reactflow';
+import dagre from '@dagrejs/dagre';
 import 'reactflow/dist/style.css';
 import axios from 'axios';
-import Sidebar from './Sidebar';
+import GraphSidebar from './GraphSidebar.jsx';
+
+const nodeWidth = 150;
+const nodeHeight = 50;
 
 const customNode = ({ data }) => (
-    <div style={{ padding: 10, borderRadius: 5, background: '#fff', border: '1px solid #ccc' }}>
-      {data.label}
-      <Handle type="target" position={Position.Top} id="a" style={{ background: '#555' }} />
-      <Handle type="source" position={Position.Bottom} id="b" style={{ background: '#555' }} />
-      <Handle type="source" position={Position.Left} id="c" style={{ background: '#555' }} />
-      <Handle type="source" position={Position.Right} id="d" style={{ background: '#555' }} />
-    </div>
-  );
+  <div style={{ padding: 10, borderRadius: 5, background: '#fff', border: '1px solid #ccc', whiteSpace: 'pre-wrap', textAlign: 'center'}}>
+    {data.label}
+    <Handle type="target" position={Position.Top} id="top" />
+    <Handle type="source" position={Position.Bottom} id="bottom" />
+    <Handle type="source" position={Position.Left} id="left" />
+    <Handle type="source" position={Position.Right} id="right" />
+  </div>
+);
+
+const getLayoutedElements = (nodes, edges) => {
+  const g = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
+  g.setGraph({ rankdir: 'TB', ranksep: 100, nodesep: 100 });
+
+  nodes.forEach((node) => {
+    g.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+  });
+
+  edges.forEach((edge) => {
+    g.setEdge(edge.source, edge.target);
+  });
+
+  dagre.layout(g);
+
+  return {
+    nodes: nodes.map((node) => {
+      const position = g.node(node.id);
+      return { ...node, position: { x: position.x, y: position.y }, draggable: true };
+    }),
+    edges,
+  };
+};
 
 const FamilyGraph = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -39,8 +66,12 @@ const FamilyGraph = () => {
         setNodes([]);
         setEdges([]);
       } else {
-        setNodes(response.data.nodes);
-        setEdges(response.data.edges);
+        const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+          response.data.nodes,
+          response.data.edges
+        );
+        setNodes(layoutedNodes);
+        setEdges(layoutedEdges);
         setErrorMessage('');
       }
     } catch (error) {
@@ -64,7 +95,11 @@ const FamilyGraph = () => {
   };
 
   const onNodeClick = (event, node) => {
-    openSidebar(node);
+    try {
+      openSidebar(node);
+    } catch (error) {
+      console.error('Error handling node click:', error);
+    }
   };
 
   return (
@@ -83,7 +118,7 @@ const FamilyGraph = () => {
         <MiniMap />
         <Background variant="dots" gap={12} size={1} />
       </ReactFlow>
-      {isSidebarOpened && <Sidebar node={selectedNode} onClose={closeSidebar} />}
+      {isSidebarOpened && <GraphSidebar node={selectedNode} onClose={closeSidebar} />}
     </div>
   );
 };

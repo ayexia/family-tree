@@ -322,17 +322,22 @@ class FamilyTreeController extends Controller
     $edges = [];
 
     foreach ($familyTree as $id => $person) {
+      $birthYear = substr($person->birth_date, 0, 4);
+      $deathYear = substr($person->death_date, 0, 4);
+      $label = $person->name . "\n(" . $birthYear . " - " . $deathYear . ")";
+
         $nodes[] = [
             'id' => (string)$id,
             'type' => 'custom',
             'data' => [
-                'label' => $person->name,
+                'label' => $label,
+                'name' => $person->name,
                 'gender' => $person->gender,
                 'birth_date' => $person->birth_date,
                 'death_date' => $person->death_date,
                 'image' => $person->image
             ],
-            'position' => ['x' => rand(0, 2000), 'y' => rand(0, 1500)],
+            'position' => ['x' => 0, 'y' => 0],
         ];
 
         foreach ($person->getSpouses() as $spouse) {

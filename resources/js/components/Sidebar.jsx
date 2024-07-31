@@ -70,19 +70,27 @@ const [errorMessage, setErrorMessage] = useState('');
           </div>
         <p>DOB: {node.attributes.DOB}</p>
         <p>DOD: {node.attributes.DOD}</p>
-        {node.attributes.marriages.map((marriage, index) => (
-          <div key={index}>
-            <p>Marriage {index + 1}: {marriage.marriage_date}</p>
-            <p>Divorce {index + 1}: {marriage.divorce_date}</p>
+        {node.attributes.marriage_dates && node.attributes.marriage_dates.length > 0 ? (
+          node.attributes.marriage_dates.map((marriage, index) => (
+            <div key={index}>
+              <p>Marriage {index + 1}: {marriage || 'Unknown date'}</p>
+              {node.attributes.divorce_dates && node.attributes.divorce_dates[index] && (
+                <p>Divorce {index + 1}: {node.attributes.divorce_dates[index]}</p>
+              )}
+            </div>
+          ))
+        ) : (
+          <p>No marriages</p>
+        )}
+         {node.attributes.parents && Object.keys(node.attributes.parents).length > 0 ? (
+          <div>
+            <p>Parents:</p>
+            <ul>
+              {Object.values(node.attributes.parents).map(parent => (
+                <li key={parent.id}>{parent.name || 'Unknown person'}</li>
+              ))}
+            </ul>
           </div>
-        ))}
-         <p>Parents:</p>
-        {node.attributes.parents && node.attributes.parents.length > 0 ? (
-          <ul>
-            {node.attributes.parents.map((parent, index) => (
-              <li key={index}>{parent.name || 'Unknown person'}</li>
-            ))}
-          </ul>
         ) : (
           <p>Unknown parents</p>
         )}

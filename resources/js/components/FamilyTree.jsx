@@ -78,14 +78,30 @@ const FamilyTree = () => {
         borderRadius: '10px' 
       }}>
       <strong style={{ fontSize: '20px', fontFamily: 'Times New Roman' }}>{node.name}</strong><br />
-      {node.attributes.marriages.map((marriage, index) => (
-          <div key={index}>
-            Marriage {index + 1}: {marriage.marriage_date}<br />
-            Divorce {index + 1}: {marriage.divorce_date}
+      {node.attributes.marriage_dates && node.attributes.marriage_dates.length > 0 ? (
+          node.attributes.marriage_dates.map((marriage, index) => (
+            <div key={index}>
+              <p>Marriage {index + 1}: {marriage || 'Unknown date'}</p>
+              {node.attributes.divorce_dates && node.attributes.divorce_dates[index] && (
+                <p>Divorce {index + 1}: {node.attributes.divorce_dates[index]}</p>
+              )}
+            </div>
+          ))
+        ) : (
+          <p>No marriages</p>
+        )}
+        {node.attributes.parents && Object.keys(node.attributes.parents).length > 0 ? (
+          <div>
+            <p>Parents:</p>
+            <ul>
+              {Object.values(node.attributes.parents).map(parent => (
+                <li key={parent.id}>{parent.name || 'Unknown person'}</li>
+              ))}
+            </ul>
           </div>
-        ))}
-        Parents: {node.attributes.parents.map(parent => parent.name).join(', ') || 'Unknown person'}<br />
-      </div>
+        ) : (
+          <p>Unknown parents</p>
+        )}</div>
     );
 
   const nodeHover = (node, isSpouse = false) => {

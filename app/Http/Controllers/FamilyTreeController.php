@@ -243,30 +243,17 @@ class FamilyTreeController extends Controller
             'gender' => $person->gender,
             'DOB' => $person->birth_date,
             'DOD' => $person->death_date,
-            'marriages' => [],
+            'marriage_dates' => $person->marriage_dates,
+            'divorce_dates' => $person->divorce_dates,
             'image' => $person->image,
-            'parents' => []
+            'parents' => array_map(function($parent) {
+            return ['id' => $parent->id, 'name' => $parent->name];
+           }, $person->getParents() ?? []),
         ],
         'children' => [],
         'spouses' => []
     ];
-    foreach ($person->marriage_dates as $index => $marriage_date) {
-      $personData['attributes']['marriages'][] = [
-          'marriage_date' => $marriage_date,
-          'divorce_date' => $person->divorce_dates[$index]
-      ];
-  }
 
-      $parents = $person->getParents();
-      foreach ($parents as $parent) {
-          if ($parent) {
-              $personData['attributes']['parents'][] = [
-                  'id' => $parent->id,
-                  'name' => $parent->name
-              ];
-          }
-      }
-  
     foreach ($person->getSpouses() as $spouse) {
         if ($spouse) {
             $spouseData = [
@@ -276,27 +263,14 @@ class FamilyTreeController extends Controller
                     'gender' => $spouse->gender,
                     'DOB' => $spouse->birth_date,
                     'DOD' => $spouse->death_date,
-                    'marriages' => [],
+                    'marriage_dates' => $spouse->marriage_dates,
+                    'divorce_dates' => $spouse->divorce_dates,
                     'image' => $spouse->image,
-                    'parents' => []
+                    'parents' => array_map(function($parent) {
+                      return ['id' => $parent->id, 'name' => $parent->name];
+                   }, $spouse->getParents() ?? []),
                 ],
             ];
-            
-      foreach ($spouse->marriage_dates as $index => $marriage_date) {
-        $spouseData['attributes']['marriages'][] = [
-            'marriage_date' => $marriage_date,
-            'divorce_date' => $spouse->divorce_dates[$index]
-        ];
-    }
-        $spouseParents = $spouse->getParents();
-        foreach ($spouseParents as $parent) {
-            if ($parent) {
-                $spouseData['attributes']['parents'][] = [
-                    'id' => $parent->id,
-                    'name' => $parent->name
-                ];
-            }
-        }
       $personData['spouses'][] = $spouseData;
     }
   }  
@@ -306,13 +280,6 @@ class FamilyTreeController extends Controller
             $personData['children'][] = $childData;
         }
     }
-
-    if (empty($personData['attributes']['marriages'])) {
-      $personData['attributes']['marriages'][] = [
-          'marriage_date' => 'Unknown date',
-          'divorce_date' => 'Unknown date'
-      ];
-  }
     return $personData;
 }
   //TODO: method to convert to JSON for graph structure and testing graph packages

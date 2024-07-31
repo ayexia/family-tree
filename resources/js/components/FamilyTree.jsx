@@ -14,6 +14,7 @@ const FamilyTree = () => {
   const [hasSearched, setHasSearched] = useState(false); //initialises and checks if search has been performed (boolean)
   const [errorMessage, setErrorMessage] = useState(''); //initialises errorMessage variable to store error messages
   const [hoveredNode, setHoveredNode] = useState(null);
+  const [images, setImages] = useState({});
 
   useEffect(() => {
     fetchFamilyTreeData(); //after component is mounted calls this function which retrieves the family tree data from the api through http requests
@@ -54,7 +55,7 @@ const FamilyTree = () => {
 
 
   const customNode = ({ nodeDatum }) => { //customises nodes in family tree based on particular properties
-    const selectedImage = nodeDatum.attributes.image || '/images/user.png'; //node's image is either the image selected by user or default image
+    const selectedImage = images[nodeDatum.id] || nodeDatum.attributes.image || '/images/user.png'; //node's image is either the image selected by user or default image
     const isMale = nodeDatum.attributes.gender === 'M'; //checks if node's gender is male or female (for spouses, only main person's gender is counted)
     const isFemale = nodeDatum.attributes.gender === 'F';
     const nodeStyle = {
@@ -165,7 +166,7 @@ const FamilyTree = () => {
                           strokeWidth: 10,
                         }} />
                         <image
-                          href={spouse.attributes.image || '/images/user.png'}
+                          href={images[spouse.id] ||spouse.attributes.image || '/images/user.png'}
                           x="-50"
                           y="-50"
                           width="100"
@@ -234,7 +235,7 @@ const FamilyTree = () => {
         renderCustomNodeElement={customNode}
       />
     )}
-      {isSidebarOpened && <Sidebar node={selectedNode} onClose={closeSidebar} />}
+      {isSidebarOpened && <Sidebar node={selectedNode} onClose={closeSidebar} setImages={setImages} images={images} />}
     </div>
   );
 };

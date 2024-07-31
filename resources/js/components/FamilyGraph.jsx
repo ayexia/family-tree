@@ -55,6 +55,7 @@ const FamilyGraph = () => {
   const [isSidebarOpened, setIsSidebarOpened] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [images, setImages] = useState({});
 
   const nodeTypes = useMemo(() => ({ custom: customNode }), []);
 
@@ -118,7 +119,7 @@ const FamilyGraph = () => {
         <MiniMap />
         <Background variant="dots" gap={12} size={1} />
       </ReactFlow>
-      {isSidebarOpened && <GraphSidebar node={selectedNode} onClose={closeSidebar} />}
+      {isSidebarOpened && <GraphSidebar node={selectedNode} onClose={closeSidebar} setImages={setImages} images={images} />}
     </div>
   );
 };

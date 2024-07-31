@@ -1,19 +1,18 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const GraphSidebar = ({ node, onClose }) => {
-  const [images, setImages] = useState({});
+const GraphSidebar = ({ node, onClose, setImages, images }) => {
   const [errorMessage, setErrorMessage] = useState('');
 
   if (!node || !node.data) return null;
 
-  const uploadImage = async (event, node) => {
+  const uploadImage = async (event) => {
     const selectedFile = event.target.files[0];
     if (!selectedFile) return;
 
     const formData = new FormData();
     formData.append('image', selectedFile);
-    formData.append('id', node);
+    formData.append('id', node.id);
 
     try {
       const response = await axios.post('/upload-image', formData, {
@@ -21,7 +20,7 @@ const GraphSidebar = ({ node, onClose }) => {
           'Content-Type': 'multipart/form-data',
         },
       });
-      setImages((prevImages) => ({ ...prevImages, [node]: response.data.imagePath }));
+      setImages((prevImages) => ({ ...prevImages, [node.id]: response.data.imagePath }));
     } catch (error) {
       setErrorMessage('Image could not be uploaded.');
     }
@@ -56,7 +55,7 @@ const GraphSidebar = ({ node, onClose }) => {
       </button>
       <div style={{ padding: '20px' }}>
         <h3>{node.data.name || 'Unknown'}</h3>
-        <p><img src={images[node.id] || node.data.image || '/images/user.png'} height={250} width={250} /></p>
+        <p><img src={images[node.id] ||node.data.image || '/images/user.png'} height={250} width={250} /></p>
         <div style={{ marginTop: '10px' }}>
           <label htmlFor="upload-button" style={{
             backgroundColor: '#37672F',
@@ -68,15 +67,15 @@ const GraphSidebar = ({ node, onClose }) => {
           }}>
             Upload Image
           </label>
-          <input id="upload-button" type="file" onChange={(event) => uploadImage(event, node.id)} style={{ display: 'none' }} />
+          <input id="upload-button" type="file" onChange={uploadImage} style={{ display: 'none' }} />
         </div>
-        <p>DOB: {node.data.birth_date || 'Unknown'}</p>
-        <p>DOD: {node.data.death_date || 'Unknown'}</p>
+        <p>DOB: {node.data.birth_date || 'Unknown date'}</p>
+        <p>DOD: {node.data.death_date || 'Unknown date'}</p>
         {node.data.marriages && node.data.marriages.length > 0 ? (
           node.data.marriages.map((marriage, index) => (
             <div key={index}>
-              <p>Marriage {index + 1}: {marriage.marriage_date || 'Unknown'}</p>
-              <p>Divorce {index + 1}: {marriage.divorce_date || 'Unknown'}</p>
+              <p>Marriage {index + 1}: {marriage.marriage_date || 'Unknown date'}</p>
+              <p>Divorce {index + 1}: {marriage.divorce_date || 'Unknown date'}</p>
             </div>
           ))
         ) : (

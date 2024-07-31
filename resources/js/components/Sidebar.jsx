@@ -1,19 +1,17 @@
 import React, { useState } from 'react';
 
-const Sidebar = ({ node, onClose }) => {
-  
-const [setImages] = useState({}); //initialises setter method for storing image paths
+const Sidebar = ({ node, onClose, setImages, images }) => {
 const [errorMessage, setErrorMessage] = useState('');
 
   if (!node) return null;
 
-  const uploadImage = async (event, node) => { //function for uploading images
+  const uploadImage = async (event) => { //function for uploading images
     const selectedFile = event.target.files[0]; //sets the selectedFile as the first file the user selects
     if (!selectedFile) return; //if no file has been selected do nothing
   
     const formData = new FormData(); //new formdata object is created (used for build the data needed to pass to the server)
     formData.append('image', selectedFile); //adds the selected file as a value for key "image" for formdata
-    formData.append('id', node); //adds the selected node's id as a value for key "id" for formdata (used to associate the image with the correct node)
+    formData.append('id', node.id); //adds the selected node's id as a value for key "id" for formdata (used to associate the image with the correct node)
   
     try { //sends request to upload-image endpoint with formdata as the data
       const response = await axios.post('/upload-image', formData, {
@@ -21,7 +19,7 @@ const [errorMessage, setErrorMessage] = useState('');
           'Content-Type': 'multipart/form-data', //necessary for file uploads
         },
       });
-      setImages({ [node]: response.data.imagePath }); //updates state with new image and sets it to node
+      setImages((prevImages) => ({ ...prevImages, [node.id]: response.data.imagePath })) //updates state with new image and sets it to node
     } catch (error) {
       setErrorMessage('Image could not be uploaded.'); //error message if image cannot be uploaded for any reason
     }
@@ -55,8 +53,8 @@ const [errorMessage, setErrorMessage] = useState('');
         &times;
       </button>
       <div style={{ padding: '20px' }}>
-        <h3>{node.name}</h3>
-        <p><img src={node.attributes.image ||'/images/user.png'} height={250} width={250}></img></p>
+        <h3>{node.name || 'Unknown'}</h3>
+        <p><img src={images[node.id] || node.attributes.image ||'/images/user.png'} height={250} width={250}></img></p>
         <div style={{ marginTop: '10px'}}>
           <label htmlFor="upload-button" style={{
             backgroundColor: '#37672F',
@@ -68,7 +66,7 @@ const [errorMessage, setErrorMessage] = useState('');
           }}>
             Upload Image
           </label>
-          <input id="upload-button" type="file" onChange={(event) => uploadImage(event, node.id)} style={{ display: 'none' }} />
+          <input id="upload-button" type="file" onChange={uploadImage} style={{ display: 'none' }} />
           </div>
         <p>DOB: {node.attributes.DOB}</p>
         <p>DOD: {node.attributes.DOD}</p>
@@ -78,7 +76,8 @@ const [errorMessage, setErrorMessage] = useState('');
             <p>Divorce {index + 1}: {marriage.divorce_date}</p>
           </div>
         ))}
-        Parents: {node.attributes.parents.map(parent => parent.name).join(', ') || 'Unknown person'}<br />
+        <p>Parents: {node.attributes.parents.map(parent => parent.name).join(', ') || 'Unknown person'}</p><br />
+        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
       </div>
     </div>
   );

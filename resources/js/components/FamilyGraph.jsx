@@ -75,7 +75,7 @@ const FamilyGraph = () => {
         );
         setNodes(layoutedNodes.map(node => ({
           ...node,
-          data: { ...node.data, image: node.data.image }
+          data: { ...node.data, image: images[node.id] || node.data.image }
         })));
         setEdges(layoutedEdges);
         setErrorMessage('');
@@ -84,11 +84,11 @@ const FamilyGraph = () => {
       console.error('Error fetching data:', error);
       setErrorMessage('An error occurred while fetching data.');
     }
-  }, []);
+  }, [images]);
 
   useEffect(() => {
     fetchFamilyTreeData();
-  }, [fetchFamilyTreeData]);
+  }, [fetchFamilyTreeData, images]);
 
   const openSidebar = (node) => {
     setSelectedNode(node);

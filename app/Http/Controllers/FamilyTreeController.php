@@ -335,7 +335,12 @@ class FamilyTreeController extends Controller
                 'gender' => $person->gender,
                 'birth_date' => $person->birth_date,
                 'death_date' => $person->death_date,
-                'image' => $person->image
+                'image' => $person->image,
+                'marriage_dates' => $person->marriage_dates,
+                'divorce_dates' => $person->divorce_dates,
+                'parents' => array_map(function($parent) {
+                 return ['id' => $parent->id, 'name' => $parent->name];
+              }, $person->getParents() ?? []),
             ],
             'position' => ['x' => 0, 'y' => 0],
         ];

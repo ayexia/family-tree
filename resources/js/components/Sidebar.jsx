@@ -76,7 +76,16 @@ const [errorMessage, setErrorMessage] = useState('');
             <p>Divorce {index + 1}: {marriage.divorce_date}</p>
           </div>
         ))}
-        <p>Parents: {node.attributes.parents.map(parent => parent.name).join(', ') || 'Unknown person'}</p><br />
+         <p>Parents:</p>
+        {node.attributes.parents && node.attributes.parents.length > 0 ? (
+          <ul>
+            {node.attributes.parents.map((parent, index) => (
+              <li key={index}>{parent.name || 'Unknown person'}</li>
+            ))}
+          </ul>
+        ) : (
+          <p>Unknown parents</p>
+        )}
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
       </div>
     </div>

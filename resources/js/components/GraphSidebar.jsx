@@ -71,20 +71,30 @@ const GraphSidebar = ({ node, onClose, setImages, images }) => {
         </div>
         <p>DOB: {node.data.birth_date || 'Unknown date'}</p>
         <p>DOD: {node.data.death_date || 'Unknown date'}</p>
-        {node.data.marriages && node.data.marriages.length > 0 ? (
-          node.data.marriages.map((marriage, index) => (
+        {node.data.marriage_dates && node.data.marriage_dates.length > 0 ? (
+          node.data.marriage_dates.map((marriage, index) => (
             <div key={index}>
-              <p>Marriage {index + 1}: {marriage.marriage_date || 'Unknown date'}</p>
-              <p>Divorce {index + 1}: {marriage.divorce_date || 'Unknown date'}</p>
+              <p>Marriage {index + 1}: {marriage || 'Unknown date'}</p>
+              {node.data.divorce_dates && node.data.divorce_dates[index] && (
+                <p>Divorce {index + 1}: {node.data.divorce_dates[index]}</p>
+              )}
             </div>
           ))
         ) : (
           <p>No marriages</p>
         )}
-        <p>Parents: {node.data.parents && node.data.parents.length > 0 ? 
-          node.data.parents.map(parent => parent.name).join(', ') 
-          : 'Unknown person'}
-        </p>
+         {node.data.parents && Object.keys(node.data.parents).length > 0 ? (
+          <div>
+            <p>Parents:</p>
+            <ul>
+              {Object.values(node.data.parents).map(parent => (
+                <li key={parent.id}>{parent.name || 'Unknown person'}</li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <p>Unknown parents</p>
+        )}
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
       </div>
     </div>

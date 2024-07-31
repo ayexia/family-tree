@@ -38,6 +38,7 @@
         "react-d3-tree": "^3.6.2",
         "react-family-tree": "^3.2.0",
         "react-flow-renderer": "^10.3.17",
+        "react-router-dom": "^6.25.1",
         "react-tooltip": "^5.27.1",
         "reactflow": "^11.11.4",
         "recharts": "^2.12.7",

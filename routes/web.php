@@ -24,6 +24,7 @@ Route::post('/upload', [GedcomController::class, 'upload'])->name('upload');
 
 
 Route::get('/family-tree', [FamilyTreeController:: class, 'displayFamilyTree'])->name('family.tree');
+Route::get('/family-graph', [FamilyTreeController:: class, 'displayFamilyTree'])->name('family.graph');
 Route::get('/test', function () {
     return view('test');
 });

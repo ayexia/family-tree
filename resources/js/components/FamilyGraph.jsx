@@ -15,10 +15,12 @@ import GraphSidebar from './GraphSidebar.jsx';
 
 const nodeWidth = 150;
 const nodeHeight = 50;
+const defaultImage = '/images/user.png';
 
 const customNode = ({ data }) => (
   <div style={{ padding: 10, borderRadius: 5, background: '#fff', border: '1px solid #ccc', whiteSpace: 'pre-wrap', textAlign: 'center'}}>
-    {data.label}
+    <img src={data.image ? data.image : defaultImage} style={{ width: '35px', height: '35px', borderRadius: '25%' }} />
+    <div>{data.label}</div>
     <Handle type="target" position={Position.Top} id="top" />
     <Handle type="source" position={Position.Bottom} id="bottom" />
     <Handle type="source" position={Position.Left} id="left" />
@@ -71,7 +73,10 @@ const FamilyGraph = () => {
           response.data.nodes,
           response.data.edges
         );
-        setNodes(layoutedNodes);
+        setNodes(layoutedNodes.map(node => ({
+          ...node,
+          data: { ...node.data, image: node.data.image }
+        })));
         setEdges(layoutedEdges);
         setErrorMessage('');
       }

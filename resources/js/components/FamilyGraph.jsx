@@ -72,6 +72,14 @@ const FamilyGraph = () => {
         const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
           response.data.nodes,
           response.data.edges
+          .map(edge => ({
+            ...edge,
+            style: {
+              stroke: edge.label === 'Spouse' ? 'red' : '#000000',
+              strokeWidth: edge.label === 'Spouse' ? '0.5' : '0.2',
+              strokeDasharray: edge.label === 'Spouse' ? '5,5' : 'none',              
+            },
+          }))
         );
         setNodes(layoutedNodes.map(node => ({
           ...node,

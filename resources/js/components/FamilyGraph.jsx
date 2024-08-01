@@ -30,24 +30,51 @@ const customNode = ({ data }) => (
 
 const getLayoutedElements = (nodes, edges) => {
   const g = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: 'TB', ranksep: 100, nodesep: 100 });
+  g.setGraph({ rankdir: 'TB', ranksep: 150, nodesep: 200 });
 
   nodes.forEach((node) => {
     g.setNode(node.id, { width: nodeWidth, height: nodeHeight });
   });
 
-  edges.forEach((edge) => {
+  edges.filter(edge => edge.label !== 'Spouse').forEach((edge) => {
     g.setEdge(edge.source, edge.target);
   });
 
   dagre.layout(g);
 
+  const positionedNodes = nodes.map((node) => {
+    const position = g.node(node.id);
+    return { ...node, position: { x: position.x, y: position.y }, draggable: true };
+  });
+
+  edges.filter(edge => edge.label === 'Spouse').forEach((edge, index) => {
+    const sourceNode = positionedNodes.find(node => node.id === edge.source);
+    const targetNode = positionedNodes.find(node => node.id === edge.target);
+    if (sourceNode && targetNode) {
+        if (index % 2 === 0) {
+          targetNode.position = {
+            x: sourceNode.position.x - (nodeWidth + 100),
+            y: sourceNode.position.y
+          };
+        } else {
+          targetNode.position = {
+            x: sourceNode.position.x + (nodeWidth + 100),
+            y: sourceNode.position.y
+          };
+        }
+      }
+    });
+
   return {
-    nodes: nodes.map((node) => {
-      const position = g.node(node.id);
-      return { ...node, position: { x: position.x, y: position.y }, draggable: true };
-    }),
-    edges,
+    nodes: positionedNodes,
+    edges: edges.map(edge => ({
+      ...edge,
+      style: {
+        stroke: edge.label === 'Spouse' ? 'red' : '#000000',
+        strokeWidth: edge.label === 'Spouse' ? '0.5' : '0.2',
+        strokeDasharray: edge.label === 'Spouse' ? '5,5' : 'none',              
+      },
+    }))
   };
 };
 
@@ -72,14 +99,6 @@ const FamilyGraph = () => {
         const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
           response.data.nodes,
           response.data.edges
-          .map(edge => ({
-            ...edge,
-            style: {
-              stroke: edge.label === 'Spouse' ? 'red' : '#000000',
-              strokeWidth: edge.label === 'Spouse' ? '0.5' : '0.2',
-              strokeDasharray: edge.label === 'Spouse' ? '5,5' : 'none',              
-            },
-          }))
         );
         setNodes(layoutedNodes.map(node => ({
           ...node,

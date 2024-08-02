@@ -154,8 +154,9 @@ const FamilyGraph = () => {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeClick={onNodeClick}
-        fitView
+        fitView={true}
         nodeTypes={nodeTypes}
+        minZoom={0.01}
       >
         <Controls />
         <MiniMap />

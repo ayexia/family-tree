@@ -83,12 +83,13 @@ const FamilyGraph = () => {
   const [selectedNode, setSelectedNode] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [images, setImages] = useState({});
+  const [generations, setGenerations] = useState(3);
 
   const nodeTypes = useMemo(() => ({ custom: customNode }), []);
 
   const fetchFamilyTreeData = useCallback(async () => {
     try {
-      const response = await axios.get('/api/family-graph-json');
+      const response = await axios.get('/api/family-graph-json', { params: { generations } });
       if (response.data.nodes.length === 0) {
         setErrorMessage('No results found.');
         setNodes([]);
@@ -109,7 +110,7 @@ const FamilyGraph = () => {
       console.error('Error fetching data:', error);
       setErrorMessage('An error occurred while fetching data.');
     }
-  }, [images]);
+  }, [images, generations]);
 
   useEffect(() => {
     fetchFamilyTreeData();
@@ -136,6 +137,17 @@ const FamilyGraph = () => {
   return (
     <div style={{ width: '100%', height: '600px' }}>
       {errorMessage && <p>{errorMessage}</p>}
+      <div style={{ marginBottom: '10px' }}>
+        <label htmlFor="generations">Select Generation: </label>
+        <input
+          type="number"
+          id="generations"
+          value={generations}
+          onChange={(e) => setGenerations(e.target.value)}
+          min="1"
+          max="10"
+        />
+      </div>
       <ReactFlow
         nodes={nodes}
         edges={edges}

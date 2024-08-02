@@ -15,15 +15,18 @@ const FamilyTree = () => {
   const [errorMessage, setErrorMessage] = useState(''); //initialises errorMessage variable to store error messages
   const [hoveredNode, setHoveredNode] = useState(null);
   const [images, setImages] = useState({});
+  const [generations, setGenerations] = useState(3); 
 
   useEffect(() => {
-    fetchFamilyTreeData(); //after component is mounted calls this function which retrieves the family tree data from the api through http requests
-  }, []);
+    if (hasSearched) {
+    fetchFamilyTreeData(query); //after component is mounted calls this function which retrieves the family tree data from the api through http requests
+    }
+  }, [query, generations, hasSearched]);
 
   const fetchFamilyTreeData = async (surname= '') => { 
     try {
       const response = await axios.get('/api/family-tree-json', {
-        params: { desiredSurname: surname }
+        params: { desiredSurname: surname, generations }
       }); //uses axios library to make http request to fetch api data, which is then parsed as JSON. this retrieves data for a queried surname in particular
       if (response.data.length === 0) {
         setErrorMessage('No results found for the given surname.'); //if no results found prints error message
@@ -243,7 +246,16 @@ const FamilyTree = () => {
         placeholder="Search a bloodline (surname)"
       />
       <button onClick={search}>Search</button>
-
+      <div style={{ margin: '10px' }}>
+        <label>Generation: </label>
+        <input
+          type="number"
+          min="1"
+          value={generations}
+          onChange={(e) => setGenerations(Number(e.target.value))}
+          style={{ width: '60px' }}
+        />
+      </div>
       {hasSearched && treeData && !errorMessage && (
       <Tree
         data={treeData}

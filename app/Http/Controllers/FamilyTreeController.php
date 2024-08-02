@@ -150,6 +150,7 @@ class FamilyTreeController extends Controller
         $requestedPerson->where('surname', 'like', '%' . $desiredSurname . '%');
     }
 
+      $generations = $request->input('generations', null);
       //retrieves people fitting the query criteria
       $allPersons = $requestedPerson->get();
   
@@ -222,12 +223,12 @@ class FamilyTreeController extends Controller
       if ($request->is('api/family-tree-json')) {
         $jsonResponse = [];
         foreach ($allPersons as $person) {
-            $jsonResponse[] = $this->convertToJsonTree($familyTree[$person->id]);
+            $jsonResponse[] = $this->convertToJsonTree($familyTree[$person->id], $generations);
         }
           return response()->json($jsonResponse);
       }
       if ($request->is('api/family-graph-json')) {
-        $graphData = $this->convertToJsonGraph($familyTree);
+        $graphData = $this->convertToJsonGraph($familyTree, $generations);
         return response()->json($graphData);
        }
       //otherwise returns the appropriate View, passing the data necessary for it
@@ -235,60 +236,69 @@ class FamilyTreeController extends Controller
   }
     
   //Converts family tree data to accepted JSON format to send as response to frontend - tree structure with separate spouses
-  private function convertToJsonTree(Node $person) {
-    $personData = [
-        'id' => $person->id,
-        'name' => $person->name,
-        'attributes' => [
-            'gender' => $person->gender,
-            'DOB' => $person->birth_date,
-            'DOD' => $person->death_date,
-            'marriage_dates' => $person->marriage_dates,
-            'divorce_dates' => $person->divorce_dates,
-            'image' => $person->image,
-            'parents' => array_map(function($parent) {
-            return ['id' => $parent->id, 'name' => $parent->name];
-           }, $person->getParents() ?? []),
-        ],
-        'children' => [],
-        'spouses' => []
-    ];
+    private function convertToJsonTree(Node $person, $generations = null, $currentGeneration = 1) {
 
-    foreach ($person->getSpouses() as $spouse) {
-        if ($spouse) {
-            $spouseData = [
-                'id' => $spouse->id,
-                'name' => $spouse->name,
-                'attributes' => [
-                    'gender' => $spouse->gender,
-                    'DOB' => $spouse->birth_date,
-                    'DOD' => $spouse->death_date,
-                    'marriage_dates' => $spouse->marriage_dates,
-                    'divorce_dates' => $spouse->divorce_dates,
-                    'image' => $spouse->image,
-                    'parents' => array_map(function($parent) {
-                      return ['id' => $parent->id, 'name' => $parent->name];
-                   }, $spouse->getParents() ?? []),
-                ],
-            ];
-      $personData['spouses'][] = $spouseData;
-    }
-  }  
-    foreach ($person->getChildren() as $child) {
-        $childData = $this->convertToJsonTree($child);
-        if ($childData) {
-            $personData['children'][] = $childData;
-        }
-    }
-    return $personData;
-}
-  //TODO: method to convert to JSON for graph structure and testing graph packages
-  private function convertToJsonGraph(array $familyTree)
+      if ($generations !== null && $currentGeneration > $generations) {
+          return null;
+      }
+
+      $personData = [
+          'id' => $person->id,
+          'name' => $person->name,
+          'attributes' => [
+              'gender' => $person->gender,
+              'DOB' => $person->birth_date,
+              'DOD' => $person->death_date,
+              'marriage_dates' => $person->marriage_dates,
+              'divorce_dates' => $person->divorce_dates,
+              'image' => $person->image,
+              'parents' => array_map(function($parent) {
+                  return ['id' => $parent->id, 'name' => $parent->name];
+              }, $person->getParents() ?? []),
+          ],
+          'children' => [],
+          'spouses' => []
+      ];
+
+      foreach ($person->getSpouses() as $spouse) {
+          if ($spouse) {
+              $spouseData = [
+                  'id' => $spouse->id,
+                  'name' => $spouse->name,
+                  'attributes' => [
+                      'gender' => $spouse->gender,
+                      'DOB' => $spouse->birth_date,
+                      'DOD' => $spouse->death_date,
+                      'marriage_dates' => $spouse->marriage_dates,
+                      'divorce_dates' => $spouse->divorce_dates,
+                      'image' => $spouse->image,
+                      'parents' => array_map(function($parent) {
+                          return ['id' => $parent->id, 'name' => $parent->name];
+                      }, $spouse->getParents() ?? []),
+                  ],
+              ];
+              $personData['spouses'][] = $spouseData;
+          }
+      }
+      foreach ($person->getChildren() as $child) {
+          $childData = $this->convertToJsonTree($child, $generations, $currentGeneration + 1);
+          if ($childData) {
+              $personData['children'][] = $childData;
+          }
+      }
+      return $personData;
+  }
+
+  private function convertToJsonGraph(array $familyTree, $generations = null)
 {
     $nodes = [];
     $edges = [];
 
     foreach ($familyTree as $id => $person) {
+      if ($generations !== null && !$this->isWithinGenerations($person, $generations)) {
+        continue;
+    }
+    
       $birthYear = substr($person->birth_date, 0, 4);
       $deathYear = substr($person->death_date, 0, 4);
       $label = $person->name . "\n(" . $birthYear . " - " . $deathYear . ")";
@@ -337,6 +347,22 @@ class FamilyTreeController extends Controller
         'edges' => $edges
     ];
 }
+
+    private function isWithinGenerations(Node $person, $generations, $currentGeneration = 1)
+    {
+        if ($currentGeneration > $generations) {
+            return false;
+        }
+
+        foreach ($person->getParents() as $parent) {
+            if (!$this->isWithinGenerations($parent, $generations, $currentGeneration + 1)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
   private function buildFamilyTree(Node $person, &$visited, $prefix = ""){
       $visited[] = $person->id; //adds current person to visited array to mark them as visited
       $partners = [$person->name]; //retrieves current person's name and adds to "partners" array

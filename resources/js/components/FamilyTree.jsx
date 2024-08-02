@@ -152,30 +152,34 @@ const FamilyTree = () => {
               {spouses.length > 0 && (
                 <g>
                   {spouses.map((spouse, index) => {
-                    const isLeft = index % 2 === 0;
-                    const isFirstRow = index < 2;
-                    return (
-                      <g key={spouse.id}
-                        transform={`translate(${isFirstRow ? (isLeft ? -spouseSpacing : spouseSpacing) : 0}, ${isFirstRow ? 0 : (index - 1) * verticalSpacing})`}
-                        onMouseEnter={(e) => {
-                          e.stopPropagation();
-                          nodeHover(spouse, true);
-                        }}
-                        onMouseLeave={() => setHoveredNode(null)}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openSidebar(spouse);
-                        }}
-                      >
-                        <line
-                          x1={isFirstRow ? (isLeft ? spouseSpacing - line : -spouseSpacing + line) : 0}
-                          y1={0}
-                          x2={isLeft ? 40 : -40}
-                          y2={0}
-                          stroke="black"
-                          strokeWidth={2}
-                          strokeDasharray="5,5"
-                        />
+                  const isFirstRow = index < 2;
+                  const isLeft = index % 2 === 0;
+                  const row = isFirstRow ? 0 : Math.floor((index - 2) / 2) + 1;
+                  const horizontalPosition = isFirstRow ? (isLeft ? -spouseSpacing : spouseSpacing) : (isLeft ? -spouseSpacing : spouseSpacing);
+                  const verticalPosition = isFirstRow ? 0 : row * verticalSpacing;
+
+                  return (
+                    <g key={spouse.id}
+                      transform={`translate(${horizontalPosition}, ${verticalPosition})`}
+                      onMouseEnter={(e) => {
+                        e.stopPropagation();
+                        nodeHover(spouse, true);
+                      }}
+                      onMouseLeave={() => setHoveredNode(null)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openSidebar(spouse);
+                      }}
+                    >
+                      <line
+                        x1={isFirstRow ? (isLeft ? (spouseSpacing - line) : (-spouseSpacing + line)) : 0}
+                        y1={0}
+                        x2={isFirstRow ? (isLeft ? (line) : (-line)) : 0}
+                        y2={-verticalPosition}
+                        stroke="black"
+                        strokeWidth={2}
+                        strokeDasharray="5,5"
+                      />
                         <circle r={nodeRadius} style={{
                           stroke: spouse.attributes.gender === 'M' ? '#97EBE6' : spouse.attributes.gender === 'F' ? '#EB97CF' : '#EBC097',
                           fill: 'none',

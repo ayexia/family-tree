@@ -30,7 +30,7 @@ const customNode = ({ data }) => (
 
 const getLayoutedElements = (nodes, edges) => {
   const g = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: 'TB', ranksep: 150, nodesep: 200 });
+  g.setGraph({ rankdir: 'TB', ranksep: 300, nodesep: 450 });
 
   nodes.forEach((node) => {
     g.setNode(node.id, { width: nodeWidth, height: nodeHeight });
@@ -51,19 +51,17 @@ const getLayoutedElements = (nodes, edges) => {
     const sourceNode = positionedNodes.find(node => node.id === edge.source);
     const targetNode = positionedNodes.find(node => node.id === edge.target);
     if (sourceNode && targetNode) {
-        if (index % 2 === 0) {
-          targetNode.position = {
-            x: sourceNode.position.x - (nodeWidth + 100),
-            y: sourceNode.position.y
-          };
-        } else {
-          targetNode.position = {
-            x: sourceNode.position.x + (nodeWidth + 100),
-            y: sourceNode.position.y
-          };
-        }
-      }
-    });
+      const numOfSpouses = edges.filter(e => e.source === edge.source && e.label === 'Spouse').length;
+      const angle = (2 * Math.PI / numOfSpouses) * index;
+      const horizontalPosition = Math.cos(angle) * 200;
+      const verticalPosition = Math.sin(angle) * 175;
+  
+      targetNode.position = {
+        x: sourceNode.position.x + horizontalPosition,
+        y: sourceNode.position.y + verticalPosition
+      };
+    }
+  });
 
   return {
     nodes: positionedNodes,

@@ -68,10 +68,11 @@ const getLayoutedElements = (nodes, edges) => {
     edges: edges.map(edge => ({
       ...edge,
       style: {
-        stroke: edge.label === 'Spouse' ? 'red' : '#000000',
-        strokeWidth: edge.label === 'Spouse' ? '0.5' : '0.2',
-        strokeDasharray: edge.label === 'Spouse' ? '5,5' : 'none',              
+      stroke: edge.label === 'Spouse' ? (edge.is_current ? 'red' : 'blue') : '#000000',
+      strokeWidth: edge.label === 'Spouse' ? '0.5' : '0.2',
+      strokeDasharray: edge.label === 'Spouse' ? (edge.is_current ? 'none' : '5,5') : 'none',             
       },
+      label: edge.label === 'Spouse' ? (edge.is_current ? 'Spouse' : 'Former Spouse') : edge.label,
     }))
   };
 };

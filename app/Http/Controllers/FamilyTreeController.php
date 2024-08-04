@@ -276,6 +276,7 @@ class FamilyTreeController extends Controller
                           return ['id' => $parent->id, 'name' => $parent->name];
                       }, $spouse->getParents() ?? []),
                   ],
+                'is_current' => $person->isCurrentSpouse($spouse)
               ];
               $personData['spouses'][] = $spouseData;
           }
@@ -298,7 +299,7 @@ class FamilyTreeController extends Controller
       if ($generations !== null && !$this->isWithinGenerations($person, $generations)) {
         continue;
     }
-    
+
       $birthYear = substr($person->birth_date, 0, 4);
       $deathYear = substr($person->death_date, 0, 4);
       $label = $person->name . "\n(" . $birthYear . " - " . $deathYear . ")";
@@ -328,7 +329,8 @@ class FamilyTreeController extends Controller
                 'source' => (string)$id,
                 'target' => (string)$spouse->id,
                 'type' => 'straight',
-                'label' => 'Spouse'
+                'label' => 'Spouse',
+                'is_current' => $person->isCurrentSpouse($spouse)
             ];
         }
 

@@ -179,9 +179,9 @@ const FamilyTree = () => {
                         y1={0}
                         x2={isFirstRow ? (isLeft ? (line) : (-line)) : 0}
                         y2={-verticalPosition}
-                        stroke="black"
-                        strokeWidth={2}
-                        strokeDasharray="5,5"
+                        stroke={spouse.is_current ? 'red' : 'blue'}
+                        strokeWidth={spouse.is_current ? 1 : 2}
+                        strokeDasharray={spouse.is_current ? 'none' : '5,5'}
                       />
                         <circle r={nodeRadius} style={{
                           stroke: spouse.attributes.gender === 'M' ? '#97EBE6' : spouse.attributes.gender === 'F' ? '#EB97CF' : '#EBC097',

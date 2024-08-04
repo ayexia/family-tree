@@ -40,6 +40,62 @@ class Node {
         $this->spouses[] = $spouse;
     }
 
+    public function isCurrentSpouse($spouse) {
+        
+        if (empty($this->marriage_dates) || empty($spouse->marriage_dates)) {
+            return true;
+        }
+    
+        $knownMarriageDates = array_filter($this->marriage_dates, function($date) {
+            return $date !== 'Unknown date';
+        });
+        $spouseKnownMarriageDates = array_filter($spouse->marriage_dates, function($date) {
+            return $date !== 'Unknown date';
+        });
+    
+        if (in_array('Unknown date', $this->marriage_dates) || in_array('Unknown date', $spouse->marriage_dates)) {
+            return true;
+        }
+    
+        $sharedMarriageDates = array_intersect($knownMarriageDates, $spouseKnownMarriageDates);
+        if (empty($sharedMarriageDates)) {
+            return false;
+        }
+    
+        $latestMarriageDate = max($sharedMarriageDates);
+    
+        $knownDivorceDates = array_filter($this->divorce_dates, function($date) {
+            return $date !== 'Unknown date';
+        });
+        $spouseKnownDivorceDates = array_filter($spouse->divorce_dates, function($date) {
+            return $date !== 'Unknown date';
+        });
+    
+        foreach ($knownDivorceDates as $date) {
+            if ($date > $latestMarriageDate) {
+                return false;
+            }
+        }
+        foreach ($spouseKnownDivorceDates as $date) {
+            if ($date > $latestMarriageDate) {
+                return false;
+            }
+        }
+
+        foreach ($knownMarriageDates as $date) {
+            if ($date > $latestMarriageDate) {
+                return false;
+            }
+        }
+        foreach ($spouseKnownMarriageDates as $date) {
+            if ($date > $latestMarriageDate) {
+                return false;
+            }
+        }
+
+        return true;
+    }    
+    
     public function addChild(Node $child) {
         $this->children[$child->id] = $child;
         if ($this->gender === 'M') {

@@ -34,7 +34,7 @@
         </div>
     </div>
     <div class="footer">
-        <p>Copyright 2024 | <a href="#">About</a></p>
+        <p>Copyright 2024 | <a href="{{ route('about') }}">About</a></p>
     </div>
 </body>
 </html>

@@ -34,6 +34,13 @@ body {
     font-size: 32px;
 }
 
+.subheading {
+    font-family: "Inika", serif;
+    font-weight: bold;
+    font-size: 32px;
+    color: #587353;
+}
+
 .profile {
     position: absolute;
     top: 10px;
@@ -63,6 +70,15 @@ body {
 
 .profile-button:hover {
     background-color: #4a6848;
+}
+
+.home-button {
+    font-size: 1.5em;
+    position: absolute;
+    top: 55px;
+    left: 10%;
+    transform: translateX(-50%);
+    text-decoration: none;
 }
 
 .gradient-text {
@@ -165,6 +181,57 @@ body {
 
 .import-gedcom {
     margin-left: 20px;
+}
+
+.textbox {
+    background-color: #9BB08C;
+    width: 425px;
+    height: 250px;
+    border-radius: 20%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35vw;
+    font-weight: bold;
+    color: #EDECD7;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.one {
+    top: 125px;
+    left: 50px;    
+    position: absolute;
+}
+
+.two {
+    bottom: -350px;
+    right: 50px;    
+    position: absolute;
+}
+
+.about img {
+    width: 300px;
+    height: 220px;
+    opacity: 0.8;
+    margin-right: 15px;
+    border: 5px solid rgba(255, 255, 255, 0.8);
+    border-color: #67584B;
+    background-color: #FFFFFF;
+}
+
+.tree {
+    bottom: -90px;
+    right: 100px;    
+    position: absolute;
+}
+
+.dna {
+    bottom: -360px;
+    left: 100px;    
+    position: absolute;
 }
 
 .footer {

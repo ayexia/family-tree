@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mystory</title>
+    <title>MyStory</title>
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inika:wght@400;700&family=Tourney:ital,wght@0,100..900;1,100..900&family=Waiting+for+the+Sunrise&display=swap" rel="stylesheet">
     <style>
@@ -229,7 +229,7 @@
         </div>
 
         <div class="footer">
-            <p>Copyright 2024 | <a href="#">About</a></p>
+            <p>Copyright 2024 | <a href="{{ route('about') }}">About</a></p>
         </div>
     </div>
 </body>

@@ -18,6 +18,10 @@ Route::get('/about', function () {
     return view('about');
 })->name('about');
 
+Route::get('/import', function () {
+    return view('import');
+})->middleware(['auth', 'verified'])->name('import');
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');

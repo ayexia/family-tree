@@ -18,6 +18,10 @@ Route::get('/about', function () {
     return view('about');
 })->name('about');
 
+Route::get('/display', function () {
+    return view('tree.display');
+})->middleware(['auth', 'verified'])->name('display');
+
 Route::get('/import', function () {
     return view('import');
 })->middleware(['auth', 'verified'])->name('import');

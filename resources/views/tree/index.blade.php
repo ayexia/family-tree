@@ -192,8 +192,6 @@
             </ul>
         </div>
     </div>
-
-    <div id="root"></div>
     <footer class="footer">
         <p>Copyright 2024 | <a href="{{ route('about') }}">About</a></p>
     </footer>

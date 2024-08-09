@@ -77,6 +77,15 @@
         font-size: 0.875rem;
         font-family: "Inika", serif;
         }
+        .footer {
+        text-align: center;
+        font-family: "Inika", serif;
+        margin-top: 2rem;
+        position: fixed;
+        right: 0%;
+        padding: 0.53rem;
+        color: #EDECD7;
+    }
     </style>
     <div class="container">
         <div class="header">
@@ -87,7 +96,7 @@
                     Profile</button>
             </div>
         </div>
-        <button class="profile-button home-button">
+        <button class="profile-button home-button" onclick="window.location.href='{{ route('home') }}'">
                     <img src="{{ asset('images/home.png') }}" alt="Home">
                     Home</button>      
     </div>
@@ -125,4 +134,7 @@
                 </form>
             </div>
         </div>
+        <div class="footer">
+        <p>Copyright 2024 | <a href="{{ route('about') }}">About</a></p>
+    </div>
 @endsection

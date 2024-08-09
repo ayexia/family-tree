@@ -61,6 +61,35 @@
             color: #EDECD7;
             font-family: "Inika", serif;
         }
+        .custom-link, .custom-link-2 {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .custom-link:focus, .custom-link-2:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .custom-button:focus {
+            outline: none;
+            box-shadow: none;
+        }
+        
+        #remember_me {
+            outline: none;
+            box-shadow: none;
+        }
+
+        #remember_me:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        #remember_me:checked {
+            background-color: #678A5C;
+            border: 2px solid #678A5C;
+        }
     </style>
 
     <form method="POST" action="{{ route('login') }}" class="form-container">

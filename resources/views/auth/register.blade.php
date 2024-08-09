@@ -6,11 +6,22 @@
         position: fixed;
         left: 37.5%;
         font-family: "Inika", serif;
-    }
+        }
 
         .custom-link:hover {
         color: #587353;
-    }
+        }
+
+        .custom-link {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .custom-link:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
         .custom-input {
             background-color: #678A5C;
             border: none;
@@ -34,6 +45,16 @@
 
         .custom-button:hover {
             background-color: #4a6848;
+        }
+
+        .custom-button:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .custom-link:focus, .custom-link-2:focus {
+            outline: none;
+            box-shadow: none;
         }
 
         .form-container {

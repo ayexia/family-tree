@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
 </head>
 <style>
+    .profile-button {
+        text-decoration: none;
+    }
+    
     .home-button {
         display: flex;
         align-items: center;
@@ -104,10 +108,10 @@
         <header class="header">
             <h1 class="gradient-text">Search</h1>
             <div class="profile">
-                <button class="profile-button">
-                    <img src="{{ asset('images/user-profile.png') }}" alt="User">
-                    Profile
-                </button>
+            <a href="{{route('profile.edit') }}" class="profile-button">
+                <img src="{{ asset('images/user-profile.png') }}" alt="User">
+                Profile
+            </a>
             </div>
             <a href="{{ route('home') }}" class="profile-button home-button">
                 <img src="{{ asset('images/home.png') }}" alt="Home">

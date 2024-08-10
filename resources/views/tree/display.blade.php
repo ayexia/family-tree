@@ -14,6 +14,11 @@
         top: 100px;
         position: absolute;
     }
+    
+    .profile-button {
+        text-decoration: none;
+    }
+
     .home-button {
         display: flex;
         align-items: center;
@@ -120,10 +125,10 @@
     <header class="header">
         <h1 class="subheading title">Family Tree</h1>
         <div class="profile">
-            <button class="profile-button">
+            <a href="{{route('profile.edit') }}" class="profile-button">
                 <img src="{{ asset('images/user-profile.png') }}" alt="User">
                 Profile
-            </button>
+            </a>
         </div>
         <a href="{{ route('home') }}" class="profile-button home-button">
             <img src="{{ asset('images/home.png') }}" alt="Home">

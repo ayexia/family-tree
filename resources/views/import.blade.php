@@ -91,15 +91,15 @@
         <div class="header">
             <h1 class="subheading">Import GEDCOM</h1>
             <div class="profile">
-                <button class="profile-button">
+                <a href="{{ route('profile.edit') }}" button class="profile-button">
                     <img src="{{ asset('images/user-profile.png') }}" alt="User">
-                    Profile</button>
+                    Profile</a>
             </div>
         </div>
-        <button class="profile-button home-button" onclick="window.location.href='{{ route('home') }}'">
+        <a href="{{ route('home') }}" class="profile-button home-button">
                     <img src="{{ asset('images/home.png') }}" alt="Home">
-                    Home</button>      
-    </div>
+                    Home</a>      
+        </div>
     <div class="max-w-3xl mx-auto mt-8 custom-background">
         <div class="bg-white dark:bg-gray-800 overflow-hidden" style="box-shadow: none;">
 

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios'; 
 
 const Sidebar = ({ node, onClose, setImages, images }) => {
 const [errorMessage, setErrorMessage] = useState('');
@@ -23,6 +24,10 @@ const [errorMessage, setErrorMessage] = useState('');
     } catch (error) {
       setErrorMessage('Image could not be uploaded.'); //error message if image cannot be uploaded for any reason
     }
+  };
+
+  const edit = () => {
+    window.location.href = `/person/${node.id}/edit`;
   };
   
   return (
@@ -95,6 +100,17 @@ const [errorMessage, setErrorMessage] = useState('');
           <p>Unknown parents</p>
         )}
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+        <button onClick={edit} style={{
+          backgroundColor: '#37672F',
+          color: 'white',
+          border: 'none',
+          padding: '10px',
+          cursor: 'pointer',
+          borderRadius: '5px',
+          marginTop: '10px'
+        }}>
+          Edit Details
+        </button>
       </div>
     </div>
   );

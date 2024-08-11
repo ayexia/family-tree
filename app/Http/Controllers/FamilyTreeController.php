@@ -389,6 +389,50 @@ class FamilyTreeController extends Controller
      * Updates family member and all associated relationships - IN PROGRESS
      * TODO: fix depending on other methods, checks, add edit button to frontend page
      */
+
+    public function edit($id)
+    {
+        $person = Person::findOrFail($id);
+        return view('edit', compact('person'));
+    }
+
+    public function updateDetails(Request $request, $id)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'birth_date' => 'nullable|date',
+            'death_date' => 'nullable|date',
+            'marriages.*.id' => 'nullable|exists:spouses,id',
+            'marriages.*.marriage_date' => 'nullable|date',
+            'marriages.*.divorce_date' => 'nullable|date',
+            'marriages.*.first_spouse_id' => 'nullable|exists:people,id',
+            'marriages.*.second_spouse_id' => 'nullable|exists:people,id',
+        ]);
+    
+        $person = Person::findOrFail($id);
+        $person->update([
+            'name' => $data['name'],
+            'birth_date' => $data['birth_date'],
+            'death_date' => $data['death_date'],
+        ]);
+    
+        $marriages = $request->input('marriages', []);
+        foreach ($marriages as $marriage) {
+            if (isset($marriage['id'])) {
+                $spouse = Spouse::find($marriage['id']);
+    
+                if ($spouse) {
+                    $spouse->update([
+                        'marriage_date' => $marriage['marriage_date'] ?? $spouse->marriage_date,
+                        'divorce_date' => $marriage['divorce_date'] ?? $spouse->divorce_date,
+                    ]);
+                }
+            }
+        }
+    
+        return redirect()->back()->with('success', 'Family member details updated successfully.');
+    }    
+
     public function update(Request $request, $id)
     {
         $data = $request->validate([

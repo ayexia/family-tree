@@ -60,7 +60,8 @@ const [errorMessage, setErrorMessage] = useState('');
       <div style={{ padding: '20px' }}>
         <h3>{node.name || 'Unknown'}</h3>
         <p><img src={images[node.id] || node.attributes.image ||'/images/user.png'} height={250} width={250}></img></p>
-        <div style={{ marginTop: '10px'}}>
+        <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+          <div>
           <label htmlFor="upload-button" style={{
             backgroundColor: '#37672F',
             color: 'white',
@@ -73,6 +74,22 @@ const [errorMessage, setErrorMessage] = useState('');
           </label>
           <input id="upload-button" type="file" onChange={uploadImage} style={{ display: 'none' }} />
           </div>
+
+          <button onClick={edit} style={{
+            backgroundColor: '#37672F',
+            color: 'white',
+            padding: '10px',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            border: 'none',
+            display: 'inline-block',
+            fontFamily: 'Inika, serif',
+            fontSize: '1em',
+          }}>
+            Edit Details
+          </button>
+        </div>
+
         <p>DOB: {node.attributes.DOB}</p>
         <p>DOD: {node.attributes.DOD}</p>
         {node.attributes.marriage_dates && node.attributes.marriage_dates.length > 0 ? (
@@ -100,17 +117,6 @@ const [errorMessage, setErrorMessage] = useState('');
           <p>Unknown parents</p>
         )}
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-        <button onClick={edit} style={{
-          backgroundColor: '#37672F',
-          color: 'white',
-          border: 'none',
-          padding: '10px',
-          cursor: 'pointer',
-          borderRadius: '5px',
-          marginTop: '10px'
-        }}>
-          Edit Details
-        </button>
       </div>
     </div>
   );

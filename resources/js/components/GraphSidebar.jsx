@@ -26,6 +26,10 @@ const GraphSidebar = ({ node, onClose, setImages, images }) => {
     }
   };
 
+  const edit = () => {
+    window.location.href = `/person/${node.id}/edit`;
+  };
+
   return (
     <div style={{
       width: '300px',
@@ -55,8 +59,9 @@ const GraphSidebar = ({ node, onClose, setImages, images }) => {
       </button>
       <div style={{ padding: '20px' }}>
         <h3>{node.data.name || 'Unknown'}</h3>
-        <p><img src={images[node.id] ||node.data.image || '/images/user.png'} height={250} width={250} /></p>
-        <div style={{ marginTop: '10px' }}>
+        <p><img src={images[node.id] || node.data.image || '/images/user.png'} height={250} width={250} /></p>  
+      <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+        <div>
           <label htmlFor="upload-button" style={{
             backgroundColor: '#37672F',
             color: 'white',
@@ -69,6 +74,22 @@ const GraphSidebar = ({ node, onClose, setImages, images }) => {
           </label>
           <input id="upload-button" type="file" onChange={uploadImage} style={{ display: 'none' }} />
         </div>
+
+          <button onClick={edit} style={{
+            backgroundColor: '#37672F',
+            color: 'white',
+            padding: '10px',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            border: 'none',
+            display: 'inline-block',
+            fontFamily: 'Inika, serif',
+            fontSize: '1em',
+          }}>
+            Edit Details
+          </button>
+        </div>
+
         <p>DOB: {node.data.birth_date || 'Unknown date'}</p>
         <p>DOD: {node.data.death_date || 'Unknown date'}</p>
         {node.data.marriage_dates && node.data.marriage_dates.length > 0 ? (

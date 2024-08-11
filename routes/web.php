@@ -18,6 +18,10 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('/person/{id}/edit', [FamilyTreeController::class, 'edit'])->name('person.edit');
+
+Route::put('/person/{id}', [FamilyTreeController::class, 'updateDetails'])->name('person.update');;
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 use Carbon\Carbon;
+use App\Models\Spouse;
 
 class Node {
     public $id;
@@ -40,61 +41,74 @@ class Node {
         $this->spouses[] = $spouse;
     }
 
-    public function isCurrentSpouse($spouse) {
-        
-        if (empty($this->marriage_dates) || empty($spouse->marriage_dates)) {
-            return true;
-        }
-    
+    public function isCurrentSpouse(Node $spouse) {
         $knownMarriageDates = array_filter($this->marriage_dates, function($date) {
             return $date !== 'Unknown date';
         });
         $spouseKnownMarriageDates = array_filter($spouse->marriage_dates, function($date) {
             return $date !== 'Unknown date';
         });
-    
-        if (in_array('Unknown date', $this->marriage_dates) || in_array('Unknown date', $spouse->marriage_dates)) {
-            return true;
-        }
-    
-        $sharedMarriageDates = array_intersect($knownMarriageDates, $spouseKnownMarriageDates);
-        if (empty($sharedMarriageDates)) {
-            return false;
-        }
-    
-        $latestMarriageDate = max($sharedMarriageDates);
-    
+
         $knownDivorceDates = array_filter($this->divorce_dates, function($date) {
             return $date !== 'Unknown date';
         });
         $spouseKnownDivorceDates = array_filter($spouse->divorce_dates, function($date) {
             return $date !== 'Unknown date';
         });
-    
-        foreach ($knownDivorceDates as $date) {
-            if ($date > $latestMarriageDate) {
-                return false;
-            }
+
+        $sharedDivorceDates = array_intersect($knownDivorceDates, $spouseKnownDivorceDates);
+        if (!empty($sharedDivorceDates)) {
+            return false;
         }
-        foreach ($spouseKnownDivorceDates as $date) {
-            if ($date > $latestMarriageDate) {
-                return false;
+
+        if (empty($knownMarriageDates) || empty($spouseKnownMarriageDates)) {
+            return true;
+        }
+
+        $latestMarriageDate = max($knownMarriageDates);
+        $spouseLatestMarriageDate = max($spouseKnownMarriageDates);
+
+        $overallLatestMarriageDate = max($latestMarriageDate, $spouseLatestMarriageDate);
+
+        if ($latestMarriageDate < $spouseLatestMarriageDate) {
+            if (!empty($knownMarriageDates) && empty($knownDivorceDates)) {
+                $this->updateSpouseDivorceDate($spouse->id, $spouseLatestMarriageDate);
+            }
+        } elseif ($spouseLatestMarriageDate < $latestMarriageDate) {
+            if (!empty($spouseKnownMarriageDates) && empty($spouseKnownDivorceDates)) {
+                $this->updateSpouseDivorceDate($this->id, $latestMarriageDate);
             }
         }
 
-        foreach ($knownMarriageDates as $date) {
-            if ($date > $latestMarriageDate) {
-                return false;
-            }
-        }
-        foreach ($spouseKnownMarriageDates as $date) {
-            if ($date > $latestMarriageDate) {
-                return false;
-            }
+        if ($spouseLatestMarriageDate === $overallLatestMarriageDate) {
+            return true;
         }
 
-        return true;
-    }    
+        return false;
+    }
+
+    private function updateSpouseDivorceDate($personId, $divorceDate) {
+        try {
+            $spouseRecord = Spouse::where(function ($query) use ($personId) {
+                $query->where(function ($q) use ($personId) {
+                    $q->where('first_spouse_id', $this->id)
+                      ->where('second_spouse_id', $personId);
+                })->orWhere(function ($q) use ($personId) {
+                    $q->where('first_spouse_id', $personId)
+                      ->where('second_spouse_id', $this->id);
+                });
+            })->first();
+
+            if ($spouseRecord) {
+                $spouseRecord->update(['divorce_date' => $divorceDate]);
+            } else {
+                Log::warning('Spouse record not found for IDs', ['person_id' => $personId]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error updating spouse divorce date: ' . $e->getMessage());
+            throw $e;
+        }
+    }
     
     public function addChild(Node $child) {
         $this->children[$child->id] = $child;

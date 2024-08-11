@@ -130,7 +130,7 @@
         </a>
 
             <x-primary-button class="custom-button ms-3">
-                {{ __('Log in') }}
+                {{ __('Login') }}
             </x-primary-button>
         </div>
     </form>

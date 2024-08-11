@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About</title>
+    <title>About MyStory</title>
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
 </head>
 <style>
@@ -14,7 +14,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1 class="subheading">About</h1>
+            <h1 class="subheading">About MyStory</h1>
             <div class="profile">
             <a href="{{route('profile.edit') }}" class="profile-button">
                 <img src="{{ asset('images/user-profile.png') }}" alt="User">

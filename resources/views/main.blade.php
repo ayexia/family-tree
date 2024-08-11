@@ -148,11 +148,31 @@
     }
 
     .register-button {
-        font-size: 1.5em;
-        padding: 30px 70px;
+        font-size: 1em;
+        padding: 20px 40px;
         position: absolute;
         bottom: 100px;
-        left: 50%;
+        left: 30%;
+        transform: translateX(-50%);
+        text-decoration: none;
+    }
+
+    .about-button {
+        font-size: 1em;
+        padding: 20px 40px;
+        position: absolute;
+        bottom: 100px;
+        left: 60%;
+        transform: translateX(-50%);
+        text-decoration: none;
+    }
+
+    .user-about-button {
+        font-size: 1em;
+        padding: 20px 40px;
+        position: absolute;
+        bottom: 100px;
+        left: 46.25%;
         transform: translateX(-50%);
         text-decoration: none;
     }
@@ -175,6 +195,8 @@
         position: fixed;
         bottom: 0;
         left: 0;
+        font-family: "Inika", serif;
+        font-size: 0.5em;
     }
 
     .footer a {
@@ -220,17 +242,31 @@
             <h1 class="title">MyStory</h1>
             <h2 class="subheading">Where does my family come from?</h2>
             <div class="profile">
+            @if (Route::has('login'))
+                @auth
+                    <a href="{{ url('/home') }}" class="profile-button login-button">
+                    <img src="{{ asset('images/home.png') }}" alt="Home">Home
+                    </a>
+                @else
                 <a href="{{ route('login') }}" class="profile-button login-button">Login</a>
+            @endauth
+                @endif
             </div>
-        </div>
 
         <div class="main-content">
+        @if (!auth()->check())
             <a href="{{ route('register') }}" class="profile-button register-button">Register Today</a>
+            <a href="{{ route('about') }}" class="profile-button about-button">About MyStory</a>
         </div>
-
+        @else        
+        <div class="main-content">
+        <a href="{{ route('about') }}" class="profile-button user-about-button">About MyStory</a>
+        </div>
+        @endif
         <div class="footer">
-            <p>Copyright 2024 | <a href="{{ route('about') }}">About</a></p>
+            <p>Copyright 2024</p>
         </div>
     </div>
+    
 </body>
 </html>

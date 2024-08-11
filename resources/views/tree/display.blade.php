@@ -14,7 +14,7 @@
         top: 100px;
         position: absolute;
     }
-    
+
     .profile-button {
         text-decoration: none;
     }
@@ -139,7 +139,7 @@
     <div id="root"></div>
 
     <footer class="footer">
-        <p>Copyright 2024 | <a href="{{ route('about') }}">About</a></p>
+        <p>Copyright 2024 | <a href="{{ route('about') }}">About MyStory</a></p>
     </footer>
 </body>
 </html>

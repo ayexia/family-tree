@@ -7,12 +7,25 @@ use App\Http\Controllers\UploadController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('main');
 });
 
 Route::get('/home', function () {
     return view('homepage');
-})->name('home');
+})->middleware(['auth', 'verified'])->name('home');
+
+
+Route::get('/about', function () {
+    return view('about');
+})->name('about');
+
+Route::get('/display', function () {
+    return view('tree.display');
+})->middleware(['auth', 'verified'])->name('display');
+
+Route::get('/import', function () {
+    return view('import');
+})->middleware(['auth', 'verified'])->name('import');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -26,13 +39,8 @@ Route::middleware('auth')->group(function () {
 
 Route::post('/upload', [GedcomController::class, 'upload'])->name('upload');
 
-
 Route::get('/family-tree', [FamilyTreeController:: class, 'displayFamilyTree'])->name('family.tree');
 Route::get('/family-graph', [FamilyTreeController:: class, 'displayFamilyTree'])->name('family.graph');
-Route::get('/test', function () {
-    return view('test');
-});
-
 
 Route::post('/upload-image', [UploadController::class, 'uploadImage']);
 

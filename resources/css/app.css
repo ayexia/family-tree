@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@media (prefers-color-scheme: dark) {
+    .dark\:bg-gray-800 {
+        --tw-bg-opacity: 0 !important;
+        background-color: rgb(31 41 55 / var(--tw-bg-opacity));
+    }
+}
+
+.shadow-md {
+    box-shadow: none !important; 
+}

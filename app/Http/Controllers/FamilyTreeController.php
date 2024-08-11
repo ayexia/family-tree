@@ -410,11 +410,10 @@ class FamilyTreeController extends Controller
         ]);
     
         $person = Person::findOrFail($id);
-        $person->update([
-            'name' => $data['name'],
-            'birth_date' => $data['birth_date'],
-            'death_date' => $data['death_date'],
-        ]);
+        $person->name = $data['name'];
+        $person->birth_date = !empty($data['birth_date']) ? $data['birth_date'] : null;
+        $person->death_date = !empty($data['death_date']) ? $data['death_date'] : null;
+        $person->save();
     
         $marriages = $request->input('marriages', []);
         foreach ($marriages as $marriage) {
@@ -422,10 +421,9 @@ class FamilyTreeController extends Controller
                 $spouse = Spouse::find($marriage['id']);
     
                 if ($spouse) {
-                    $spouse->update([
-                        'marriage_date' => $marriage['marriage_date'] ?? $spouse->marriage_date,
-                        'divorce_date' => $marriage['divorce_date'] ?? $spouse->divorce_date,
-                    ]);
+                    $spouse->marriage_date = !empty($marriage['marriage_date']) ? $marriage['marriage_date'] : null;
+                    $spouse->divorce_date = !empty($marriage['divorce_date']) ? $marriage['divorce_date'] : null;
+                    $spouse->save();
                 }
             }
         }

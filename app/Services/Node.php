@@ -43,17 +43,17 @@ class Node {
 
     public function isCurrentSpouse(Node $spouse) {
         $knownMarriageDates = array_filter($this->marriage_dates, function($date) {
-            return $date !== 'Unknown date';
+            return $date !== 'Unknown date' && $date !== null;
         });
         $spouseKnownMarriageDates = array_filter($spouse->marriage_dates, function($date) {
-            return $date !== 'Unknown date';
+            return $date !== 'Unknown date' && $date !== null;
         });
 
         $knownDivorceDates = array_filter($this->divorce_dates, function($date) {
-            return $date !== 'Unknown date';
+            return $date !== 'Unknown date' && $date !== null;
         });
         $spouseKnownDivorceDates = array_filter($spouse->divorce_dates, function($date) {
-            return $date !== 'Unknown date';
+            return $date !== 'Unknown date' && $date !== null;
         });
 
         $sharedDivorceDates = array_intersect($knownDivorceDates, $spouseKnownDivorceDates);

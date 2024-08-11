@@ -12,7 +12,7 @@
     </div>
 
     <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    <x-auth-session-status class="mb-4" :status="session('status')" style="font-family: Inika, serif"/>
 
     <div class="p-6 bg-green-100 border border-green-300 rounded-lg shadow-md" style="background-color: #9BB08C; border-radius:20px">
         <form method="POST" action="{{ route('password.email') }}">

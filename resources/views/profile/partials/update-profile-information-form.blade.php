@@ -19,6 +19,12 @@
         box-shadow: 0 0 0 4px rgba(177, 205, 175, 0.6);
         outline: none;
     }
+
+    button[form="send-verification"]:focus {
+        border-color: #678A5C;
+        box-shadow: 0 0 0 4px rgba(177, 205, 175, 1.0);
+        outline: none;
+    }
 }
 </style>
     <header>

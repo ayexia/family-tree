@@ -12,7 +12,8 @@ Route::get('/', function () {
 
 Route::get('/home', function () {
     return view('homepage');
-})->name('home');
+})->middleware(['auth', 'verified'])->name('home');
+
 
 Route::get('/about', function () {
     return view('about');

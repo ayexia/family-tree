@@ -56,7 +56,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1 class="gradient-text">Hello, User!</h1>
+            <h1 class="gradient-text">Hello, {{ Auth::user()->name }}!</h1>
             <div class="profile">
                 <a href="{{ route('profile.edit') }}" class="profile-button">
                     <img src="{{ asset('images/user-profile.png') }}" alt="User">

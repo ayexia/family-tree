@@ -6,7 +6,8 @@ import ReactFlow, {
   useNodesState, 
   useEdgesState,
   Handle,
-  Position 
+  Position,
+  useReactFlow
 } from 'reactflow';
 import dagre from '@dagrejs/dagre';
 import 'reactflow/dist/style.css';
@@ -68,9 +69,9 @@ const getLayoutedElements = (nodes, edges) => {
     edges: edges.map(edge => ({
       ...edge,
       style: {
-      stroke: edge.label === 'Spouse' ? (edge.is_current ? 'red' : 'blue') : '#000000',
-      strokeWidth: edge.label === 'Spouse' ? '0.5' : '0.2',
-      strokeDasharray: edge.label === 'Spouse' ? (edge.is_current ? 'none' : '5,5') : 'none',             
+        stroke: edge.label === 'Spouse' ? (edge.is_current ? 'red' : 'blue') : '#000000',
+        strokeWidth: edge.label === 'Spouse' ? '0.5' : '0.2',
+        strokeDasharray: edge.label === 'Spouse' ? (edge.is_current ? 'none' : '5,5') : 'none',             
       },
       label: edge.label === 'Spouse' ? (edge.is_current ? 'Spouse' : 'Former Spouse') : edge.label,
     }))
@@ -85,6 +86,9 @@ const FamilyGraph = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [images, setImages] = useState({});
   const [generations, setGenerations] = useState(3);
+  const [query, setQuery] = useState('');
+  const [highlightedNode, setHighlightedNode] = useState(null);
+  const { fitView } = useReactFlow();
 
   const nodeTypes = useMemo(() => ({ custom: customNode }), []);
 
@@ -117,6 +121,15 @@ const FamilyGraph = () => {
     fetchFamilyTreeData();
   }, [fetchFamilyTreeData, images]);
 
+  useEffect(() => {
+    if (highlightedNode) {
+      const node = nodes.find(n => n.id === highlightedNode);
+      if (node) {
+        fitView({ nodes: [node], padding: 0.1 });
+      }
+    }
+  }, [highlightedNode, nodes, fitView]);
+
   const openSidebar = (node) => {
     setSelectedNode(node);
     setIsSidebarOpened(true);
@@ -135,6 +148,16 @@ const FamilyGraph = () => {
     }
   };
 
+  const search = () => {
+    setErrorMessage('');
+    const node = nodes.find(n => n.data.name?.toLowerCase().includes(query.toLowerCase()));
+    if (node) {
+      setHighlightedNode(node.id);
+    } else {
+      setErrorMessage('No person found with that name.');
+    }
+  };
+
   return (
     <div style={{ width: '100%', height: '600px' }}>
       {errorMessage && <p>{errorMessage}</p>}
@@ -144,10 +167,19 @@ const FamilyGraph = () => {
           type="number"
           id="generations"
           value={generations}
-          onChange={(e) => setGenerations(e.target.value)}
+          onChange={(e) => setGenerations(Number(e.target.value))}
           min="1"
           max="10"
         />
+      </div>
+      <div style={{ marginBottom: '10px' }}>
+        <input
+          type="text"
+          placeholder="Search for a person"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <button onClick={search}>Search</button>
       </div>
       <ReactFlow
         nodes={nodes}

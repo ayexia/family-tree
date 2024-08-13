@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { ReactFlowProvider } from 'reactflow';
 import FamilyTree from './FamilyTree';
 import FamilyGraph from './FamilyGraph';
 
@@ -37,21 +38,26 @@ const App = () => {
     };
 
     return (
-        <Router>
-            <div>
-                <button style={buttonStyle} onClick={switchView}>
-                    <img src="/images/grid.png" alt="Grid" style={imgStyle} />
-                    Switch to {view === 'tree' ? 'Graph View' : 'Tree View'}
-                </button>
+        <ReactFlowProvider>
+            <Router>
+                <div>
+                    <button style={buttonStyle} onClick={switchView}>
+                        <img src="/images/grid.png" alt="Grid" style={imgStyle} />
+                        Switch to {view === 'tree' ? 'Graph View' : 'Tree View'}
+                    </button>
 
-                <Routes>
-                    <Route path="/family-tree" element={<FamilyTree />} />
-                    <Route path="/family-graph" element={<FamilyGraph />} />
-                </Routes>
-
-                {view === 'tree' ? <FamilyTree /> : <FamilyGraph />}
-            </div>
-        </Router>
+                    <Routes>
+                        <Route path="/family-tree" element={<FamilyTree />} />
+                        <Route path="/family-graph" element={<FamilyGraph />} />
+                    </Routes>
+                    {view === 'tree' ? (
+                        <FamilyTree />
+                    ) : (
+                        <FamilyGraph />
+                    )}
+                </div>
+            </Router>
+        </ReactFlowProvider>
     );
 };
 

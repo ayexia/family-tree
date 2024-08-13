@@ -14,7 +14,7 @@ const Legend = () => {
     position: 'absolute',
     top: '50px', 
     left: '20px', 
-    zIndex: '5',
+    zIndex: '10',
     maxWidth: '200px',
     overflow: 'auto',
   };
@@ -54,6 +54,10 @@ const Legend = () => {
       <div style={legendItemStyle}>
         <div style={colourBoxStyle('#EBC097')}></div>
         <span>Other/Unknown</span>
+      </div>
+      <div style={legendItemStyle}>
+        <div style={colourBoxStyle('yellow')}></div>
+        <span>Highlighted</span>
       </div>
       <div style={legendItemStyle}>
         <div style={lineStyle(false)}></div>

@@ -9,22 +9,24 @@ import Legend from './Legend';
 
 const FamilyTree = () => {
   const [treeData, setTreeData] = useState(null); //initialises variable treeData to store fetched family tree data
-  const [isSidebarOpened, setIsSidebarOpened] = useState( false ); //initialises, checks and sets visibility of sidebar (boolean)
+  const [isSidebarOpened, setIsSidebarOpened] = useState(false); //initialises, checks and sets visibility of sidebar (boolean)
   const [selectedNode, setSelectedNode] = useState(null); //initialises node selection state
-  const [query, setQuery] = useState(''); //initialises search function to store query 
+  const [nameQuery, setNameQuery] = useState(''); //initialises search function to store query 
+  const [surnameQuery, setSurnameQuery] = useState('');
   const [hasSearched, setHasSearched] = useState(false); //initialises and checks if search has been performed (boolean)
   const [errorMessage, setErrorMessage] = useState(''); //initialises errorMessage variable to store error messages
   const [hoveredNode, setHoveredNode] = useState(null);
   const [images, setImages] = useState({});
-  const [generations, setGenerations] = useState(3); 
+  const [generations, setGenerations] = useState(3);
+  const [highlightQuery, setHighlightQuery] = useState('');
 
   useEffect(() => {
     if (hasSearched) {
-    fetchFamilyTreeData(query); //after component is mounted calls this function which retrieves the family tree data from the api through http requests
+      fetchFamilyTreeData(surnameQuery); //after component is mounted calls this function which retrieves the family tree data from the api through http requests
     }
-  }, [query, generations, hasSearched]);
+  }, [surnameQuery, generations, hasSearched]);
 
-  const fetchFamilyTreeData = async (surname= '') => { 
+  const fetchFamilyTreeData = async (surname = '') => { 
     try {
       const response = await axios.get('/api/family-tree-json', {
         params: { desiredSurname: surname, generations }
@@ -33,18 +35,23 @@ const FamilyTree = () => {
         setErrorMessage('No results found for the given surname.'); //if no results found prints error message
         setTreeData(null);
       } else {
-      setTreeData(response.data); //the fetched data is stored in treeData variable
-      setErrorMessage(''); //clears error message
+        setTreeData(response.data); //the fetched data is stored in treeData variable
+        setErrorMessage(''); //clears error message
+        setHighlightQuery(nameQuery.trim().toLowerCase());
       }
     } catch (error) {
-       setErrorMessage('An error occurred while fetching data.'); //error message if any issues with fetching data
+      setErrorMessage('An error occurred while fetching data.'); //error message if any issues with fetching data
     }
   };
- 
-  const search = () => { //search function
+
+  const searchSurname = () => { //search function
     setErrorMessage('');
     setHasSearched(true); //sets hasSearched to true, thus allowing the tree data to be shown (or an error message if nothing is found)
-    fetchFamilyTreeData(query); //calls function to retrieve the family tree data for queried surname
+    fetchFamilyTreeData(surnameQuery); //calls function to retrieve the family tree data for queried surname
+  };
+
+  const searchByName = () => {
+   setHighlightQuery(nameQuery.trim().toLowerCase());
   };
 
   const openSidebar = (node) => { //if user clicks a node, sets that as selectedNode and sets sideBar opened to true, opening it and displaying information for that node
@@ -57,15 +64,17 @@ const FamilyTree = () => {
       setSelectedNode(null); 
     };
 
-
   const customNode = ({ nodeDatum }) => { //customises nodes in family tree based on particular properties
     const selectedImage = images[nodeDatum.id] || nodeDatum.attributes.image || '/images/user.png'; //node's image is either the image selected by user or default image
     const isMale = nodeDatum.attributes.gender === 'M'; //checks if node's gender is male or female (for spouses, only main person's gender is counted)
     const isFemale = nodeDatum.attributes.gender === 'F';
+    const isHighlighted = highlightQuery && nodeDatum.name.toLowerCase().includes(highlightQuery);
+
+    const shouldHighlight = isHighlighted;
     const nodeStyle = {
-      stroke: isMale ? '#97EBE6' : isFemale ? '#EB97CF': '#EBC097', //changes outline colour of node depending on gender (alternative colour if neither or unknown)
+      stroke: shouldHighlight ? 'yellow' : (isMale ? '#97EBE6' : isFemale ? '#EB97CF' : '#EBC097'),
       fill: 'none',
-      strokeWidth: 10,
+      strokeWidth: shouldHighlight ? 15 : 10,
     };
 
     const spouses = nodeDatum.spouses || [];
@@ -105,7 +114,8 @@ const FamilyTree = () => {
           </div>
         ) : (
           <p>Unknown parents</p>
-        )}</div>
+        )}
+      </div>
     );
 
   const nodeHover = (node, isSpouse = false) => {
@@ -119,11 +129,8 @@ const FamilyTree = () => {
     return null;
   };
 
-//returns custom node features: tooltip with desired information and appearance, 
-      //onClick function which calls openSidebar on a node to display its details, provided the user clicks any of the properties of that specific node,
-      //styles the node to contain an image in a circular fashion, with the image filling its contents (any extra is clipped off),
-      //contains the names, DOBs and DODs for the people of that specific node and a button for users to upload images to their node of choice
-      return (<> 
+  return (
+        <>
           <Tippy content={tooltipContent()} arrow={false}>
             <g>
               <g onClick={() => openSidebar(nodeDatum)}
@@ -161,6 +168,7 @@ const FamilyTree = () => {
                   const row = isFirstRow ? 0 : Math.floor((index - 2) / 2) + 1;
                   const horizontalPosition = isFirstRow ? (isLeft ? -spouseSpacing : spouseSpacing) : (isLeft ? -spouseSpacing : spouseSpacing);
                   const verticalPosition = isFirstRow ? 0 : row * verticalSpacing;
+                  const isSpouseHighlighted = highlightQuery && spouse.name.toLowerCase().includes(highlightQuery);
 
                   return (
                     <g key={spouse.id}
@@ -185,12 +193,12 @@ const FamilyTree = () => {
                         strokeDasharray={spouse.is_current ? 'none' : '5,5'}
                       />
                         <circle r={nodeRadius} style={{
-                          stroke: spouse.attributes.gender === 'M' ? '#97EBE6' : spouse.attributes.gender === 'F' ? '#EB97CF' : '#EBC097',
+                          stroke: isSpouseHighlighted ? 'yellow' : spouse.attributes.gender === 'M' ? '#97EBE6' : spouse.attributes.gender === 'F' ? '#EB97CF' : '#EBC097',
                           fill: 'none',
                           strokeWidth: 10,
                         }} />
                         <image
-                          href={images[spouse.id] ||spouse.attributes.image || '/images/user.png'}
+                          href={images[spouse.id] || spouse.attributes.image || '/images/user.png'}
                           x="-50"
                           y="-50"
                           width="100"
@@ -223,31 +231,37 @@ const FamilyTree = () => {
     };
 
     if (!treeData) { //alternate display if no tree data is available - error message and search bar
-      return <div>{errorMessage}
+    return (
+    <div>
+      {errorMessage}
       <div style={{ margin: '10px', width: '100%', height: '100vh' }}>
-      <input 
-        type="text" 
-        value={query} 
-        onChange={(e) => setQuery(e.target.value)} 
-        placeholder="Search a bloodline (surname)"
-      />
-      <button onClick={search}>Search</button>
+        <input 
+          type="text" 
+          value={surnameQuery} 
+          onChange={(e) => setSurnameQuery(e.target.value)} 
+          placeholder="Search a bloodline (surname)"
+        />
+        <button onClick={searchSurname}>Search</button>
       </div>
-      </div>
+    </div>
+    );
     }
+
   return ( //utilises react-d3-tree library to set parameters for tree display
     //sets width and height of display, places search bar, the data to be used, any node customisations the orientation of the tree and style of links/branches, positioning of tree and spacing between sibling and non-sibling nodes
     //only appears if the user has searched a bloodline/surname where family tree data is available, and no errors were given
     //also ensures sidebar is only opened if isSidebarOpened is true, and if so will display the data of a selected node and also close if user selects to do this
-    <div style={{ width: '100%', height: '100vh' }}>
+<div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100vh' }}>
+  <div style={{ display: 'flex', padding: '-10px' }}>
+    <div style={{ flex: '1' }}>
       <input 
         type="text" 
-        value={query} 
-        onChange={(e) => setQuery(e.target.value)} 
+        value={surnameQuery} 
+        onChange={(e) => setSurnameQuery(e.target.value)} 
         placeholder="Search a bloodline (surname)"
       />
-      <button onClick={search}>Search</button>
-      <div style={{ margin: '10px' }}>
+      <button onClick={searchSurname}>Search</button>
+      <div style={{ marginTop: '10px' }}>
         <label>Generation: </label>
         <input
           type="number"
@@ -257,21 +271,35 @@ const FamilyTree = () => {
           style={{ width: '60px' }}
         />
       </div>
-      {hasSearched && treeData && !errorMessage && (
+    </div>
+
+    <div style={{ width: '200px', marginLeft: 'auto', padding: '40px' }}>
+      <input
+        type="text"
+        value={nameQuery}
+        onChange={(e) => setNameQuery(e.target.value)}
+        placeholder="Search for a name"
+      />
+      <button onClick={searchByName}>Search</button>
+    </div>
+  </div>
+  <div style={{ flex: '1', height: '100%' }}>
+    {hasSearched && treeData && !errorMessage && (
       <Tree
         data={treeData}
         orientation="vertical"
         pathFunc="step"
         translate={{ x: 300, y: 50 }}
-        separation={{ siblings: 4, nonSiblings: 5}}
+        separation={{ siblings: 4, nonSiblings: 5 }}
         nodeSize={{ x: 190, y: 300 }}
         renderCustomNodeElement={customNode}
       />
     )}
-      {isSidebarOpened && <Sidebar node={selectedNode} onClose={closeSidebar} setImages={setImages} images={images} />}
-      <Legend />
-    </div>
-  );
+  </div>
+  {isSidebarOpened && <Sidebar node={selectedNode} onClose={closeSidebar} setImages={setImages} images={images} />}
+  <Legend />
+</div>
+);
 };
 
 export default FamilyTree; //exports component for use

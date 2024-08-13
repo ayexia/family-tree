@@ -5,6 +5,7 @@ import Tippy from '@tippyjs/react'; //uses tippyjs package to customise tooltip
 import 'tippy.js/dist/tippy.css';
 import "../../css/treeCustomisation.css";
 import Sidebar from './Sidebar';
+import Legend from './Legend';
 
 const FamilyTree = () => {
   const [treeData, setTreeData] = useState(null); //initialises variable treeData to store fetched family tree data
@@ -268,6 +269,7 @@ const FamilyTree = () => {
       />
     )}
       {isSidebarOpened && <Sidebar node={selectedNode} onClose={closeSidebar} setImages={setImages} images={images} />}
+      <Legend />
     </div>
   );
 };

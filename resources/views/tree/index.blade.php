@@ -130,15 +130,18 @@
         <div class="search-container">
         <p>Search for a family member whose information you'd like to see in greater detail.</p>
             <div class="search-input-container">
-                <form method="GET" action="{{ route('family.tree') }}">
-                    <input type="text" id="desiredName" name="desiredName" value="{{ request('desiredName') }}" class="search-input" placeholder="Search">
-                    <button type="submit" class="search-button">
-                        <img src="{{ asset('images/search.png') }}" alt="Search">
-                    </button>
-                </form>
-            </div>
-        </div>
-
+            @if($familyTreeId)
+    <form method="GET" action="{{ route('family.tree', ['familyTreeId' => $familyTreeId]) }}">
+        <input type="text" id="desiredName" name="desiredName" value="{{ request('desiredName') }}" class="search-input" placeholder="Search">
+        <button type="submit" class="search-button">
+            <img src="{{ asset('images/search.png') }}" alt="Search">
+        </button>
+    </form>
+        @else
+            <p>You don't have a family tree yet. Please import a GEDCOM file first.</p>
+        @endif
+</div>
+</div>
         @if ($allPersons->isEmpty())
             <div>No results found for the given query.</div>
         @else

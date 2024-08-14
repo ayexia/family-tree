@@ -103,7 +103,7 @@
     <div class="header">
         <h1 class="subheading">Import GEDCOM</h1>
         <div class="profile">
-            <a href="{{ route('profile.edit') }}" button class="profile-button">
+            <a href="{{ route('profile.edit') }}" class="profile-button">
                 <img src="{{ asset('images/user-profile.png') }}" alt="User">
                 Profile
             </a>
@@ -139,21 +139,21 @@
             <li>If you encounter any issues, please make sure your file is properly formatted and the correct type.</li>
         </ol>
 
-        <form action="{{ route('upload') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
-            @csrf
-            <div>
-                <label for="gedcom_file">Choose GEDCOM file</label>
-                <input type="file" name="gedcom_file" id="gedcom_file" accept=".ged" style="margin-top: 0.25rem; display: block; width: 100%; font-size: 0.875rem; color: #1a202c; border: 1px solid #cbd5e0; border-radius: 0.375rem; cursor: pointer; background-color: #f7fafc;">
-                <p class="file-type-info">Files must be of .ged extension</p>
-                @error('gedcom_file')
-                @enderror
-            </div>
-            <div>
-                <button type="submit" class="custom-button">
-                    Upload GEDCOM
-                </button>
-            </div>
-        </form>
+    <form action="{{ route('import') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+    @csrf
+    <input type="hidden" name="family_tree_id" value="{{ $familyTreeId ?? '' }}">
+    <div>
+        <label for="gedcom_file">Choose GEDCOM file</label>
+        <input type="file" name="gedcom_file" id="gedcom_file" accept=".ged" style="margin-top: 0.25rem; display: block; width: 100%; font-size: 0.875rem; color: #1a202c; border: 1px solid #cbd5e0; border-radius: 0.375rem; cursor: pointer; background-color: #f7fafc;">
+        <p class="file-type-info">Files must be of .ged extension</p>
+    </div>
+    <div>
+        <button type="submit" class="custom-button">
+            Upload GEDCOM
+        </button>
+    </div>
+</form>
+
     </div>
 </div>
 <div class="footer">

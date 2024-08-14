@@ -8,7 +8,9 @@ use App\Models\Person;
 use App\Models\FatherAndChild;
 use App\Models\MotherAndChild;
 use App\Models\Spouse;
+use App\Models\FamilyTree;
 use App\Services\Node;
+use Illuminate\Support\Facades\Auth;
 
 class FamilyTreeController extends Controller
 {
@@ -128,18 +130,26 @@ class FamilyTreeController extends Controller
      * - root nodes displaying below their children, is this fine? will formatting make this clearer? -- most likely
      * - another way of displaying relationships with multiple spouses? -- may be easier when using library for visualisation
      */
-    
+
      public function displayFamilyTree(Request $request){
+
+      $userId = auth()->id();
+
+      $familyTreeId = FamilyTree::where('user_id', $userId)->value('id');
+     
       //initialises query by ensuring results will be displayed in order of DOB, null values first
       $requestedPerson = Person::query()
-      ->leftJoin('father_and_children', 'people.id', '=', 'father_and_children.child_id')
-      ->leftJoin('mother_and_children', 'people.id', '=', 'mother_and_children.child_id')
+      ->join('family_trees', 'people.family_tree_id', '=', 'family_trees.id') // join family_trees table
+      ->leftJoin('father_and_children as fac', 'people.id', '=', 'fac.child_id') // join father_and_children
+      ->leftJoin('mother_and_children as mac', 'people.id', '=', 'mac.child_id') // join mother_and_children
+      ->where('family_trees.id', $familyTreeId) // filter by family_tree_id
+      ->where('family_trees.user_id', $userId) // filter by user_id
       ->select('people.*')
-      ->selectRaw('CASE WHEN father_and_children.father_id IS NULL AND mother_and_children.mother_id IS NULL THEN 0 ELSE 1 END as has_parents')
+      ->selectRaw('CASE WHEN fac.father_id IS NULL AND mac.mother_id IS NULL THEN 0 ELSE 1 END as has_parents')
       ->orderByRaw('has_parents ASC')
-      ->orderByRaw('CASE WHEN birth_date IS NULL THEN 1 ELSE 0 END')
-      ->orderBy('birth_date', 'ASC');
-  
+      ->orderByRaw('CASE WHEN people.birth_date IS NULL THEN 1 ELSE 0 END')
+      ->orderBy('people.birth_date', 'ASC');
+
       $desiredName = $request->input('desiredName');
       $desiredSurname = $request->input('desiredSurname');
   
@@ -157,10 +167,14 @@ class FamilyTreeController extends Controller
       $allPersonsIds = $allPersons->pluck('id'); //extracts IDs of the queried people
   
       //retrieves all mother-child, father-child and spouse relationships from respective Models (DB)
-      $marriages = Spouse::all();
-      $motherAndChildRelationships = MotherAndChild::all();
-      $fatherAndChildRelationships = FatherAndChild::all();
-  
+      $marriages = Spouse::join('family_trees', 'spouses.family_tree_id', '=', 'family_trees.id')
+      ->where('family_trees.user_id', $userId)
+      ->where('spouses.family_tree_id', $familyTreeId)
+      ->get();
+
+    $motherAndChildRelationships = MotherAndChild::where('family_tree_id', $familyTreeId)->get();
+    $fatherAndChildRelationships = FatherAndChild::where('family_tree_id', $familyTreeId)->get();
+    
       //extracts IDs of relatives and merges with IDs of queried people to form a list of all relatives
       $relativeIds = $allPersonsIds
           ->merge($motherAndChildRelationships->pluck('mother_id'))
@@ -172,7 +186,9 @@ class FamilyTreeController extends Controller
           ->unique();
   
       //retrieves all people whose IDs are in the list of all relatives formed
-      $relatives = Person::whereIn('id', $relativeIds)->get();
+      $relatives = Person::whereIn('id', $relativeIds)
+      ->where('family_tree_id', $familyTreeId)
+      ->get();
   
       //initialises "familyTree" array, containing all information of an individual and their relationships
       $familyTree = [];
@@ -183,7 +199,7 @@ class FamilyTreeController extends Controller
     }
       //iterates through spouse relationships, checks if both spouses exist in the familyTree array
       foreach ($marriages as $marriage){
-          if (isset($familyTree[$marriage['first_spouse_id']]) && isset($familyTree[$marriage['second_spouse_id']])) {
+          if (isset($familyTree[$marriage['first_spouse_id']]) && isset($familyTree[$marriage['second_spouse_id']])) {      
               // adds spouse data to the nodes' list of spouses
               $familyTree[$marriage['first_spouse_id']]->addSpouse($familyTree[$marriage['second_spouse_id']]);
               $familyTree[$marriage['first_spouse_id']]->setMarriageDates($marriage['marriage_date'], $marriage['divorce_date']);
@@ -232,7 +248,7 @@ class FamilyTreeController extends Controller
         return response()->json($graphData);
        }
       //otherwise returns the appropriate View, passing the data necessary for it
-      return view('tree.index', compact('allPersons', 'familyTree', 'desiredName', 'relatives', 'trees'));
+      return view('tree.index', compact('allPersons', 'familyTree', 'desiredName', 'relatives', 'trees', 'familyTreeId'));
   }
     
   //Converts family tree data to accepted JSON format to send as response to frontend - tree structure with separate spouses
@@ -392,8 +408,11 @@ class FamilyTreeController extends Controller
 
     public function edit($id)
     {
-        $person = Person::findOrFail($id);
-        return view('edit', compact('person'));
+      $person = Person::findOrFail($id);
+      if ($person->familyTree->user_id !== Auth::id()) {
+        abort(403, 'Unauthorised action.');
+      }    
+     return view('edit', compact('person'));
     }
 
     public function updateDetails(Request $request, $id)

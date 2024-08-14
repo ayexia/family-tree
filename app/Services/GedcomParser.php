@@ -29,8 +29,9 @@ class GedcomParser
  * and manual parsing is used to extract relationship information by splitting and reading each line, 
  * and identifying tags relevant for extraction.
  */
-    public function parse($filePath)
+    public function parse($filePath, $familyTreeId)
     {
+        $this->familyTreeId = $familyTreeId; 
         //Parser (php-gedcom) extracts the file which is uploaded on website
         $parser = new Parser();
         $gedcom = $parser->parse($filePath);
@@ -52,6 +53,7 @@ class GedcomParser
                 
                 //corresponding information is then passed to storePerson method
                 $this->storePerson(
+                    $this->familyTreeId,
                     $individual->getId(), //obtains GEDCOM ID for individual (characterised by @Ixxxx@)
                     $name->getGivn() . ' ' . $name->getSurn(), //obtains and concatenates first name and surname
                     $name->getSurn(),
@@ -81,6 +83,7 @@ class GedcomParser
                 if ($level === 0 && strpos($tag, '@F') === 0) { //if level is 0 and the tag begins with '@F' (indicating family)
                     if (isset($id)) { //stores previous family record when new one is found (spouse, mother-child and father-child info)
                         $this->storeSpouses(
+                            $this->familyTreeId,
                             $id,
                             $mother_id ?? null,
                             $father_id ?? null,
@@ -90,12 +93,14 @@ class GedcomParser
                             $divorceDate['qualifier'] ?? null
                         );
                         $this->storeMotherAndChild(
+                            $this->familyTreeId,
                             $id,
                             $mother_id ?? null,
                             $child_id ?? null,
                             $child_number ?? null
                         );
                         $this->storeFatherAndChild(
+                            $this->familyTreeId,
                             $id,
                             $father_id ?? null,
                             $child_id ?? null,
@@ -136,6 +141,7 @@ class GedcomParser
         }
             if (isset($id)) { //passes all data extracted of final family record to storeSpouse, storeMotherAndChild and storeFatherAndChild methods
                 $this->storeSpouses(  
+                $this->familyTreeId,
                 $id,
                 $mother_id ?? null,
                 $father_id ?? null,
@@ -145,12 +151,14 @@ class GedcomParser
                 $divorceDate['qualifier'] ?? null
             );
             $this->storeMotherAndChild(
+                $this->familyTreeId,
                 $id,
                 $mother_id ?? null,
                 $child_id ?? null,
                 $child_number ?? null
             );
             $this->storeFatherAndChild(
+                $this->familyTreeId,
                 $id,
                 $father_id ?? null,
                 $child_id ?? null,
@@ -162,11 +170,12 @@ class GedcomParser
     /**
     * Stores the extracted information from the parser into the People table, creating or updating a Person record within it.
     */
-    private function storePerson($gedcomId, $name, $surname, $gender, $birth, $birthDateQualifier, $death, $deathDateQualifier)
+    private function storePerson($familyTreeId, $gedcomId, $name, $surname, $gender, $birth, $birthDateQualifier, $death, $deathDateQualifier)
     {
         $person = Person::updateOrCreate( //updates/creates Person record with corresponding information for each column in People table
             ['gedcom_id' => $gedcomId],
             [
+                'family_tree_id' => $familyTreeId,
                 'name' => $name,
                 'gender' => $gender,
                 'surname' => $surname,
@@ -191,7 +200,7 @@ class GedcomParser
     /**
     * Stores the extracted information from the parser into the Spouses table, creating or updating a Spouse record within it.
     */
-            private function storeSpouses($gedcomId, $mother_id, $father_id, $marriageDate, $marriageDateQualifier, $divorceDate, $divorceDateQualifier)
+            private function storeSpouses($familyTreeId, $gedcomId, $mother_id, $father_id, $marriageDate, $marriageDateQualifier, $divorceDate, $divorceDateQualifier)
             {
                 if ($mother_id && $father_id){ //if mother_id and father_id were extracted searches for respective GEDCOM IDs in People table and obtains details
                     $mother = Person::where('gedcom_id', $mother_id)->first();
@@ -200,7 +209,8 @@ class GedcomParser
                     if ($mother && $father) { //if mother's and father's details are available through matching IDs will update/create Spouse record with corresponding information for each column in Spouses table
                         $spouseRelationship = Spouse::updateOrCreate(
                     ['gedcom_id' => $gedcomId],
-                    [   'first_spouse_id' => $mother->id,
+                    [   'family_tree_id' => $familyTreeId,
+                        'first_spouse_id' => $mother->id,
                         'second_spouse_id' => $father->id,
                         'marriage_date' => $this->convertToDate($marriageDate),
                         'marriage_date_qualifier' => $marriageDateQualifier,
@@ -214,7 +224,7 @@ class GedcomParser
     /**
     * Stores the extracted information from the parser into the MotherAndChildren table, creating or updating a Mother/Child record within it.
     */
-            private function storeMotherAndChild($gedcomId, $mother_id, $child_id, $child_number)
+            private function storeMotherAndChild($familyTreeId, $gedcomId, $mother_id, $child_id, $child_number)
             {
                 if ($mother_id && $child_id) { //if mother_id and child_id were extracted searches for respective GEDCOM IDs in People table and obtains details
                     $mother = Person::where('gedcom_id', $mother_id)->first();
@@ -222,7 +232,8 @@ class GedcomParser
                     if ($mother && $child){ //if mother's and child's details are available through matching IDs will update/create Mother/Child record with corresponding information for each column in MotherAndChildren table
                     $motherAndChildRelationship = MotherAndChild::updateOrCreate(
                         ['gedcom_id' => $gedcomId . '-CHILD '.$child_number], //concatenates the family GEDCOM ID with "-CHILD" string and the child's number (appropriate for families with multiple children as only the last child is stored otherwise due to overwriting the same GEDCOM ID)
-                        [   'mother_id' => $mother->id,
+                        [   'family_tree_id' => $familyTreeId, 
+                            'mother_id' => $mother->id,
                             'child_id' => $child->id,
                             'child_number' => $child_number
                         ]
@@ -233,7 +244,7 @@ class GedcomParser
     /**
     * Stores the extracted information from the parser into the FatherAndChildren table, creating or updating a Father/Child record within it.
     */
-        private function storeFatherAndChild($gedcomId, $father_id, $child_id, $child_number)
+        private function storeFatherAndChild($familyTreeId, $gedcomId, $father_id, $child_id, $child_number)
         {
                 if ($father_id && $child_id) { //if father_id and child_id were extracted searches for respective GEDCOM IDs in People table and obtains details
                 $father = Person::where('gedcom_id', $father_id)->first();
@@ -241,7 +252,8 @@ class GedcomParser
                 if ($father && $child){ //if father's and child's details are available through matching IDs will update/create Father/Child record with corresponding information for each column in FatherAndChildren table
                 $fatherAndChildRelationship = FatherAndChild::updateOrCreate(
                 ['gedcom_id' => $gedcomId. '-CHILD '.$child_number],
-                [   'father_id' => $father->id,
+                [   'family_tree_id' => $familyTreeId,
+                    'father_id' => $father->id,
                     'child_id' => $child->id,
                     'child_number' => $child_number
                 ]

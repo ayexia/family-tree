@@ -67,7 +67,7 @@
         <div class="search-container">
             <p>This is your dashboard - you can start your journey by uploading a GEDCOM file, view or edit your tree, and search for family members.</p>
             <div class="search-input-container">
-                <form method="GET" action="{{ route('family.tree') }}">
+                <form method="GET" action="{{ route('family.tree', ['familyTreeId' => $familyTreeId]) }}">
                     <input type="text" id="desiredName" name="desiredName" value="{{ request('desiredName') }}" class="search-input" placeholder="Search for a family member">
                     <button type="submit" class="search-button">
                         <img src="{{ asset('images/search.png') }}" alt="Search">
@@ -80,7 +80,7 @@
                 Family Tree
                 <span class="tooltip">View your family tree and explore your ancestry</span>
             </a>
-            <a href="{{ route('import') }}" class="circle import-gedcom">
+            <a href="{{ route('import.form', ['familyTreeId' => $familyTreeId ?? '']) }}" class="circle import-gedcom">
                 Import GEDCOM
                 <span class="tooltip">Import a GEDCOM file to build your family tree</span>
             </a>

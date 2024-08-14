@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Person;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class UploadController extends Controller
 {
@@ -16,7 +17,11 @@ class UploadController extends Controller
             'id' => 'required|exists:people,id',
         ]);
 
-        $person = Person::find($request->input('id'));
+        $person = Person::findOrFail($request->input('id'));
+
+        if ($person->familyTree->user_id !== Auth::id()) {
+            return response()->json(['error' => 'Unauthorised access to person'], 403);
+        }
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');

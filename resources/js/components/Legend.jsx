@@ -12,7 +12,7 @@ const Legend = () => {
     fontFamily: 'Inika, serif',
     fontSize: '18px',
     position: 'absolute',
-    top: '50px', 
+    top: '70px', 
     left: '20px', 
     zIndex: '10',
     maxWidth: '200px',

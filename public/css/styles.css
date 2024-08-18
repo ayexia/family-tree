@@ -169,6 +169,7 @@ body {
     color: #EDECD7;
     cursor: pointer;
     transition: border-color 0.3s;
+    position: relative;
 }
 
 .circle:hover {

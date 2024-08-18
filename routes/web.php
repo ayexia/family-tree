@@ -16,6 +16,17 @@ Route::get('/home', function () {
     return view('homepage');
 })->middleware(['auth', 'verified'])->name('home');
 
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/home', [GedcomController::class, 'index'])->name('home');
+    Route::get('/import/{familyTreeId?}', [GedcomController::class, 'showUploadForm'])->name('import.form');
+    Route::post('/import', [GedcomController::class, 'upload'])->name('import');
+    Route::get('/family-tree', [FamilyTreeController::class, 'displayFamilyTree'])->name('family.tree');
+    Route::get('/family-graph', [FamilyTreeController:: class, 'displayFamilyTree'])->name('family.graph');
+});
+
+
+Route::get('/api/family-tree-json', [FamilyTreeController::class, 'displayFamilyTree']);
+Route::get('/api/family-graph-json', [FamilyTreeController::class, 'displayFamilyTree']);
 
 Route::get('/about', function () {
     return view('about');
@@ -25,17 +36,13 @@ Route::get('/display', function () {
     return view('tree.display');
 })->middleware(['auth', 'verified'])->name('display');
 
-Route::get('/import', function () {
-    return view('import');
-})->middleware(['auth', 'verified'])->name('import');
-
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('/person/{id}/edit', [FamilyTreeController::class, 'edit'])->name('person.edit');
+Route::get('/person/{id}/edit', [FamilyTreeController::class, 'edit'])->name('person.edit')->middleware(['auth', 'verified']);
 
-Route::put('/person/{id}', [FamilyTreeController::class, 'updateDetails'])->name('person.update');;
+Route::put('/person/{id}', [FamilyTreeController::class, 'updateDetails'])->name('person.update')->middleware(['auth', 'verified']);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -43,11 +50,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::post('/upload', [GedcomController::class, 'upload'])->name('upload');
+Route::post('/upload', [GedcomController::class, 'upload'])->name('upload')->middleware(['auth', 'verified']);
 
-Route::get('/family-tree', [FamilyTreeController:: class, 'displayFamilyTree'])->name('family.tree');
-Route::get('/family-graph', [FamilyTreeController:: class, 'displayFamilyTree'])->name('family.graph');
-
-Route::post('/upload-image', [UploadController::class, 'uploadImage']);
+Route::post('/upload-image', [UploadController::class, 'uploadImage'])->middleware(['auth', 'verified']);;
 
 require __DIR__.'/auth.php';

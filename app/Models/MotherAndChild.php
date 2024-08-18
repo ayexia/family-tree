@@ -12,7 +12,8 @@ class MotherAndChild extends Model
     'gedcom_id',
     'mother_id',
     'child_id',
-    'child_number'
+    'child_number',
+    'family_tree_id',
     ];
 
     public function mother()

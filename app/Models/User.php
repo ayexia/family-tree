@@ -44,4 +44,9 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
         ];
     }
+
+    public function familyTree()
+    {
+        return $this->hasOne(FamilyTree::class);
+    }
 }

@@ -16,6 +16,7 @@ class Spouse extends Model
         'marriage_date_qualifier',
         'divorce_date',
         'divorce_date_qualifier',
+        'family_tree_id',
     ];
 
     protected $casts = [

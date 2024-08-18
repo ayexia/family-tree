@@ -16,11 +16,7 @@ const App = () => {
     const exportToPDF = () => {
         setShowPDF(true);
     };
-
-    const exportToPDF = () => {
-        setShowPDF(true);
-    };
-
+    
     const buttonStyle = {
         backgroundColor: '#CCE7BD',
         color: '#A7B492',

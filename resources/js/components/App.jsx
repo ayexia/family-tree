@@ -17,10 +17,6 @@ const App = () => {
         setShowPDF(true);
     };
 
-    const exportToPDF = () => {
-        setShowPDF(true);
-    };
-
     const buttonStyle = {
         backgroundColor: '#CCE7BD',
         color: '#A7B492',
@@ -50,34 +46,34 @@ const App = () => {
         right: '20px',
         display: 'flex',
         flexDirection: 'column',
+        zIndex: 1000,
     };
 
     return (
         <ReactFlowProvider>
             <Router>
-                <div>
+                <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
                     <div style={buttonContainer}>
                         <button style={buttonStyle} onClick={switchView}>
                             <img src="/images/grid.png" alt="Grid" style={imgStyle} />
                               
                             Switch to {view === 'graph' ? 'Tree View' : 'Graph View'}
                         </button>
-                        <button style={buttonStyle} onClick={exportToPDF}>
+                            <button style={buttonStyle} onClick={exportToPDF}>
                             <img src="/images/printing.png" alt="PDF" style={imgStyle} />
                             Export to PDF
                         </button>
+                    </div>
+
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+                        {view === 'graph' ? <FamilyGraph /> : <FamilyTree />}
                     </div>
 
                     <Routes>
                         <Route path="/family-tree" element={<FamilyTree />} />
                         <Route path="/family-graph" element={<FamilyGraph />} />
                     </Routes>
-
-                    {view === 'graph' ? (
-                        <FamilyGraph />
-                    ) : (
-                        <FamilyTree />
-                    )}
+                    
                     {showPDF && <FamilyTreePDF onClose={() => setShowPDF(false)} />}
                 </div>
             </Router>

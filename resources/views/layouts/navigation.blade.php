@@ -17,7 +17,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
             <div class="flex-shrink-0">
-                <a href="{{ route('dashboard') }}">
+                <a href="{{ route('home') }}">
                     <x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
                 </a>
             </div>

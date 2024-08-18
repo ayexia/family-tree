@@ -7,6 +7,7 @@ use App\Models\Spouse;
 class Node {
     public $id;
     public $name;
+    public $surname;
     public $birth_date;
     public $death_date;
     public $children = [];

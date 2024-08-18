@@ -18,6 +18,7 @@ class Person extends Model
         'death_date',
         'death_date_qualifier',
         'image',
+        'family_tree_id',
     ];
 
     protected $casts = [
@@ -53,6 +54,11 @@ class Person extends Model
     public function childrenofMother()
     {
     return $this->hasManyThrough(Person::class, MotherAndChild::class, 'mother_id', 'id', 'id', 'child_id');
+    }
+
+    public function familyTree()
+    {
+        return $this->belongsTo(FamilyTree::class);
     }
 
 }

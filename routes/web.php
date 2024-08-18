@@ -10,6 +10,12 @@ Route::get('/', function () {
     return view('main');
 });
 
+Route::get('/api/user', [ProfileController::class, 'getUserName'])->middleware(['auth', 'verified']);
+
+Route::get('/home', function () {
+    return view('homepage');
+})->middleware(['auth', 'verified'])->name('home');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/home', [GedcomController::class, 'index'])->name('home');
     Route::get('/import/{familyTreeId?}', [GedcomController::class, 'showUploadForm'])->name('import.form');
@@ -17,6 +23,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/family-tree', [FamilyTreeController::class, 'displayFamilyTree'])->name('family.tree');
     Route::get('/family-graph', [FamilyTreeController:: class, 'displayFamilyTree'])->name('family.graph');
 });
+
 
 Route::get('/api/family-tree-json', [FamilyTreeController::class, 'displayFamilyTree']);
 Route::get('/api/family-graph-json', [FamilyTreeController::class, 'displayFamilyTree']);

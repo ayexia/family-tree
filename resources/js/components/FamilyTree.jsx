@@ -273,7 +273,7 @@ const FamilyTree = () => {
       </div>
     </div>
 
-    <div style={{ width: '200px', marginLeft: 'auto', padding: '40px' }}>
+    <div style={{ width: '200px', marginLeft: 'auto', padding: '40px', marginTop: '70px' }}>
       <input
         type="text"
         value={nameQuery}

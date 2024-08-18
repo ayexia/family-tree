@@ -6,11 +6,15 @@ import FamilyGraph from './FamilyGraph';
 import FamilyTreePDF from './FamilyTreePDF';
 
 const App = () => {
-    const [view, setView] = useState('tree');
+    const [view, setView] = useState('graph');
     const [showPDF, setShowPDF] = useState(false);
 
     const switchView = () => {
-        setView(view === 'tree' ? 'graph' : 'tree');
+        setView(view === 'graph' ? 'tree' : 'graph');
+    };
+
+    const exportToPDF = () => {
+        setShowPDF(true);
     };
 
     const exportToPDF = () => {
@@ -55,7 +59,8 @@ const App = () => {
                     <div style={buttonContainer}>
                         <button style={buttonStyle} onClick={switchView}>
                             <img src="/images/grid.png" alt="Grid" style={imgStyle} />
-                            Switch to {view === 'tree' ? 'Graph View' : 'Tree View'}
+                              
+                            Switch to {view === 'graph' ? 'Tree View' : 'Graph View'}
                         </button>
                         <button style={buttonStyle} onClick={exportToPDF}>
                             <img src="/images/printing.png" alt="PDF" style={imgStyle} />
@@ -67,10 +72,11 @@ const App = () => {
                         <Route path="/family-tree" element={<FamilyTree />} />
                         <Route path="/family-graph" element={<FamilyGraph />} />
                     </Routes>
-                    {view === 'tree' ? (
-                        <FamilyTree />
-                    ) : (
+
+                    {view === 'graph' ? (
                         <FamilyGraph />
+                    ) : (
+                        <FamilyTree />
                     )}
                     {showPDF && <FamilyTreePDF onClose={() => setShowPDF(false)} />}
                 </div>

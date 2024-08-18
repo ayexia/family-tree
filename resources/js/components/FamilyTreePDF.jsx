@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Document, Page, Text, View, StyleSheet, Font, PDFViewer } from '@react-pdf/renderer';
+import axios from 'axios';
+
 
 Font.register({
   family: 'Great Vibes',
@@ -31,7 +33,7 @@ const styles = StyleSheet.create({ //CSS
   },
 });
 
-const TitlePage = ({ title }) => ( //title page - requires fetching from backend to dynamically add user's name
+const TitlePage = ({ title }) => ( //title page
   <Page size="A5" style={styles.page}>
     <View style={styles.border}>
       <Text style={styles.title}>{title}</Text>
@@ -39,7 +41,23 @@ const TitlePage = ({ title }) => ( //title page - requires fetching from backend
   </Page>
 );
 
-const FamilyTreePDF = ({ onClose }) => {
+const FamilyTreePDF = ({ onClose }) => { //fetch user's name from backend
+  const [userName, setUserName] = useState('');
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      try {
+        const response = await axios.get('/api/user');
+        setUserName(response.data.name);
+      } catch (error) {
+        console.error('Error fetching user name:', error);
+        setUserName('User');
+      }
+    };
+
+    fetchUserName();
+  }, []);
+
   const overlay = { // position when viewing PDF
     position: 'fixed',
     top: 0,
@@ -73,7 +91,7 @@ const FamilyTreePDF = ({ onClose }) => {
       <button style={closeButton} onClick={onClose}>Close</button>
       <PDFViewer width="80%" height="80%">
         <Document>
-          <TitlePage title="Family Book" />
+          <TitlePage title={`${userName}'s Family Book`} />
         </Document>
       </PDFViewer>
     </div>

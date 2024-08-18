@@ -4,10 +4,15 @@ import FamilyTree from './FamilyTree';
 import FamilyGraph from './FamilyGraph';
 
 const App = () => {
-    const [view, setView] = useState('tree');
+    const [view, setView] = useState('graph');
+    const [showPDF, setShowPDF] = useState(false);
 
     const switchView = () => {
-        setView(view === 'tree' ? 'graph' : 'tree');
+        setView(view === 'graph' ? 'tree' : 'graph');
+    };
+
+    const exportToPDF = () => {
+        setShowPDF(true);
     };
 
     const buttonStyle = {
@@ -37,21 +42,33 @@ const App = () => {
     };
 
     return (
-        <Router>
-            <div>
-                <button style={buttonStyle} onClick={switchView}>
-                    <img src="/images/grid.png" alt="Grid" style={imgStyle} />
-                    Switch to {view === 'tree' ? 'Graph View' : 'Tree View'}
-                </button>
+        <ReactFlowProvider>
+            <Router>
+                <div>
+                    <div style={buttonContainer}>
+                        <button style={buttonStyle} onClick={switchView}>
+                            <img src="/images/grid.png" alt="Grid" style={imgStyle} />
+                            Switch to {view === 'graph' ? 'Tree View' : 'Graph View'}
+                        </button>
+                        <button style={buttonStyle} onClick={exportToPDF}>
+                            <img src="/images/printing.png" alt="PDF" style={imgStyle} />
+                            Export to PDF
+                        </button>
+                    </div>
 
-                <Routes>
-                    <Route path="/family-tree" element={<FamilyTree />} />
-                    <Route path="/family-graph" element={<FamilyGraph />} />
-                </Routes>
-
-                {view === 'tree' ? <FamilyTree /> : <FamilyGraph />}
-            </div>
-        </Router>
+                    <Routes>
+                        <Route path="/family-tree" element={<FamilyTree />} />
+                        <Route path="/family-graph" element={<FamilyGraph />} />
+                    </Routes>
+                    {view === 'graph' ? (
+                        <FamilyGraph />
+                    ) : (
+                        <FamilyTree />
+                    )}
+                    {showPDF && <FamilyTreePDF onClose={() => setShowPDF(false)} />}
+                </div>
+            </Router>
+        </ReactFlowProvider>
     );
 };
 

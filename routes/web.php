@@ -10,6 +10,8 @@ Route::get('/', function () {
     return view('main');
 });
 
+Route::get('/api/user', [ProfileController::class, 'getUserName'])->middleware(['auth', 'verified']);
+
 Route::get('/home', function () {
     return view('homepage');
 })->middleware(['auth', 'verified'])->name('home');

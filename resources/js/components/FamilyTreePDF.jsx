@@ -69,41 +69,45 @@ const TitlePage = ({ title }) => ( //title page
   </Page>
 );
 
-const ContentsPage = ({ data }) => (
+const ContentsPage = ({ graph }) => ( //contents page
   <Page size="A5" style={styles.page}>
    <View style={styles.border}>
       <Text style={styles.contentsTitle}>Contents</Text>
       <View style={styles.content}>
-      {renderContents(data)}
+      {renderContents(graph)}
       </View>
     </View>
   </Page>
 );
 
-const renderContents = (data) => {
+const renderContents = (graph) => { //render each person in contents
   const allPeople = new Set();
 
-  const renderContentsItem = (person, level = 0) => {
-    if (allPeople.has(person.id)) {
+  const renderContentsItem = (id) => {
+    if (allPeople.has(id)) {
       return null;
     }
-    allPeople.add(person.id);
+    allPeople.add(id);
 
-    const indent = '....'.repeat(level);
+    const person = graph.nodes.find(node => node.id === id);
+    if (!person) return null;
 
     const mainPerson = (
       <Link key={person.id} src={`#${person.id}`} style={styles.link}>
-        {person.name}
+        {person.data.name}
       </Link>
     );
 
-    const spouses = (person.spouses || [])
-    .filter(spouse => !allPeople.has(spouse.id))
-    .map(spouse => {
-      allPeople.add(spouse.id);
-      return (
+    const spouses = graph.edges
+      .filter(edge => edge.source === id && edge.label === 'Spouse')
+      .map(edge => {
+        const spouseId = edge.target;
+        if (allPeople.has(spouseId)) return null;
+        allPeople.add(spouseId);
+        const spouse = graph.nodes.find(node => node.id === spouseId);
+        return (
           <Link key={spouse.id} src={`#${spouse.id}`} style={styles.link}>
-            {spouse.name}
+            {spouse.data.name}
           </Link>
         );
       });
@@ -113,28 +117,38 @@ const renderContents = (data) => {
     return (
       <React.Fragment key={person.id}>
         <Text style={styles.contentItem}>
-          {indent}
           {couple}
         </Text>
-        {(person.children || []).map(child => renderContentsItem(child, level + 1))}
       </React.Fragment>
     );
   };
 
-  return data.map(person => renderContentsItem(person));
+  return graph.nodes.map(node => renderContentsItem(node.id));
 };
 
-const PersonPage = ({ person }) => (
-  <Page size="A5" style={styles.page} id={person.id}>
-    <View style={styles.border}>
-    <Text style={styles.contentsTitle}>{person.name}</Text>
-    </View>
-  </Page>
-);
+const PersonPage = ({ person }) => {
+  if (!person || !person.data) {
+    return (
+      <Page size="A5" style={styles.page}>
+        <View style={styles.border}>
+          <Text style={styles.contentsTitle}>Unknown Person</Text>
+        </View>
+      </Page>
+    );
+  }
 
-const FamilyTreePDF = ({ onClose }) => { //fetch user's name from backend
+  return (
+    <Page size="A5" style={styles.page} id={person.id}>
+      <View style={styles.border}>
+        <Text style={styles.contentsTitle}>{person.data.name}</Text>
+      </View>
+    </Page>
+  );
+};
+
+const FamilyTreePDF = ({ onClose }) => { //fetch user's name and family data from backend
   const [userName, setUserName] = useState('');
-  const [familyData, setFamilyData] = useState([]);
+  const [familyData, setFamilyData] = useState({ nodes: [], edges: [] });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -148,8 +162,8 @@ const FamilyTreePDF = ({ onClose }) => { //fetch user's name from backend
         });
         setUserName(userResponse.data.name);
 
-        const familyResponse = await axios.get('/api/family-tree-json');
-        setFamilyData(buildFamilyTree(familyResponse.data));
+        const familyResponse = await axios.get('/api/family-graph-json');
+        setFamilyData(familyResponse.data);
       } catch (error) {
         console.error('Error fetching data:', error);
         setUserName('User');
@@ -159,23 +173,7 @@ const FamilyTreePDF = ({ onClose }) => { //fetch user's name from backend
     fetchData();
   }, []);
 
-  const buildFamilyTree = (data) => {
-    const visited = new Set();
-    const processPerson = (person) => {
-      if (visited.has(person.id)) {
-        return null;
-      }
-      visited.add(person.id);
-      return {
-        ...person,
-        children: (person.children || []).map(processPerson).filter(Boolean),
-        spouses: (person.spouses || []).map(processPerson).filter(Boolean),
-      };
-    };
-    return (data || []).map(processPerson).filter(Boolean);
-  };
-
-  const renderPages = (data) => {
+  const renderPages = (graph) => {
     const allPeople = new Set();
     
     const renderPerson = (person) => {
@@ -184,27 +182,31 @@ const FamilyTreePDF = ({ onClose }) => { //fetch user's name from backend
       }
       allPeople.add(person.id);
 
-      const pages = [<PersonPage key={person.id} person={person} />];
+      const pages = [<PersonPage key={person.id} person={person} graph={graph} />];
 
-      if (person.spouses) {
-        person.spouses.forEach(spouse => {
-          if (!allPeople.has(spouse.id)) {
-            pages.push(<PersonPage key={spouse.id} person={spouse} />);
+      graph.edges.forEach(edge => {
+        if (edge.source === person.id && edge.label === 'Spouse') {
+          const spouse = graph.nodes.find(node => node.id === edge.target);
+          if (spouse && !allPeople.has(spouse.id)) {
+            pages.push(<PersonPage key={spouse.id} person={spouse} graph={graph} />);
             allPeople.add(spouse.id);
           }
-        });
-      }
+        }
+      });
 
-      if (person.children) {
-        person.children.forEach(child => {
-          pages.push(...renderPerson(child));
-        });
-      }
-
+      graph.edges.forEach(edge => {
+        if (edge.source === person.id && edge.label === 'Child') {
+          const child = graph.nodes.find(node => node.id === edge.target);
+          if (child) {
+            pages.push(...renderPerson(child));
+          }
+        }
+      });
+  
       return pages;
     };
-
-    return data.flatMap(renderPerson);
+  
+    return graph.nodes.flatMap(node => renderPerson(node));
   };
 
   const overlay = { // position when viewing PDF
@@ -241,7 +243,7 @@ const FamilyTreePDF = ({ onClose }) => { //fetch user's name from backend
       <PDFViewer width="80%" height="80%">
         <Document>
           <TitlePage title={`${userName}'s Family Book`} />
-          <ContentsPage data={familyData} />
+          <ContentsPage graph={familyData} />
           {renderPages(familyData)}
         </Document>
       </PDFViewer>

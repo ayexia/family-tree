@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Document, Page, Text, View, StyleSheet, Font, PDFViewer, Link } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Font, PDFViewer, Link, Image } from '@react-pdf/renderer';
 import axios from 'axios';
 
 Font.register({
@@ -56,6 +56,52 @@ const styles = StyleSheet.create({ //CSS
     height: '100%',
     padding: 30,
     boxSizing: 'border-box',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  name: {
+    fontSize: 24,
+    fontFamily: 'Great Vibes',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  photoPlaceholder: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: '#E0E0E0',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    alignSelf: 'center',
+  },
+  photo: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    marginBottom: 20,
+    alignSelf: 'center',
+  },
+  photoText: {
+    fontSize: 12,
+    color: '#666666',
+  },
+  biographyTitle: {
+    fontSize: 20,
+    fontFamily: 'Great Vibes',
+    marginBottom: 5,
+    textAlign: 'left',
+  },
+  biographyBox: {
+    border: '1pt solid black',
+    padding: 10,
+    marginTop: 'auto',
+    flexGrow: 1,
+  },
+  biographyText: {
+    fontSize: 10,
+    lineHeight: 1.5,
   },
 });
 
@@ -126,21 +172,140 @@ const renderContents = (graph) => { //render each person in contents
   return graph.nodes.map(node => renderContentsItem(node.id));
 };
 
-const PersonPage = ({ person }) => {
+const formatDate = (dateString) => {
+  if (!dateString) return null;
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return null;
+  
+  const day = date.getUTCDate();
+  const month = date.toLocaleString('default', { month: 'long', timeZone: 'UTC' });
+  const year = date.getUTCFullYear();
+  
+  if (day === 1 && date.getUTCMonth() === 0) {
+    return `${year}`;
+  } else if (day === 1) {
+    return `${month} ${year}`;
+  } else {
+    return `${day} ${month} ${year}`;
+  }
+};
+
+const PersonPage = ({ person, graph }) => {
   if (!person || !person.data) {
     return (
       <Page size="A5" style={styles.page}>
         <View style={styles.border}>
-          <Text style={styles.contentsTitle}>Unknown Person</Text>
+          <Text style={styles.name}>Unknown Person</Text>
         </View>
       </Page>
     );
   }
 
+  const { data } = person;
+
+  const spouses = graph.edges
+    .filter(edge => edge.source === person.id && edge.label === 'Spouse')
+    .map((edge, index) => {
+      const spouseNode = graph.nodes.find(node => node.id === edge.target);
+      return {
+        ...spouseNode,
+        marriageDate: data.marriage_dates && data.marriage_dates[index] ? formatDate(data.marriage_dates[index]) : null,
+        divorceDate: data.divorce_dates && data.divorce_dates[index] ? formatDate(data.divorce_dates[index]) : null,
+        isCurrent: edge.is_current
+      };
+    });
+
+  const children = graph.edges
+    .filter(edge => edge.source === person.id && edge.label === 'Child')
+    .map(edge => graph.nodes.find(node => node.id === edge.target));
+
+  const parents = data.parents && typeof data.parents === 'object' ? Object.values(data.parents) : [];
+
+  const generateBiography = () => {
+    let bio = '';
+    
+    const birthDate = formatDate(data.birth_date);
+    const hasKnownParents = parents.length > 0;
+
+    if (!birthDate && !hasKnownParents) {
+      bio += `${data.name}'s date of birth is unknown. `;
+    } else if (!birthDate && hasKnownParents) {
+      bio += `${data.name}'s date of birth is unknown, born to parents ${parents.map(p => p.name).join(' and ')}. `;
+    } else if (birthDate && !hasKnownParents) {
+      bio += `${data.name} was born ${birthDate.includes(' ') ? 'on' : 'in'} ${birthDate}. `;
+    } else if (birthDate && hasKnownParents) {
+      bio += `${data.name} was born ${birthDate.includes(' ') ? 'on' : 'in'} ${birthDate} to parents ${parents.map(p => p.name).join(' and ')}. `;
+    }
+    
+    if (spouses.length > 0) {
+      bio += `${data.gender === 'M' ? 'He' : 'She'} `;
+      if (spouses.length === 1) {
+        const spouse = spouses[0];
+        bio += `married ${spouse.data.name}`;
+        if (spouse.marriageDate) {
+          bio += ` ${spouse.marriageDate.includes(' ') ? 'on' : 'in'} ${spouse.marriageDate}`;
+        }
+        if (spouse.divorceDate && !spouse.isCurrent) {
+          bio += ` and divorced ${spouse.divorceDate.includes(' ') ? 'on' : 'in'} ${spouse.divorceDate}`;
+        }
+        bio += '. ';
+      } else {
+        bio += 'married ';
+        spouses.forEach((spouse, index) => {
+          if (index > 0) {
+            bio += index === spouses.length - 1 ? ' and ' : ', ';
+          }
+          bio += `${spouse.data.name}`;
+          if (spouse.marriageDate) {
+            bio += ` ${spouse.marriageDate.includes(' ') ? 'on' : 'in'} ${spouse.marriageDate}`;
+          }
+          if (spouse.divorceDate && !spouse.isCurrent) {
+            bio += ` (divorced ${spouse.divorceDate.includes(' ') ? 'on' : 'in'} ${spouse.divorceDate})`;
+          }
+          if (spouse.isCurrent) {
+            bio += ' (current spouse)';
+          }
+        });
+        bio += '. ';
+      }
+    }
+    
+    if (children.length > 0) {
+      bio += `${data.gender === 'M' ? 'He' : 'She'} had ${children.length} ${children.length === 1 ? 'child' : 'children'}: ${children.map(c => c.data.name).join(', ')}. `;
+    }
+    
+    const deathDate = formatDate(data.death_date);
+    if (deathDate) {
+      bio += `${data.gender === 'M' ? 'He' : 'She'} passed away ${deathDate.includes(' ') ? 'on' : 'in'} ${deathDate}.`;
+    } else if (data.death_date === null) {
+      bio += `${data.gender === 'M' ? 'His' : 'Her'} date of death is unknown.`;
+    }
+    
+    return bio;
+  };
+
   return (
     <Page size="A5" style={styles.page} id={person.id}>
       <View style={styles.border}>
-        <Text style={styles.contentsTitle}>{person.data.name}</Text>
+        <Text style={styles.name}>{data.name}</Text>
+        
+        {data.image ? (
+          <Image
+            src={data.image}
+            style={styles.photo}
+          />
+        ) : (
+          <View style={styles.photoPlaceholder}>
+            <Text style={styles.photoText}>Photo</Text>
+          </View>
+        )}
+
+        <Text style={styles.biographyTitle}>Biography</Text>
+        <View style={styles.biographyBox}>
+          <Text style={styles.biographyText}>
+            {generateBiography()}
+          </Text>
+        </View>
       </View>
     </Page>
   );

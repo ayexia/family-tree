@@ -222,67 +222,101 @@ const PersonPage = ({ person, graph }) => {
   const parents = data.parents && typeof data.parents === 'object' ? Object.values(data.parents) : [];
 
   const generateBiography = () => {
-    let bio = '';
+    const bio = [];
     
     const birthDate = formatDate(data.birth_date);
     const hasKnownParents = parents.length > 0;
-
+  
     if (!birthDate && !hasKnownParents) {
-      bio += `${data.name}'s date of birth is unknown. `;
+      bio.push(`${data.name}'s date of birth is unknown. `);
     } else if (!birthDate && hasKnownParents) {
-      bio += `${data.name}'s date of birth is unknown, born to parents ${parents.map(p => p.name).join(' and ')}. `;
+      bio.push(`${data.name}'s date of birth is unknown, born to parents `);
+      parents.forEach((p, index) => {
+        if (index > 0) bio.push(' and ');
+        bio.push(
+          <Link key={p.id} src={`#${p.id}`} style={styles.link}>
+            {p.name}
+          </Link>
+        );
+      });
+      bio.push('. ');
     } else if (birthDate && !hasKnownParents) {
-      bio += `${data.name} was born ${birthDate.includes(' ') ? 'on' : 'in'} ${birthDate}. `;
+      bio.push(`${data.name} was born ${birthDate.includes(' ') ? 'on' : 'in'} ${birthDate}. `);
     } else if (birthDate && hasKnownParents) {
-      bio += `${data.name} was born ${birthDate.includes(' ') ? 'on' : 'in'} ${birthDate} to parents ${parents.map(p => p.name).join(' and ')}. `;
+      bio.push(`${data.name} was born ${birthDate.includes(' ') ? 'on' : 'in'} ${birthDate} to parents `);
+      parents.forEach((p, index) => {
+        if (index > 0) bio.push(' and ');
+        bio.push(
+          <Link key={p.id} src={`#${p.id}`} style={styles.link}>
+            {p.name}
+          </Link>
+        );
+      });
+      bio.push('. ');
     }
-    
+  
     if (spouses.length > 0) {
-      bio += `${data.gender === 'M' ? 'He' : 'She'} `;
+      bio.push(`${data.gender === 'M' ? 'He' : 'She'} `);
       if (spouses.length === 1) {
         const spouse = spouses[0];
-        bio += `married ${spouse.data.name}`;
+        bio.push(`married `);
+        bio.push(
+          <Link key={spouse.id} src={`#${spouse.id}`} style={styles.link}>
+            {spouse.data.name}
+          </Link>
+        );
         if (spouse.marriageDate) {
-          bio += ` ${spouse.marriageDate.includes(' ') ? 'on' : 'in'} ${spouse.marriageDate}`;
+          bio.push(` ${spouse.marriageDate.includes(' ') ? 'on' : 'in'} ${spouse.marriageDate}`);
         }
         if (spouse.divorceDate && !spouse.isCurrent) {
-          bio += ` and divorced ${spouse.divorceDate.includes(' ') ? 'on' : 'in'} ${spouse.divorceDate}`;
+          bio.push(` and divorced ${spouse.divorceDate.includes(' ') ? 'on' : 'in'} ${spouse.divorceDate}`);
         }
-        bio += '. ';
+        bio.push('. ');
       } else {
-        bio += 'married ';
+        bio.push('married ');
         spouses.forEach((spouse, index) => {
-          if (index > 0) {
-            bio += index === spouses.length - 1 ? ' and ' : ', ';
-          }
-          bio += `${spouse.data.name}`;
+          if (index > 0) bio.push(index === spouses.length - 1 ? ' and ' : ', ');
+          bio.push(
+            <Link key={spouse.id} src={`#${spouse.id}`} style={styles.link}>
+              {spouse.data.name}
+            </Link>
+          );
           if (spouse.marriageDate) {
-            bio += ` ${spouse.marriageDate.includes(' ') ? 'on' : 'in'} ${spouse.marriageDate}`;
+            bio.push(` ${spouse.marriageDate.includes(' ') ? 'on' : 'in'} ${spouse.marriageDate}`);
           }
           if (spouse.divorceDate && !spouse.isCurrent) {
-            bio += ` (divorced ${spouse.divorceDate.includes(' ') ? 'on' : 'in'} ${spouse.divorceDate})`;
+            bio.push(` (divorced ${spouse.divorceDate.includes(' ') ? 'on' : 'in'} ${spouse.divorceDate})`);
           }
           if (spouse.isCurrent) {
-            bio += ' (current spouse)';
+            bio.push(' (current spouse)');
           }
         });
-        bio += '. ';
+        bio.push('. ');
       }
     }
-    
+  
     if (children.length > 0) {
-      bio += `${data.gender === 'M' ? 'He' : 'She'} had ${children.length} ${children.length === 1 ? 'child' : 'children'}: ${children.map(c => c.data.name).join(', ')}. `;
+      bio.push(`${data.gender === 'M' ? 'He' : 'She'} had ${children.length} ${children.length === 1 ? 'child' : 'children'}: `);
+      children.forEach((child, index) => {
+        if (index > 0) bio.push(', ');
+        bio.push(
+          <Link key={child.id} src={`#${child.id}`} style={styles.link}>
+            {child.data.name}
+          </Link>
+        );
+      });
+      bio.push('. ');
     }
-    
+  
     const deathDate = formatDate(data.death_date);
     if (deathDate) {
-      bio += `${data.gender === 'M' ? 'He' : 'She'} passed away ${deathDate.includes(' ') ? 'on' : 'in'} ${deathDate}.`;
+      bio.push(`${data.gender === 'M' ? 'He' : 'She'} passed away ${deathDate.includes(' ') ? 'on' : 'in'} ${deathDate}.`);
     } else if (data.death_date === null) {
-      bio += `${data.gender === 'M' ? 'His' : 'Her'} date of death is unknown.`;
+      bio.push(`${data.gender === 'M' ? 'His' : 'Her'} date of death is unknown.`);
     }
-    
+  
     return bio;
-  };
+  };  
 
   return (
     <Page size="A5" style={styles.page} id={person.id}>

@@ -232,6 +232,7 @@ const formatDate = (dateString) => {
 
 const TimelinePage = ({ person, events }) => (
   <Page size="A5" style={styles.timelinePage}>
+   <View style={styles.border}>
     <Text style={styles.timelineTitle}>{person.data.name}'s Timeline</Text>
     <View style={styles.timelineContainer}>
       <View style={styles.timelineLine} />
@@ -241,6 +242,7 @@ const TimelinePage = ({ person, events }) => (
           <Text style={styles.timelineDescription}>{event.description}</Text>
         </View>
       ))}
+    </View>
     </View>
   </Page>
 );

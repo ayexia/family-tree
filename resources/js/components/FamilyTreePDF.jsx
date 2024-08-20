@@ -27,7 +27,7 @@ const styles = StyleSheet.create({ //CSS
     width: '100%',
   },
   title: {
-    fontSize: 24,
+    fontSize: 30,
     fontFamily: 'Great Vibes',
     fontWeight: 'bold',
     textAlign: 'center',
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({ //CSS
     flexDirection: 'column',
   },
   name: {
-    fontSize: 24,
+    fontSize: 28,
     fontFamily: 'Great Vibes',
     marginBottom: 20,
     textAlign: 'center',
@@ -100,8 +100,48 @@ const styles = StyleSheet.create({ //CSS
     flexGrow: 1,
   },
   biographyText: {
-    fontSize: 10,
+    fontSize: 9,
     lineHeight: 1.5,
+  },
+  timelinePage: {
+    padding: 40,
+    backgroundColor: '#ffffff',
+    fontFamily: 'Corben',
+  },
+  timelineTitle: {
+    fontSize: 20,
+    fontFamily: 'Great Vibes',
+    marginBottom: 30,
+    textAlign: 'center',
+  },
+  timelineContainer: {
+    flexDirection: 'column',
+    position: 'relative',
+    paddingLeft: 20,
+  },
+  timelineLine: {
+    position: 'absolute',
+    left: 10,
+    top: 0,
+    bottom: 0,
+    width: 1,
+    backgroundColor: 'black',
+  },
+  timelineEvent: {
+    flexDirection: 'row',
+    marginBottom: 5,
+    alignItems: 'center',
+  },
+  timelineDate: {
+    width: '30%',
+    fontSize: 8,
+    textAlign: 'right',
+    paddingRight: 5,
+  },
+  timelineDescription: {
+    width: '70%',
+    fontSize: 8,
+    paddingLeft: 5,
   },
 });
 
@@ -156,7 +196,7 @@ const renderContents = (graph) => { //render each person in contents
             {spouse.data.name}
           </Link>
         );
-      });
+      }).filter(spouse => spouse !== null); //only includes non-null spouses 
 
     const couple = [mainPerson, ...spouses].reduce((prev, curr) => [prev, ' & ', curr]);
 
@@ -189,6 +229,21 @@ const formatDate = (dateString) => {
     return `${day} ${month} ${year}`;
   }
 };
+
+const TimelinePage = ({ person, events }) => (
+  <Page size="A5" style={styles.timelinePage}>
+    <Text style={styles.timelineTitle}>{person.data.name}'s Timeline</Text>
+    <View style={styles.timelineContainer}>
+      <View style={styles.timelineLine} />
+      {events.map((event, index) => (
+        <View key={index} style={styles.timelineEvent}>
+          <Text style={styles.timelineDate}>{event.date || 'Unknown date'}</Text>
+          <Text style={styles.timelineDescription}>{event.description}</Text>
+        </View>
+      ))}
+    </View>
+  </Page>
+);
 
 const PersonPage = ({ person, graph }) => {
   if (!person || !person.data) {
@@ -316,30 +371,81 @@ const PersonPage = ({ person, graph }) => {
     return bio;
   };  
 
-  return (
-    <Page size="A5" style={styles.page} id={person.id}>
-      <View style={styles.border}>
-        <Text style={styles.name}>{data.name}</Text>
-        
-        {data.image ? (
-          <Image
-            src={data.image}
-            style={styles.photo}
-          />
-        ) : (
-          <View style={styles.photoPlaceholder}>
-            <Text style={styles.photoText}>Photo</Text>
-          </View>
-        )}
+  const generateTimeline = () => {
+    const events = [];
 
-        <Text style={styles.biographyTitle}>Biography</Text>
-        <View style={styles.biographyBox}>
-          <Text style={styles.biographyText}>
-            {generateBiography()}
-          </Text>
+    if (data.birth_date) {
+      events.push({ date: formatDate(data.birth_date), description: 'Born' });
+    }
+
+    spouses.forEach((spouse, index) => {
+      if (spouse.marriageDate) {
+        events.push({ 
+          date: spouse.marriageDate, 
+          description: `Married ${spouse.data.name}` 
+        });
+      }
+      if (spouse.divorceDate && !spouse.isCurrent) {
+        events.push({ 
+          date: spouse.divorceDate, 
+          description: `Divorced from ${spouse.data.name}` 
+        });
+      }
+    });
+
+    children.forEach(child => {
+      if (child.data.birth_date) {
+        events.push({ 
+          date: formatDate(child.data.birth_date), 
+          description: `${child.data.name} born` 
+        });
+      }
+    });
+
+    if (data.death_date) {
+      events.push({ date: formatDate(data.death_date), description: 'Passed away' });
+    }
+
+    events.sort((a, b) =>  {
+      if (a.description === 'Born') return -1; //ensure born is always first
+      if (b.description === 'Born') return 1;
+      if (a.description === 'Passed away') return 1; //ensure passed away is always last
+      if (b.description === 'Passed away') return -1;
+      return new Date(a.date) - new Date(b.date)
+    });
+
+    return events;
+  };
+
+  const timelineEvents = generateTimeline();
+
+  return (
+    <>
+      <Page size="A5" style={styles.page} id={person.id}>
+        <View style={styles.border}>
+          <Text style={styles.name}>{data.name}</Text>
+          
+          {data.image ? (
+            <Image
+              src={data.image}
+              style={styles.photo}
+            />
+          ) : (
+            <View style={styles.photoPlaceholder}>
+              <Text style={styles.photoText}>Photo</Text>
+            </View>
+          )}
+
+          <Text style={styles.biographyTitle}>Biography</Text>
+          <View style={styles.biographyBox}>
+            <Text style={styles.biographyText}>
+              {generateBiography()}
+            </Text>
+          </View>
         </View>
-      </View>
-    </Page>
+      </Page>
+      <TimelinePage person={person} events={timelineEvents} />
+    </>
   );
 };
 

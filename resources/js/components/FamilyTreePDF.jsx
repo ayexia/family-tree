@@ -178,7 +178,7 @@ const formatDate = (dateString) => {
   if (isNaN(date.getTime())) return null;
   
   const day = date.getUTCDate();
-  const month = date.toLocaleString('default', { month: 'long', timeZone: 'UTC' });
+  const month = date.toLocaleString('default', { month: 'long', timeZone: 'UTC' }); //UTC required as local time conversion shifts a day back
   const year = date.getUTCFullYear();
   
   if (day === 1 && date.getUTCMonth() === 0) {
@@ -256,7 +256,7 @@ const PersonPage = ({ person, graph }) => {
     }
   
     if (spouses.length > 0) {
-      bio.push(`${data.gender === 'M' ? 'He' : 'She'} `);
+      bio.push(`${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} `);
       if (spouses.length === 1) {
         const spouse = spouses[0];
         bio.push(`married `);
@@ -296,9 +296,9 @@ const PersonPage = ({ person, graph }) => {
     }
   
     if (children.length > 0) {
-      bio.push(`${data.gender === 'M' ? 'He' : 'She'} had ${children.length} ${children.length === 1 ? 'child' : 'children'}: `);
+      bio.push(`${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} had ${children.length} ${children.length === 1 ? 'child' : 'children'}: `);
       children.forEach((child, index) => {
-        if (index > 0) bio.push(', ');
+        if (index > 0) bio.push(index === children.length - 1 ? ' and ' : ', ');
         bio.push(
           <Link key={child.id} src={`#${child.id}`} style={styles.link}>
             {child.data.name}
@@ -310,9 +310,7 @@ const PersonPage = ({ person, graph }) => {
   
     const deathDate = formatDate(data.death_date);
     if (deathDate) {
-      bio.push(`${data.gender === 'M' ? 'He' : 'She'} passed away ${deathDate.includes(' ') ? 'on' : 'in'} ${deathDate}.`);
-    } else if (data.death_date === null) {
-      bio.push(`${data.gender === 'M' ? 'His' : 'Her'} date of death is unknown.`);
+      bio.push(`${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} passed away ${deathDate.includes(' ') ? 'on' : 'in'} ${deathDate}.`);
     }
   
     return bio;

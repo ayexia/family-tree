@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import ReactFlow, { 
-  MiniMap, 
-  Controls, 
   Background, 
   useNodesState, 
   useEdgesState,
@@ -18,79 +16,91 @@ const nodeWidth = 150;
 const nodeHeight = 50;
 const defaultImage = '/images/user.png';
 
-const customNode = ({ data }) => (
-  <div style={{ padding: 10, borderRadius: 5, background: '#fff', border: '1px solid #ccc', whiteSpace: 'pre-wrap', textAlign: 'center'}}>
-    <img src={data.image ? data.image : defaultImage} style={{ width: '35px', height: '35px', borderRadius: '25%' }} />
-    <div>{data.label}</div>
-    <Handle type="target" position={Position.Top} id="top" />
-    <Handle type="source" position={Position.Bottom} id="bottom" />
-    <Handle type="source" position={Position.Left} id="left" />
-    <Handle type="source" position={Position.Right} id="right" />
-  </div>
-);
-
-const getLayoutedElements = (nodes, edges) => {
-  const g = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: 'TB', ranksep: 300, nodesep: 450 });
-
-  nodes.forEach((node) => {
-    g.setNode(node.id, { width: nodeWidth, height: nodeHeight });
-  });
-
-  edges.filter(edge => edge.label !== 'Spouse').forEach((edge) => {
-    g.setEdge(edge.source, edge.target);
-  });
-
-  dagre.layout(g);
-
-  const positionedNodes = nodes.map((node) => {
-    const position = g.node(node.id);
-    return { ...node, position: { x: position.x, y: position.y }, draggable: true };
-  });
-
-  edges.filter(edge => edge.label === 'Spouse').forEach((edge, index) => {
-    const sourceNode = positionedNodes.find(node => node.id === edge.source);
-    const targetNode = positionedNodes.find(node => node.id === edge.target);
-    if (sourceNode && targetNode) {
-      const numOfSpouses = edges.filter(e => e.source === edge.source && e.label === 'Spouse').length;
-      const angle = (2 * Math.PI / numOfSpouses) * index;
-      const horizontalPosition = Math.cos(angle) * 200;
-      const verticalPosition = Math.sin(angle) * 175;
-  
-      targetNode.position = {
-        x: sourceNode.position.x + horizontalPosition,
-        y: sourceNode.position.y + verticalPosition
-      };
-    }
-  });
-
-  return {
-    nodes: positionedNodes,
-    edges: edges.map(edge => ({
-      ...edge,
-      style: {
-        stroke: edge.label === 'Spouse' ? (edge.is_current ? 'red' : 'blue') : '#000000',
-        strokeWidth: edge.label === 'Spouse' ? '0.5' : '0.2',
-        strokeDasharray: edge.label === 'Spouse' ? (edge.is_current ? 'none' : '5,5') : 'none',             
-      },
-      label: edge.label === 'Spouse' ? (edge.is_current ? 'Spouse' : 'Former Spouse') : edge.label,
-    }))
-  };
-};
-
-const FamilyGraph = () => {
+const FamilyGraph = ({ 
+  generations, 
+  query, 
+  showStatistics,
+  setShowStatistics,
+  highlightedNode,
+  setHighlightedNode,
+  setSearchResults
+}) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [isSidebarOpened, setIsSidebarOpened] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [images, setImages] = useState({});
-  const [generations, setGenerations] = useState(3);
-  const [query, setQuery] = useState('');
-  const [highlightedNode, setHighlightedNode] = useState(null);
-  const { fitView } = useReactFlow();
+  const { setCenter } = useReactFlow();
 
-  const nodeTypes = useMemo(() => ({ custom: customNode }), []);
+  const customNode = useCallback(({ data }) => (
+    <div style={{ 
+      padding: 10, 
+      borderRadius: 5, 
+      background: data.gender === 'M' ? '#97EBE6' : data.gender === 'F' ? '#EB97CF' : '#EBC097', 
+      border: '1px solid #ccc', 
+      whiteSpace: 'pre-wrap', 
+      textAlign: 'center'
+    }}>
+      <img src={data.image ? data.image : defaultImage} style={{ width: '35px', height: '35px', borderRadius: '25%' }} />
+         <div>{data.label}</div>
+      <Handle type="target" position={Position.Top} id="top" />
+      <Handle type="source" position={Position.Bottom} id="bottom" />
+      <Handle type="source" position={Position.Left} id="left" />
+      <Handle type="source" position={Position.Right} id="right" />
+    </div>
+  ), []);
+
+  const nodeTypes = useMemo(() => ({ custom: customNode }), [customNode]);
+
+  const getLayoutedElements = (nodes, edges) => {
+    const g = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
+    g.setGraph({ rankdir: 'TB', ranksep: 300, nodesep: 450 });
+
+    nodes.forEach((node) => {
+      g.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+    });
+
+    edges.filter(edge => edge.label !== 'Spouse').forEach((edge) => {
+      g.setEdge(edge.source, edge.target);
+    });
+
+    dagre.layout(g);
+
+    const positionedNodes = nodes.map((node) => {
+      const position = g.node(node.id);
+      return { ...node, position: { x: position.x, y: position.y }, draggable: true };
+    });
+
+    edges.filter(edge => edge.label === 'Spouse').forEach((edge, index) => {
+      const sourceNode = positionedNodes.find(node => node.id === edge.source);
+      const targetNode = positionedNodes.find(node => node.id === edge.target);
+      if (sourceNode && targetNode) {
+        const numOfSpouses = edges.filter(e => e.source === edge.source && e.label === 'Spouse').length;
+        const angle = (2 * Math.PI / numOfSpouses) * index;
+        const horizontalPosition = Math.cos(angle) * 200;
+        const verticalPosition = Math.sin(angle) * 175;
+    
+        targetNode.position = {
+          x: sourceNode.position.x + horizontalPosition,
+          y: sourceNode.position.y + verticalPosition
+        };
+      }
+    });
+
+    return {
+      nodes: positionedNodes,
+      edges: edges.map(edge => ({
+        ...edge,
+        style: {
+          stroke: edge.label === 'Spouse' ? (edge.is_current ? 'red' : 'blue') : '#000000',
+          strokeWidth: edge.label === 'Spouse' ? '0.5' : '0.2',
+          strokeDasharray: edge.label === 'Spouse' ? (edge.is_current ? 'none' : '5,5') : 'none',             
+        },
+        label: edge.label === 'Spouse' ? (edge.is_current ? 'Spouse' : 'Former Spouse') : edge.label,
+      }))
+    };
+  };
 
   const fetchFamilyTreeData = useCallback(async () => {
     try {
@@ -119,16 +129,28 @@ const FamilyGraph = () => {
 
   useEffect(() => {
     fetchFamilyTreeData();
-  }, [fetchFamilyTreeData, images]);
+  }, [fetchFamilyTreeData]);
 
   useEffect(() => {
     if (highlightedNode) {
       const node = nodes.find(n => n.id === highlightedNode);
       if (node) {
-        fitView({ nodes: [node], padding: 0.1 });
+        setCenter(node.position.x, node.position.y, { zoom: 1.5, duration: 1000 });
+        setHighlightedNode(null);
       }
     }
-  }, [highlightedNode, nodes, fitView]);
+  }, [highlightedNode, nodes, setCenter, setHighlightedNode]);
+
+  const handleSearch = useCallback(() => {
+    const results = nodes.filter(node => 
+      node.data.label.toLowerCase().includes(query.toLowerCase())
+    );
+    setSearchResults(results);
+  }, [query, nodes, setSearchResults]);
+
+  useEffect(() => {
+    handleSearch();
+  }, [handleSearch]);
 
   const openSidebar = (node) => {
     setSelectedNode(node);
@@ -141,60 +163,63 @@ const FamilyGraph = () => {
   };
 
   const onNodeClick = (event, node) => {
-    try {
+    try {      
       openSidebar(node);
     } catch (error) {
       console.error('Error handling node click:', error);
     }
   };
 
-  const search = () => {
-    setErrorMessage('');
-    const node = nodes.find(n => n.data.name?.toLowerCase().includes(query.toLowerCase()));
-    if (node) {
-      setHighlightedNode(node.id);
-    } else {
-      setErrorMessage('No person found with that name.');
-    }
+  const statistics = useMemo(() => {
+    return {
+      totalMembers: nodes.length,
+      maleCount: nodes.filter(node => node.data.gender === 'M').length,
+      femaleCount: nodes.filter(node => node.data.gender === 'F').length,
+      unknownCount: nodes.filter(node => node.data.gender !== 'M' && node.data.gender !== 'F').length
+    };
+  }, [nodes]);
+
+  const popupStyle = {
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    backgroundColor: 'white',
+    padding: '20px',
+    borderRadius: '10px',
+    boxShadow: '0 0 10px rgba(0,0,0,0.2)',
+    zIndex: 1000,
   };
 
   return (
-    <div style={{ width: '100%', height: '600px' }}>
-      {errorMessage && <p>{errorMessage}</p>}
-      <div style={{ marginBottom: '10px' }}>
-        <label htmlFor="generations">Select Generation: </label>
-        <input
-          type="number"
-          id="generations"
-          value={generations}
-          onChange={(e) => setGenerations(Number(e.target.value))}
-          min="1"
-          max="10"
-        />
-      </div>
-      <div style={{ marginBottom: '10px' }}>
-        <input
-          type="text"
-          placeholder="Search for a person"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <button onClick={search}>Search</button>
-      </div>
+    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+      {errorMessage && <p style={{ position: 'absolute', top: 10, left: 10, color: 'red' }}>{errorMessage}</p>}
+      
       <ReactFlow
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeClick={onNodeClick}
-        fitView={true}
+        fitView
         nodeTypes={nodeTypes}
-        minZoom={0.01}
+        minZoom={0.1}
+        maxZoom={2}
       >
-        <Controls />
-        <MiniMap />
         <Background variant="dots" gap={12} size={1} />
       </ReactFlow>
+
+      {showStatistics && (
+        <div style={popupStyle}>
+          <h3>Family Statistics</h3>
+          <p>Total Members: {statistics.totalMembers}</p>
+          <p>Male: {statistics.maleCount}</p>
+          <p>Female: {statistics.femaleCount}</p>
+          <p>Other: {statistics.unknownCount}</p>
+          <button onClick={() => setShowStatistics(false)}>Close</button>
+        </div>
+      )}
+
       {isSidebarOpened && <GraphSidebar node={selectedNode} onClose={closeSidebar} setImages={setImages} images={images} />}
     </div>
   );

@@ -3,42 +3,43 @@ import React from 'react';
 const Legend = () => {
   const legendStyles = {
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     alignItems: 'flex-start',
     padding: '10px',
-    backgroundColor: '#9BB08C',
     borderRadius: '10px',
-    color: '#EDECD7',
+    color: '#9BB08C',
     fontFamily: 'Inika, serif',
-    fontSize: '18px',
+    fontSize: '15px',
+    fontWeight: 'bold',
     position: 'absolute',
-    top: '60px', 
-    left: '0px', 
+    top: '0px', 
+    left: '175px', 
     zIndex: '10',
-    maxWidth: '200px',
-    overflow: 'auto',
+    width: '900px',
   };
 
   const legendItemStyle = {
     display: 'flex',
     alignItems: 'center',
-    marginBottom: '10px',
+    marginBottom: '0px',
   };
 
   const colourBoxStyle = (colour) => ({
     width: '20px',
     height: '20px',
     backgroundColor: colour,
-    marginRight: '10px',
+    marginRight: '15px',
+    marginLeft: '15px',
     borderRadius: '50%',
   });
 
   const lineStyle = (dash) => ({
     width: '40px',
     height: '2px',
+    marginRight: '10px',
+    marginLeft: '15px',
     backgroundColor: dash ? 'transparent' : 'red',
     border: dash ? '1px dashed blue' : 'none',
-    marginRight: '10px',
   });
 
   return (

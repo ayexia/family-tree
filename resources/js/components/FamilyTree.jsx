@@ -252,7 +252,7 @@ const FamilyTree = () => {
     //only appears if the user has searched a bloodline/surname where family tree data is available, and no errors were given
     //also ensures sidebar is only opened if isSidebarOpened is true, and if so will display the data of a selected node and also close if user selects to do this
 <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100vh' }}>
-  <div style={{ display: 'flex', padding: '-10px' }}>
+  <div style={{ display: 'flex', padding: '15px' }}>
     <div style={{ flex: '1' }}>
       <input 
         type="text" 
@@ -261,29 +261,9 @@ const FamilyTree = () => {
         placeholder="Search a bloodline (surname)"
       />
       <button onClick={searchSurname}>Search</button>
-      <div style={{ marginTop: '10px' }}>
-        <label>Generation: </label>
-        <input
-          type="number"
-          min="1"
-          value={generations}
-          onChange={(e) => setGenerations(Number(e.target.value))}
-          style={{ width: '60px' }}
-        />
-      </div>
-    </div>
-
-    <div style={{ width: '200px', marginLeft: 'auto', padding: '40px', marginTop: '90px' }}>
-      <input
-        type="text"
-        value={nameQuery}
-        onChange={(e) => setNameQuery(e.target.value)}
-        placeholder="Search for a name"
-      />
-      <button onClick={searchByName}>Search</button>
     </div>
   </div>
-  <div style={{ flex: '1', height: '100%' }}>
+  <div style={{ flex: '1', height: '100%', width: '100%' }}>
     {hasSearched && treeData && !errorMessage && (
       <Tree
         data={treeData}

@@ -10,7 +10,7 @@
 <style>
     .title {
         left: 515px;
-        top: 50px;
+        top: 0px;
         position: absolute;
         font-family: "Inika", serif;
         font-size: 40px;
@@ -35,8 +35,8 @@
         margin: 10px;
         font-family: "Inika", serif;
         position: absolute;
-        top: 161.67px;
-        left: 12%;
+        left: 7.5%;
+        top: 25px;
     }
 
     .home-button img {
@@ -141,9 +141,10 @@
         padding: 20px;
         border-radius: 15px;
         max-width: 1200px;
-        width: 80%;
+        width: 100%;
         margin: 0px auto 80px;
         position: relative;
+        top: 45px;
     }
 </style>
 </head>
@@ -162,6 +163,7 @@
         </a>
     </header>
 
+    <div id="root"></div>
     <div class="info-text">
         <p>Welcome to your Family Tree page! Here you can:</p>
         <p>View and explore your family tree - the default tree view allows you to search for a specific family line (surname). After clicking "search" this then automatically updates when typing a new name. You are also able to adjust the number of generations in your family that you wish to see. Hovering over each member will give you additional details.</p>
@@ -170,8 +172,6 @@
         <p>Search for specific individuals - feel like your family is too large? No problem! The additional searchbar will allow you to search for a family member and centre the focus on them.</p>
         <p>Export as PDF book - click to lead to a page to print your personalised family tree book, with the details you wish to include.</p>
     </div>
-
-    <div id="root"></div>
 
     <footer class="footer">
         <p>Copyright 2024 | <a href="{{ route('about') }}">About MyStory</a></p>

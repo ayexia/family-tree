@@ -13,6 +13,13 @@ const App = () => {
     const [searchResults, setSearchResults] = useState([]);
     const [highlightedNode, setHighlightedNode] = useState(null);
     const [showStatistics, setShowStatistics] = useState(false);
+    const [zoomIn, setZoomIn] = useState(() => {});
+    const [zoomOut, setZoomOut] = useState(() => {});
+    const [centerView, setCenterView] = useState(() => {});
+
+    const handleZoomIn = () => zoomIn();
+    const handleZoomOut = () => zoomOut();
+    const handleCenterView = () => centerView();
 
     const switchView = () => {
         setView(view === 'graph' ? 'tree' : 'graph');
@@ -27,18 +34,12 @@ const App = () => {
         setHighlightedNode(selectedNodeId);
     };
 
-    // Placeholder functions for zoom and center view
-    const zoomIn = () => {
-        // TODO: Implement zoom in functionality
-    };
-
-    const zoomOut = () => {
-        // TODO: Implement zoom out functionality
-    };
-
-    const centerView = () => {
-        // TODO: Implement center view functionality
-    };
+    const formatOptions = (results) => {
+        return results.map(node => ({
+            id: node.id,
+            name: view === 'graph' ? node.data.label : node.name
+        }));
+    };   
 
     const buttonStyle = {
         backgroundColor: '#CCE7BD',
@@ -101,50 +102,83 @@ const App = () => {
                         <button style={buttonStyle} onClick={switchView}>
                             <img src="/images/grid.png" alt="Grid" style={imgStyle} />
                             Switch to {view === 'graph' ? 'Tree View' : 'Graph View'}
-                        </button>
-                        <button style={buttonStyle} onClick={exportToPDF}>
-                            <img src="/images/printing.png" alt="PDF" style={imgStyle} />
-                            Export to PDF book
-                        </button>
-                        <div>
-                            <label htmlFor="generations">Generations: </label>
-                            <input
-                                type="number"
-                                id="generations"
-                                value={generations}
-                                onChange={(e) => setGenerations(Number(e.target.value))}
-                                min="1"
-                                max="10"
-                                style={inputStyle}
-                            />
-                        </div>
-                        <div>
-                            <input
-                                type="text"
-                                placeholder="Search for a person"
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                style={inputStyle}
-                            />
-                            <select 
-                                onChange={resultSelect}
-                                value={highlightedNode || ''}
-                                style={inputStyle}
-                            >
-                                <option value="">Select a person</option>
-                                {searchResults.map(node => (
-                                    <option key={node.id} value={node.id}>
-                                        {node.data.label}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <button style={buttonStyle} onClick={() => setShowStatistics(true)}>Show Statistics</button>
-                        <div>
-                            <button style={buttonStyle} onClick={zoomIn}>Zoom In</button>
-                            <button style={buttonStyle} onClick={zoomOut}>Zoom Out</button>
-                            <button style={buttonStyle} onClick={centerView}>Center View</button>
-                        </div>
+                        </button>                        
+                        {view === 'graph' && (
+                            <>
+                                <button style={buttonStyle} onClick={exportToPDF}>
+                                    <img src="/images/printing.png" alt="PDF" style={imgStyle} />
+                                    Export to PDF book
+                                </button>
+                                <div>
+                                    <label htmlFor="generations">Generations: </label>
+                                    <input
+                                        type="number"
+                                        id="generations"
+                                        value={generations}
+                                        onChange={(e) => setGenerations(Number(e.target.value))}
+                                        min="1"
+                                        max="10"
+                                        style={inputStyle}
+                                    />
+                                </div>
+                                <div>
+                                    <input
+                                        type="text"
+                                        placeholder="Search for a person"
+                                        value={query}
+                                        onChange={(e) => setQuery(e.target.value)}
+                                        style={inputStyle}
+                                    />
+                                    <select 
+                                        onChange={resultSelect}
+                                        value={highlightedNode || ''}
+                                        style={inputStyle}
+                                    >
+                                        <option value="">Select a person</option>
+                                        {formatOptions(searchResults).map(node => (
+                                            <option key={node.id} value={node.id}>
+                                                {node.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <button style={buttonStyle} onClick={() => setShowStatistics(true)}>Show Statistics</button>
+                                <div>
+                                    <button style={buttonStyle} onClick={handleZoomIn}>Zoom In</button>
+                                    <button style={buttonStyle} onClick={handleZoomOut}>Zoom Out</button>
+                                    <button style={buttonStyle} onClick={handleCenterView}>Center View</button>
+                                </div>
+                            </>
+                        )}
+                        {view === 'tree' && (
+                            <>
+                             <button style={buttonStyle} onClick={exportToPDF}>
+                                    <img src="/images/printing.png" alt="PDF" style={imgStyle} />
+                                    Export to PDF book
+                                </button>
+                                <div>
+                                    <label htmlFor="generations">Generations: </label>
+                                    <input
+                                        type="number"
+                                        id="generations"
+                                        value={generations}
+                                        onChange={(e) => setGenerations(Number(e.target.value))}
+                                        min="1"
+                                        max="10"
+                                        style={inputStyle}
+                                    />
+                                </div>
+                                <div>
+                                    <input
+                                        type="text"
+                                        placeholder="Search for a person"
+                                        value={query}
+                                        onChange={(e) => setQuery(e.target.value)}
+                                        style={inputStyle}
+                                    />                                    
+                                </div>
+                            </>
+                        )}
                     </div>
                     <div style={mainContentStyle}>
                         {view === 'graph' ? 
@@ -156,14 +190,13 @@ const App = () => {
                                 highlightedNode={highlightedNode}
                                 setSearchResults={setSearchResults}
                                 setHighlightedNode={setHighlightedNode}
+                                setZoomIn={setZoomIn}
+                                setZoomOut={setZoomOut}
+                                setCenterView={setCenterView}
                             /> : 
                             <FamilyTree 
                                 generations={generations} 
                                 query={query}
-                                showStatistics={showStatistics}
-                                setShowStatistics={setShowStatistics}
-                                highlightedNode={highlightedNode}
-                                setSearchResults={setSearchResults}
                             />
                         }
                     </div>

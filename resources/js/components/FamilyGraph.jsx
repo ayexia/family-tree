@@ -23,7 +23,10 @@ const FamilyGraph = ({
   setShowStatistics,
   highlightedNode,
   setHighlightedNode,
-  setSearchResults
+  setSearchResults,
+  setZoomIn,
+  setZoomOut,
+  setCenterView
 }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -31,7 +34,7 @@ const FamilyGraph = ({
   const [selectedNode, setSelectedNode] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [images, setImages] = useState({});
-  const { setCenter } = useReactFlow();
+  const { setCenter, zoomIn: reactFlowZoomIn, zoomOut: reactFlowZoomOut, fitView } = useReactFlow();
 
   const customNode = useCallback(({ data }) => (
     <div style={{ 
@@ -140,6 +143,12 @@ const FamilyGraph = ({
       }
     }
   }, [highlightedNode, nodes, setCenter, setHighlightedNode]);
+
+  useEffect(() => {
+    setZoomIn(() => () => reactFlowZoomIn());
+    setZoomOut(() => () => reactFlowZoomOut());
+    setCenterView(() => () => fitView({ duration: 800, padding: 0.1 }));
+  }, [setZoomIn, setZoomOut, setCenterView, reactFlowZoomIn, reactFlowZoomOut, fitView]);
 
   const handleSearch = useCallback(() => {
     const results = nodes.filter(node => 

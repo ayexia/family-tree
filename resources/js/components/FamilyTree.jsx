@@ -7,17 +7,15 @@ import "../../css/treeCustomisation.css";
 import Sidebar from './Sidebar';
 import Legend from './Legend';
 
-const FamilyTree = () => {
+const FamilyTree = ({ generations, query }) => {
   const [treeData, setTreeData] = useState(null); //initialises variable treeData to store fetched family tree data
   const [isSidebarOpened, setIsSidebarOpened] = useState(false); //initialises, checks and sets visibility of sidebar (boolean)
   const [selectedNode, setSelectedNode] = useState(null); //initialises node selection state
-  const [nameQuery, setNameQuery] = useState(''); //initialises search function to store query 
   const [surnameQuery, setSurnameQuery] = useState('');
   const [hasSearched, setHasSearched] = useState(false); //initialises and checks if search has been performed (boolean)
   const [errorMessage, setErrorMessage] = useState(''); //initialises errorMessage variable to store error messages
   const [hoveredNode, setHoveredNode] = useState(null);
   const [images, setImages] = useState({});
-  const [generations, setGenerations] = useState(3);
   const [highlightQuery, setHighlightQuery] = useState('');
 
   useEffect(() => {
@@ -25,6 +23,14 @@ const FamilyTree = () => {
       fetchFamilyTreeData(surnameQuery); //after component is mounted calls this function which retrieves the family tree data from the api through http requests
     }
   }, [surnameQuery, generations, hasSearched]);
+
+  useEffect(() => {
+    if (query) {
+      setHighlightQuery(query.toLowerCase());
+    } else {
+      setHighlightQuery ('');
+    }
+  }, [query]);
 
   const fetchFamilyTreeData = async (surname = '') => { 
     try {
@@ -36,8 +42,7 @@ const FamilyTree = () => {
         setTreeData(null);
       } else {
         setTreeData(response.data); //the fetched data is stored in treeData variable
-        setErrorMessage(''); //clears error message
-        setHighlightQuery(nameQuery.trim().toLowerCase());
+        setErrorMessage(''); //clears error message      
       }
     } catch (error) {
       setErrorMessage('An error occurred while fetching data.'); //error message if any issues with fetching data
@@ -48,10 +53,6 @@ const FamilyTree = () => {
     setErrorMessage('');
     setHasSearched(true); //sets hasSearched to true, thus allowing the tree data to be shown (or an error message if nothing is found)
     fetchFamilyTreeData(surnameQuery); //calls function to retrieve the family tree data for queried surname
-  };
-
-  const searchByName = () => {
-   setHighlightQuery(nameQuery.trim().toLowerCase());
   };
 
   const openSidebar = (node) => { //if user clicks a node, sets that as selectedNode and sets sideBar opened to true, opening it and displaying information for that node
@@ -252,7 +253,7 @@ const FamilyTree = () => {
     //only appears if the user has searched a bloodline/surname where family tree data is available, and no errors were given
     //also ensures sidebar is only opened if isSidebarOpened is true, and if so will display the data of a selected node and also close if user selects to do this
 <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100vh' }}>
-  <div style={{ display: 'flex', padding: '15px' }}>
+  <div style={{ display: 'flex', padding: '10px' }}>
     <div style={{ flex: '1' }}>
       <input 
         type="text" 

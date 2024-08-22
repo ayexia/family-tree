@@ -16,6 +16,21 @@ const App = () => {
     const [zoomIn, setZoomIn] = useState(() => {});
     const [zoomOut, setZoomOut] = useState(() => {});
     const [centerView, setCenterView] = useState(() => {});
+    const [lineStyles, setLineStyles] = useState({
+        parentChild: { color: '#000000', width: 2, dashArray: 'none' },
+        current: { color: '#FF0000', width: 2, dashArray: 'none' },
+        divorced: { color: '#808080', width: 2, dashArray: '5,5' }
+    });
+
+    const handleLineStyleChange = (type, property) => (event) => {
+        setLineStyles(prevStyles => ({
+            ...prevStyles,
+            [type]: {
+                ...prevStyles[type],
+                [property]: event.target.value
+            }
+        }));
+    };
 
     const handleZoomIn = () => zoomIn();
     const handleZoomOut = () => zoomOut();
@@ -56,7 +71,7 @@ const App = () => {
         display: 'flex',
         alignItems: 'center',
         gap: '0px',
-        width: '120%',
+        width: '100%',
     };
 
     const imgStyle = {
@@ -66,7 +81,7 @@ const App = () => {
     };
 
     const controlsContainer = {
-        width: '150px',
+        width: '160px',
         height: '100vh',
         padding: '20px',
         display: 'flex',
@@ -76,22 +91,34 @@ const App = () => {
         position: 'absolute',
         left: -15,
         top: -22,
+        overflowY: 'auto',
     };
 
     const mainContentStyle = {
-        marginLeft: '165px',
-        marginTop: '00px',
-        width: 'calc(100vw - 165px)',
+        marginLeft: '160px',
+        marginTop: '0px',
+        width: 'calc(100vw - 160px)',
         height: '100vh',
         overflow: 'hidden',
     };
 
     const inputStyle = {
-        width: '100%',
-        padding: '10px',
-        margin: '10px 0',
+        padding: '5px',
+        margin: '5px 0',
         borderRadius: '5px',
         border: '1px solid #ccc',
+    };
+
+    const lineStyleContainerStyle = {
+        display: 'flex',
+        flexDirection: 'column',
+        marginBottom: '10px',
+    };
+
+    const lineStyleInputsStyle = {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
     };
 
     return (
@@ -118,7 +145,7 @@ const App = () => {
                                         onChange={(e) => setGenerations(Number(e.target.value))}
                                         min="1"
                                         max="10"
-                                        style={inputStyle}
+                                        style={{...inputStyle, width: '80%'}}
                                     />
                                 </div>
                                 <div>
@@ -127,12 +154,12 @@ const App = () => {
                                         placeholder="Search for a person"
                                         value={query}
                                         onChange={(e) => setQuery(e.target.value)}
-                                        style={inputStyle}
+                                        style={{...inputStyle, width: '80%'}}
                                     />
                                     <select 
                                         onChange={resultSelect}
                                         value={highlightedNode || ''}
-                                        style={inputStyle}
+                                        style={{...inputStyle, width: '80%'}}
                                     >
                                         <option value="">Select a person</option>
                                         {formatOptions(searchResults).map(node => (
@@ -152,7 +179,7 @@ const App = () => {
                         )}
                         {view === 'tree' && (
                             <>
-                             <button style={buttonStyle} onClick={exportToPDF}>
+                                <button style={buttonStyle} onClick={exportToPDF}>
                                     <img src="/images/printing.png" alt="PDF" style={imgStyle} />
                                     Export to PDF book
                                 </button>
@@ -165,7 +192,7 @@ const App = () => {
                                         onChange={(e) => setGenerations(Number(e.target.value))}
                                         min="1"
                                         max="10"
-                                        style={inputStyle}
+                                        style={{...inputStyle, width: '80%'}}
                                     />
                                 </div>
                                 <div>
@@ -174,8 +201,44 @@ const App = () => {
                                         placeholder="Search for a person"
                                         value={query}
                                         onChange={(e) => setQuery(e.target.value)}
-                                        style={inputStyle}
+                                        style={{...inputStyle, width: '80%'}}
                                     />                                    
+                                </div>
+                                <div>
+                                    <h4>Line Styles:</h4>
+                                    <h5>Colour, Width, Dash level</h5>
+                                    {['Parent-Child', 'Current Spouse', 'Divorced Spouse'].map((type, index) => {
+                                        const key = Object.keys(lineStyles)[index];
+                                        const style = lineStyles[key];
+                                        return (
+                                            <div key={key} style={lineStyleContainerStyle}>
+                                                <label>{type}</label>
+                                                <div style={lineStyleInputsStyle}>
+                                                    <input
+                                                        type="color"
+                                                        value={style.color}
+                                                        onChange={handleLineStyleChange(key, 'color')}
+                                                        style={{ ...inputStyle, width: '30px', padding: '0' }}
+                                                    />
+                                                    <input
+                                                        type="number"
+                                                        value={style.width}
+                                                        onChange={handleLineStyleChange(key, 'width')}
+                                                        min="1"
+                                                        max="10"
+                                                        style={{ ...inputStyle, width: '40px' }}
+                                                    />
+                                                    <input
+                                                        type="text"
+                                                        value={style.dashArray}
+                                                        onChange={handleLineStyleChange(key, 'dashArray')}
+                                                        placeholder="e.g., 5,5"
+                                                        style={{ ...inputStyle, width: '70px' }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </>
                         )}
@@ -197,6 +260,7 @@ const App = () => {
                             <FamilyTree 
                                 generations={generations} 
                                 query={query}
+                                lineStyles={lineStyles}
                             />
                         }
                     </div>

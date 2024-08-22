@@ -1,9 +1,10 @@
 import React from 'react';
 
-const Legend = () => {
+const Legend = ({ lineStyles }) => {
   const legendStyles = {
     display: 'flex',
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'flex-start',
     padding: '10px',
     borderRadius: '10px',
@@ -12,34 +13,34 @@ const Legend = () => {
     fontSize: '15px',
     fontWeight: 'bold',
     position: 'absolute',
-    top: '0px', 
-    left: '175px', 
+    top: '0px',
+    left: '175px',
     zIndex: '10',
-    width: '900px',
+    width: '1200px',
   };
 
   const legendItemStyle = {
     display: 'flex',
     alignItems: 'center',
-    marginBottom: '0px',
+    marginBottom: '5px',
+    marginRight: '15px',
   };
 
   const colourBoxStyle = (colour) => ({
     width: '20px',
     height: '20px',
     backgroundColor: colour,
-    marginRight: '15px',
-    marginLeft: '15px',
+    marginRight: '5px',
     borderRadius: '50%',
   });
 
-  const lineStyle = (dash) => ({
+  const lineStyle = (style) => ({
     width: '40px',
-    height: '2px',
-    marginRight: '10px',
-    marginLeft: '15px',
-    backgroundColor: dash ? 'transparent' : 'red',
-    border: dash ? '1px dashed blue' : 'none',
+    height: `${style.width}px`,
+    marginRight: '5px',
+    backgroundColor: style.color,
+    border: 'none',
+    strokeDasharray: style.dashArray,
   });
 
   return (
@@ -60,14 +61,12 @@ const Legend = () => {
         <div style={colourBoxStyle('yellow')}></div>
         <span>Highlighted</span>
       </div>
-      <div style={legendItemStyle}>
-        <div style={lineStyle(false)}></div>
-        <span>Current Spouse</span>
-      </div>
-      <div style={legendItemStyle}>
-        <div style={lineStyle(true)}></div>
-        <span>Former Spouse</span>
-      </div>
+      {lineStyles && Object.entries(lineStyles).map(([key, style]) => (
+        <div key={key} style={legendItemStyle}>
+          <div style={lineStyle(style)}></div>
+          <span>{key === 'parentChild' ? 'Parent-Child' : key === 'current' ? 'Current Spouse' : 'Divorced Spouse'}</span>
+        </div>
+      ))}
     </div>
   );
 };

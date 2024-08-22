@@ -35,7 +35,7 @@
         margin: 10px;
         font-family: "Inika", serif;
         position: absolute;
-        left: 7.5%;
+        left: 6.75%;
         top: 25px;
     }
 

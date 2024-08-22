@@ -7,7 +7,7 @@ import "../../css/treeCustomisation.css";
 import Sidebar from './Sidebar';
 import Legend from './Legend';
 
-const FamilyTree = ({ generations, query }) => {
+const FamilyTree = ({ generations, query, lineStyles }) => {
   const [treeData, setTreeData] = useState(null); //initialises variable treeData to store fetched family tree data
   const [isSidebarOpened, setIsSidebarOpened] = useState(false); //initialises, checks and sets visibility of sidebar (boolean)
   const [selectedNode, setSelectedNode] = useState(null); //initialises node selection state
@@ -170,6 +170,9 @@ const FamilyTree = ({ generations, query }) => {
                   const horizontalPosition = isFirstRow ? (isLeft ? -spouseSpacing : spouseSpacing) : (isLeft ? -spouseSpacing : spouseSpacing);
                   const verticalPosition = isFirstRow ? 0 : row * verticalSpacing;
                   const isSpouseHighlighted = highlightQuery && spouse.name.toLowerCase().includes(highlightQuery);
+                  const spouseLineStyle = spouse.is_current ? lineStyles.current : 
+                  (spouse.attributes.divorce_dates && spouse.attributes.divorce_dates.length > 0) ? lineStyles.divorced : 
+                  lineStyles.current;
 
                   return (
                     <g key={spouse.id}
@@ -189,9 +192,9 @@ const FamilyTree = ({ generations, query }) => {
                         y1={0}
                         x2={isFirstRow ? (isLeft ? (line) : (-line)) : 0}
                         y2={-verticalPosition}
-                        stroke={spouse.is_current ? 'red' : 'blue'}
-                        strokeWidth={spouse.is_current ? 1 : 2}
-                        strokeDasharray={spouse.is_current ? 'none' : '5,5'}
+                        stroke={spouseLineStyle.color}
+                        strokeWidth={spouseLineStyle.width}
+                        strokeDasharray={spouseLineStyle.dashArray}
                       />
                         <circle r={nodeRadius} style={{
                           stroke: isSpouseHighlighted ? 'yellow' : spouse.attributes.gender === 'M' ? '#97EBE6' : spouse.attributes.gender === 'F' ? '#EB97CF' : '#EBC097',
@@ -231,6 +234,18 @@ const FamilyTree = ({ generations, query }) => {
       );
     };
 
+    const pathClassFunc = () => {
+      return 'parent-child-link';
+    };
+  
+    const linkStyles = `
+      .parent-child-link {
+        stroke: ${lineStyles.parentChild.color} !important;
+        stroke-width: ${lineStyles.parentChild.width}px !important;
+        stroke-dasharray: ${lineStyles.parentChild.dashArray} !important;
+      }
+    `;
+
     if (!treeData) { //alternate display if no tree data is available - error message and search bar
     return (
     <div>
@@ -253,6 +268,7 @@ const FamilyTree = ({ generations, query }) => {
     //only appears if the user has searched a bloodline/surname where family tree data is available, and no errors were given
     //also ensures sidebar is only opened if isSidebarOpened is true, and if so will display the data of a selected node and also close if user selects to do this
 <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100vh' }}>
+<style>{linkStyles}</style>
   <div style={{ display: 'flex', padding: '10px' }}>
     <div style={{ flex: '1' }}>
       <input 
@@ -269,7 +285,8 @@ const FamilyTree = ({ generations, query }) => {
       <Tree
         data={treeData}
         orientation="vertical"
-        pathFunc="step"
+        pathFunc="step"        
+        pathClassFunc={pathClassFunc}
         translate={{ x: 300, y: 50 }}
         separation={{ siblings: 4, nonSiblings: 5 }}
         nodeSize={{ x: 190, y: 300 }}
@@ -278,7 +295,7 @@ const FamilyTree = ({ generations, query }) => {
     )}
   </div>
   {isSidebarOpened && <Sidebar node={selectedNode} onClose={closeSidebar} setImages={setImages} images={images} />}
-  <Legend />
+  <Legend lineStyles={lineStyles} />
 </div>
 );
 };

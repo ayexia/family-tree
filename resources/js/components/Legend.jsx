@@ -15,7 +15,6 @@ const Legend = ({ lineStyles }) => {
     position: 'absolute',
     top: '0px',
     left: '175px',
-    zIndex: '10',
     width: '1200px',
   };
 
@@ -60,6 +59,10 @@ const Legend = ({ lineStyles }) => {
       <div style={legendItemStyle}>
         <div style={colourBoxStyle('yellow')}></div>
         <span>Highlighted</span>
+      </div>
+      <div style={legendItemStyle}>
+        <div style={colourBoxStyle('#FFD700')}></div>
+        <span>Birthday</span>
       </div>
       {lineStyles && Object.entries(lineStyles).map(([key, style]) => (
         <div key={key} style={legendItemStyle}>

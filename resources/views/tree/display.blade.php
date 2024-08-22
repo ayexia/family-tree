@@ -57,6 +57,7 @@
         right: 0%;
         padding: 0.53rem;
         color: #EDECD7;
+        z-index: 1000;
     }
 
     .info-text {

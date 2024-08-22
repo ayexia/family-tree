@@ -42,6 +42,7 @@ const [errorMessage, setErrorMessage] = useState('');
       overflowY: 'auto',
       transition: 'transform .3s',
       transform: 'translate(0px)',
+      zIndex: '500',
     }}>
       <button onClick={onClose} style={{
         backgroundColor: '#37672F',

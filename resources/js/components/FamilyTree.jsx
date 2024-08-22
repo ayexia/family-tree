@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'; //react modules handling sta
 import Tree from 'react-d3-tree'; //Uses react-d3-tree package for visual representation of tree structure
 import axios from 'axios'; //used to fetch api data through making http requests
 import Tippy from '@tippyjs/react'; //uses tippyjs package to customise tooltip
+import { Cake } from 'lucide-react';
 import 'tippy.js/dist/tippy.css';
 import "../../css/treeCustomisation.css";
 import Sidebar from './Sidebar';
@@ -65,15 +66,23 @@ const FamilyTree = ({ generations, query, lineStyles }) => {
       setSelectedNode(null); 
     };
 
+  const isBirthday = (dob) => {
+      if (!dob) return false;
+      const today = new Date();
+      const birthDate = new Date(dob);
+      return today.getMonth() === birthDate.getMonth() && today.getDate() === birthDate.getDate();
+    };
+
   const customNode = ({ nodeDatum }) => { //customises nodes in family tree based on particular properties
     const selectedImage = images[nodeDatum.id] || nodeDatum.attributes.image || '/images/user.png'; //node's image is either the image selected by user or default image
     const isMale = nodeDatum.attributes.gender === 'M'; //checks if node's gender is male or female (for spouses, only main person's gender is counted)
     const isFemale = nodeDatum.attributes.gender === 'F';
     const isHighlighted = highlightQuery && nodeDatum.name.toLowerCase().includes(highlightQuery);
+    const isTodayBirthday = isBirthday(nodeDatum.attributes.DOB);
 
-    const shouldHighlight = isHighlighted;
+    const shouldHighlight = isHighlighted || isTodayBirthday;
     const nodeStyle = {
-      stroke: shouldHighlight ? 'yellow' : (isMale ? '#97EBE6' : isFemale ? '#EB97CF' : '#EBC097'),
+      stroke: shouldHighlight ? (isTodayBirthday ? '#FFD700' : 'yellow') : (isMale ? '#97EBE6' : isFemale ? '#EB97CF' : '#EBC097'),
       fill: 'none',
       strokeWidth: shouldHighlight ? 15 : 10,
     };
@@ -146,6 +155,15 @@ const FamilyTree = ({ generations, query, lineStyles }) => {
                   height="100"
                   clipPath="url(#clipCircle)"
                 />
+                {isTodayBirthday && (
+                <Cake
+                  size={24}
+                  color="#FFD700"
+                  style={{
+                    transform: 'translate(30px, -60px)',
+                  }}
+                />
+                )}
                 <defs>
                   <clipPath id="clipCircle">
                     <circle cx="0" cy="0" r={nodeRadius} />
@@ -172,7 +190,8 @@ const FamilyTree = ({ generations, query, lineStyles }) => {
                   const isSpouseHighlighted = highlightQuery && spouse.name.toLowerCase().includes(highlightQuery);
                   const spouseLineStyle = spouse.is_current ? lineStyles.current : 
                   (spouse.attributes.divorce_dates && spouse.attributes.divorce_dates.length > 0) ? lineStyles.divorced : 
-                  lineStyles.current;
+                  lineStyles.current;                  
+                  const isSpouseBirthday = isBirthday(spouse.attributes.DOB);
 
                   return (
                     <g key={spouse.id}
@@ -197,9 +216,9 @@ const FamilyTree = ({ generations, query, lineStyles }) => {
                         strokeDasharray={spouseLineStyle.dashArray}
                       />
                         <circle r={nodeRadius} style={{
-                          stroke: isSpouseHighlighted ? 'yellow' : spouse.attributes.gender === 'M' ? '#97EBE6' : spouse.attributes.gender === 'F' ? '#EB97CF' : '#EBC097',
+                          stroke: isSpouseHighlighted || isSpouseBirthday ? (isSpouseBirthday ? '#FFD700' : 'yellow') : spouse.attributes.gender === 'M' ? '#97EBE6' : spouse.attributes.gender === 'F' ? '#EB97CF' : '#EBC097',
                           fill: 'none',
-                          strokeWidth: 10,
+                          strokeWidth: isSpouseHighlighted || isSpouseBirthday ? 15 : 10,
                         }} />
                         <image
                           href={images[spouse.id] || spouse.attributes.image || '/images/user.png'}
@@ -209,6 +228,15 @@ const FamilyTree = ({ generations, query, lineStyles }) => {
                           height="100"
                           clipPath="url(#clipCircle)"
                         ></image>
+                        {isSpouseBirthday && (
+                        <Cake
+                          size={24}
+                          color="#FFD700"
+                          style={{
+                            transform: 'translate(30px, -60px)',
+                          }}
+                        />
+                      )}
                         <defs>
                           <clipPath id="clipCircle">
                             <circle cx="0" cy="0" r={nodeRadius} />

@@ -144,7 +144,7 @@ const App = () => {
                                         value={generations}
                                         onChange={(e) => setGenerations(Number(e.target.value))}
                                         min="1"
-                                        max="10"
+                                        max="100"
                                         style={{...inputStyle, width: '80%'}}
                                     />
                                 </div>
@@ -191,7 +191,7 @@ const App = () => {
                                         value={generations}
                                         onChange={(e) => setGenerations(Number(e.target.value))}
                                         min="1"
-                                        max="10"
+                                        max="100"
                                         style={{...inputStyle, width: '80%'}}
                                     />
                                 </div>

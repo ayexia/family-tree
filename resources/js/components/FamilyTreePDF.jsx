@@ -48,7 +48,7 @@ const styles = StyleSheet.create({ //CSS
   },
   link: {
     color: 'black',
-    textDecoration: 'none',
+    textDecoration: 'underline',
   },
   border: {
     border: '1pt solid black',
@@ -451,32 +451,28 @@ const PersonPage = ({ person, graph }) => {
   );
 };
 
-const FamilyTreePDF = ({ onClose }) => { //fetch user's name and family data from backend
-  const [userName, setUserName] = useState('');
+const FamilyTreePDF = ({ onClose }) => { //fetch family data from backend
   const [familyData, setFamilyData] = useState({ nodes: [], edges: [] });
+  const [bookTitle, setBookTitle] = useState('');
+  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userResponse = await axios.get('/api/user', {
-          withCredentials: true,
-          headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-          }
-        });
-        setUserName(userResponse.data.name);
-
-        const familyResponse = await axios.get('/api/family-graph-json');
-        setFamilyData(familyResponse.data);
+        const response = await axios.get('/api/family-graph-json');
+        setFamilyData(response.data);
       } catch (error) {
         console.error('Error fetching data:', error);
-        setUserName('User');
       }
     };
 
     fetchData();
   }, []);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setIsFormSubmitted(true);
+  };
 
   const renderPages = (graph) => {
     const allPeople = new Set();
@@ -542,16 +538,60 @@ const FamilyTreePDF = ({ onClose }) => { //fetch user's name and family data fro
     fontWeight: 'bold',
   };
 
+  const formStyle = {
+    backgroundColor: 'white',
+    padding: '20px',
+    borderRadius: '10px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  };
+
+  const inputStyle = {
+    margin: '10px 0',
+    padding: '5px',
+    width: '300px',
+    fontFamily: '"Inika", serif',
+  };
+
+  const buttonStyle = {
+    margin: '10px 0',
+    padding: '5px 10px',
+    backgroundColor: '#CCE7BD',
+    color: '#A7B492',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontSize: '1em',
+    fontFamily: '"Inika", serif',
+    fontWeight: 'bold',
+  };
+
   return (
     <div style={overlay}>
       <button style={closeButton} onClick={onClose}>Close</button>
+      {!isFormSubmitted ? (
+        <form onSubmit={handleSubmit} style={formStyle}>
+          <h2>Create Family Book</h2>
+          <input
+            type="text"
+            value={bookTitle}
+            onChange={(e) => setBookTitle(e.target.value)}
+            placeholder="Enter the title for your family book"
+            style={inputStyle}
+            required
+          />
+          <button type="submit" style={buttonStyle}>Create PDF</button>
+        </form>
+      ) : (
       <PDFViewer width="80%" height="80%">
         <Document>
-          <TitlePage title={`${userName}'s Family Book`} />
-          <ContentsPage graph={familyData} />
-          {renderPages(familyData)}
-        </Document>
-      </PDFViewer>
+            <TitlePage title={bookTitle} />
+            <ContentsPage graph={familyData} />
+            {renderPages(familyData)}
+          </Document>
+        </PDFViewer>
+      )}
     </div>
   );
 };

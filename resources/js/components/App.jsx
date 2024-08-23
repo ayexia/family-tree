@@ -126,7 +126,7 @@ const App = () => {
         fontSize: '1em',
         textAlign: 'center',
         position: 'absolute',
-        color: '#A7B492',
+        color: '#587353',
         top: '-27.5px',
         right: '550px',
         marginBottom: '0px'

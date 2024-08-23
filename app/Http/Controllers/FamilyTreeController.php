@@ -269,7 +269,7 @@ class FamilyTreeController extends Controller
               'divorce_dates' => $person->divorce_dates,
               'image' => $person->image,
               'parents' => array_map(function($parent) {
-                  return ['id' => $parent->id, 'name' => $parent->name];
+                  return ['id' => $parent->id, 'name' => $parent->name, 'gender' => $parent->gender];
               }, $person->getParents() ?? []),
           ],
           'children' => [],
@@ -289,7 +289,7 @@ class FamilyTreeController extends Controller
                       'divorce_dates' => $spouse->divorce_dates,
                       'image' => $spouse->image,
                       'parents' => array_map(function($parent) {
-                          return ['id' => $parent->id, 'name' => $parent->name];
+                          return ['id' => $parent->id, 'name' => $parent->name, 'gender' => $parent->gender];
                       }, $spouse->getParents() ?? []),
                   ],
                 'is_current' => $person->isCurrentSpouse($spouse)
@@ -333,7 +333,7 @@ class FamilyTreeController extends Controller
                 'marriage_dates' => $person->marriage_dates,
                 'divorce_dates' => $person->divorce_dates,
                 'parents' => array_map(function($parent) {
-                 return ['id' => $parent->id, 'name' => $parent->name];
+                 return ['id' => $parent->id, 'name' => $parent->name, 'gender' => $parent->gender];
               }, $person->getParents() ?? []),
             ],
             'position' => ['x' => 0, 'y' => 0],

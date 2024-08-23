@@ -78,6 +78,36 @@
         font-family: "Inika", serif;
     }
 
+    .back-to-tree-button {
+        position: absolute;
+        left: 7.5%;
+        bottom: 100px;
+        background-color: #587353;
+        color: #EDECD7;
+        font-family: "Inika", serif;
+        border-radius: 2.5rem;
+        padding: 1rem 1.5rem;
+        border: none;
+        cursor: pointer;
+        text-transform: none;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        font-size: 1.4rem;
+        font-weight: bold;
+    }
+
+    .back-to-tree-button img {
+        width: 35px;
+        height: 35px;
+        opacity: 0.3;
+        margin-right: 10px;
+    }
+
+    .back-to-tree-button:hover {
+        background-color: #4a6848;
+    }
+
     .footer {
         text-align: center;
         font-family: "Inika", serif;
@@ -156,6 +186,10 @@
 
     </div>
 </div>
+<a href="{{ route('display') }}" class="back-to-tree-button">
+    <img src="{{ asset('images/tree-icon.png') }}" alt="Tree Icon">
+    Family Tree
+</a>
 <div class="footer">
     <p>Copyright 2024 | <a href="{{ route('about') }}">About MyStory</a></p>
 </div>

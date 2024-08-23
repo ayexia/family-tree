@@ -162,6 +162,9 @@
             <img src="{{ asset('images/home.png') }}" alt="Home">
             Home
         </a>
+        <a href="{{ route('import.form', ['familyTreeId' => $familyTreeId ?? '']) }}" class="profile-button home-button" style="left: 22.75%;">
+            Import GEDCOM
+        </a>
     </header>
 
     <div id="root"></div>

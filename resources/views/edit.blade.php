@@ -19,7 +19,7 @@
     .back-to-tree-button {
         position: absolute;
         left: 5%;
-        bottom: 2%;
+        bottom: 50px;
         background-color: #587353;
         color: #EDECD7;
         font-family: "Inika", serif;

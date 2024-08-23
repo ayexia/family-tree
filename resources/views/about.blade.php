@@ -19,12 +19,14 @@
     <div class="container">
         <div class="header">
             <h1 class="subheading">About MyStory</h1>
+            @auth
             <div class="profile">
             <a href="{{route('profile.edit') }}" class="profile-button">
                 <img src="{{ asset('images/user-profile.png') }}" alt="User">
                 Profile
             </a>
             </div>
+            @endauth
         </div>
         <a href="{{ route('home') }}" class="profile-button home-button">
                 <img src="{{ asset('images/home.png') }}" alt="Home">

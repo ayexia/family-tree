@@ -11,6 +11,7 @@ import dagre from '@dagrejs/dagre';
 import 'reactflow/dist/style.css';
 import axios from 'axios';
 import GraphSidebar from './GraphSidebar.jsx';
+import { Cake } from 'lucide-react';
 
 const nodeWidth = 150;
 const nodeHeight = 50;
@@ -36,15 +37,30 @@ const FamilyGraph = ({
   const [images, setImages] = useState({});
   const { setCenter, zoomIn: reactFlowZoomIn, zoomOut: reactFlowZoomOut, fitView } = useReactFlow();
 
-  const customNode = useCallback(({ data }) => (
+  const isBirthday = (dob) => {
+    if (!dob) return false;
+    const today = new Date();
+    const birthDate = new Date(dob);
+    return today.getMonth() === birthDate.getMonth() && today.getDate() === birthDate.getDate();
+  };
+
+  const customNode = useCallback(({ data }) => {
+    const isTodayBirthday = isBirthday(data.birth_date);
+    return (
     <div style={{ 
       padding: 10, 
       borderRadius: 5, 
       background: data.gender === 'M' ? '#97EBE6' : data.gender === 'F' ? '#EB97CF' : '#EBC097', 
       border: '1px solid #ccc', 
       whiteSpace: 'pre-wrap', 
-      textAlign: 'center'
+      textAlign: 'center',
+      position: 'relative'
     }}>
+       {isTodayBirthday && (
+          <div style={{ position: 'absolute', top: 0, right: 10 }}>
+            <Cake size={24} color="#FFD700" />
+          </div>
+        )}
       <img src={data.image ? data.image : defaultImage} style={{ width: '35px', height: '35px', borderRadius: '25%' }} />
          <div>{data.label}</div>
       <Handle type="target" position={Position.Top} id="top" />
@@ -52,7 +68,8 @@ const FamilyGraph = ({
       <Handle type="source" position={Position.Left} id="left" />
       <Handle type="source" position={Position.Right} id="right" />
     </div>
-  ), []);
+  );
+ }, []);
 
   const nodeTypes = useMemo(() => ({ custom: customNode }), [customNode]);
 

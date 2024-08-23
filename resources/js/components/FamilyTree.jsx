@@ -114,17 +114,22 @@ const FamilyTree = ({ generations, query, lineStyles }) => {
           <p>No marriages</p>
         )}
         {node.attributes.parents && Object.keys(node.attributes.parents).length > 0 ? (
-          <div>
-            <p>Parents:</p>
             <ul>
-              {Object.values(node.attributes.parents).map(parent => (
-                <li key={parent.id}>{parent.name || 'Unknown person'}</li>
-              ))}
+              {Object.values(node.attributes.parents).map(parent => {
+                let parentType = parent.gender === 'F' ? 'Mother' : parent.gender === 'M' ? 'Father' : 'Parent';
+                return (
+                  <li key={parent.id}>
+                    {parentType}: {parent.name || 'Unknown person'}
+                  </li>
+                );
+              })}
             </ul>
-          </div>
-        ) : (
-          <p>Unknown parents</p>
-        )}
+          ) : (
+            <ul>
+            <li>Mother: Unknown person</li>
+            <li>Father: Unknown person</li>
+            </ul>
+          )}
       </div>
     );
 

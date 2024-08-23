@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios'; 
+import { Cake } from 'lucide-react';
 
 const Sidebar = ({ node, onClose, setImages, images }) => {
 const [errorMessage, setErrorMessage] = useState('');
@@ -29,6 +30,15 @@ const [errorMessage, setErrorMessage] = useState('');
   const edit = () => {
     window.location.href = `/person/${node.id}/edit`;
   };
+
+  const isBirthday = (birthDate) => {
+    if (!birthDate) return false;
+    const today = new Date();
+    const birth = new Date(birthDate);
+    return today.getMonth() === birth.getMonth() && today.getDate() === birth.getDate();
+  };
+
+  const isTodayBirthday = isBirthday(node.attributes.DOB);
   
   return (
     <div style={{
@@ -59,6 +69,20 @@ const [errorMessage, setErrorMessage] = useState('');
         &times;
       </button>
       <div style={{ padding: '20px' }}>
+        {isTodayBirthday && (
+          <div style={{ 
+            backgroundColor: '#FFD700', 
+            padding: '10px', 
+            borderRadius: '5px', 
+            marginBottom: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px'
+          }}>
+            <Cake size={24} />
+            <span>It's {node.name}'s birthday today!</span>
+          </div>
+        )}
         <h3>{node.name || 'Unknown'}</h3>
         <p><img src={images[node.id] || node.attributes.image ||'/images/user.png'} height={250} width={250}></img></p>
         <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
@@ -91,8 +115,8 @@ const [errorMessage, setErrorMessage] = useState('');
           </button>
         </div>
 
-        <p>DOB: {node.attributes.DOB}</p>
-        <p>DOD: {node.attributes.DOD}</p>
+        <p>Date of birth: {node.attributes.DOB}</p>
+        <p>Date of death: {node.attributes.DOD}</p>
         {node.attributes.marriage_dates && node.attributes.marriage_dates.length > 0 ? (
           node.attributes.marriage_dates.map((marriage, index) => (
             <div key={index}>
@@ -105,18 +129,26 @@ const [errorMessage, setErrorMessage] = useState('');
         ) : (
           <p>No marriages</p>
         )}
-         {node.attributes.parents && Object.keys(node.attributes.parents).length > 0 ? (
-          <div>
-            <p>Parents:</p>
+         <div>
+          <p>Parents:</p>
+          {node.attributes.parents && Object.keys(node.attributes.parents).length > 0 ? (
             <ul>
-              {Object.values(node.attributes.parents).map(parent => (
-                <li key={parent.id}>{parent.name || 'Unknown person'}</li>
-              ))}
+              {Object.values(node.attributes.parents).map(parent => {
+                let parentType = parent.gender === 'F' ? 'Mother' : parent.gender === 'M' ? 'Father' : 'Parent';
+                return (
+                  <li key={parent.id}>
+                    {parentType}: {parent.name || 'Unknown person'}
+                  </li>
+                );
+              })}
             </ul>
-          </div>
-        ) : (
-          <p>Unknown parents</p>
-        )}
+          ) : (
+            <ul>
+            <li>Mother: Unknown person</li>
+            <li>Father: Unknown person</li>
+            </ul>
+          )}
+        </div>
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
       </div>
     </div>

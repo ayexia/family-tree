@@ -109,21 +109,34 @@ const App = () => {
         border: '1px solid #ccc',
     };
 
-    const lineStyleContainerStyle = {
+    const lineStyleContainer = {
         display: 'flex',
         flexDirection: 'column',
         marginBottom: '10px',
     };
 
-    const lineStyleInputsStyle = {
+    const lineStyleInputs = {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
     };
 
+    const currentViewStyle = {
+        fontFamily: '"Inika", serif',
+        fontSize: '1em',
+        textAlign: 'center',
+        position: 'absolute',
+        color: '#A7B492',
+        top: '-27.5px',
+        right: '550px',
+        marginBottom: '0px'
+    };
+
     return (
         <ReactFlowProvider>
             <Router>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <p style={currentViewStyle}>Current View - {view === 'graph' ? 'Graph' : 'Tree'}</p>
                 <div style={{ display: 'flex' }}>
                     <div style={controlsContainer}>
                         <button style={buttonStyle} onClick={switchView}>
@@ -211,9 +224,9 @@ const App = () => {
                                         const key = Object.keys(lineStyles)[index];
                                         const style = lineStyles[key];
                                         return (
-                                            <div key={key} style={lineStyleContainerStyle}>
+                                            <div key={key} style={lineStyleContainer}>
                                                 <label>{type}</label>
-                                                <div style={lineStyleInputsStyle}>
+                                                <div style={lineStyleInputs}>
                                                     <input
                                                         type="color"
                                                         value={style.color}
@@ -265,6 +278,7 @@ const App = () => {
                         }
                     </div>
                 </div>
+            </div>
                 <Routes>
                     <Route path="/family-tree" element={<FamilyTree />} />
                     <Route path="/family-graph" element={<FamilyGraph />} />

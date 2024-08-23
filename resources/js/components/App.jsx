@@ -104,9 +104,12 @@ const App = () => {
 
     const inputStyle = {
         padding: '5px',
-        margin: '5px 0',
+        margin: '2.5px 0',
         borderRadius: '5px',
         border: '1px solid #ccc',
+        fontSize: '0.85em',
+        fontFamily: '"Inika", serif',
+        border: '1px solid #CCE7BD',
     };
 
     const lineStyleContainer = {

@@ -279,18 +279,56 @@ const FamilyTree = ({ generations, query, lineStyles }) => {
       }
     `;
 
+    const searchContainerStyle = {
+      display: 'flex',
+      alignItems: 'center',
+      margin: '12px',
+      width: '27.5%',
+    };
+  
+    const inputStyle = {
+      flex: 1,
+      padding: '2.5px',
+      fontSize: '0.85em',
+      fontFamily: '"Inika", serif',
+      border: '1px solid #CCE7BD',
+      borderRadius: '5px 0 0 5px',
+      outline: 'none',
+    };
+  
+    const buttonStyle = {
+      padding: '2.5px 20px',
+      backgroundColor: '#CCE7BD',
+      color: '#587353',
+      border: 'none',
+      borderRadius: '0 5px 5px 0',
+      cursor: 'pointer',
+      fontSize: '0.85em',
+      fontFamily: '"Inika", serif',
+      fontWeight: 'bold',
+      transition: 'background-color 0.3s',
+    };
+
+    const imgStyle = {
+      width: '15px',
+      height: '15px',
+      opacity: 0.3,
+  };
+
     if (!treeData) { //alternate display if no tree data is available - error message and search bar
-    return (
+  return (
     <div>
       {errorMessage}
-      <div style={{ margin: '10px', width: '100%', height: '100vh' }}>
+      <div style={searchContainerStyle}>
         <input 
           type="text" 
           value={surnameQuery} 
           onChange={(e) => setSurnameQuery(e.target.value)} 
           placeholder="Search a bloodline (surname)"
+          style={inputStyle}
         />
-        <button onClick={searchSurname}>Search</button>
+        <button onClick={searchSurname} style={buttonStyle}>
+        <img src="/images/search.png" alt="Search" style={imgStyle}></img></button>
       </div>
     </div>
     );
@@ -301,17 +339,17 @@ const FamilyTree = ({ generations, query, lineStyles }) => {
     //only appears if the user has searched a bloodline/surname where family tree data is available, and no errors were given
     //also ensures sidebar is only opened if isSidebarOpened is true, and if so will display the data of a selected node and also close if user selects to do this
 <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100vh' }}>
-<style>{linkStyles}</style>
-  <div style={{ display: 'flex', padding: '10px' }}>
-    <div style={{ flex: '1' }}>
+    <style>{linkStyles}</style>
+    <div style={searchContainerStyle}>
       <input 
         type="text" 
         value={surnameQuery} 
         onChange={(e) => setSurnameQuery(e.target.value)} 
         placeholder="Search a bloodline (surname)"
+        style={inputStyle}
       />
-      <button onClick={searchSurname}>Search</button>
-    </div>
+      <button onClick={searchSurname} style={buttonStyle}>
+      <img src="/images/search.png" alt="Search" style={imgStyle}></img></button>
   </div>
   <div style={{ flex: '1', height: '100%', width: '100%' }}>
     {hasSearched && treeData && !errorMessage && (

@@ -210,7 +210,6 @@ class FamilyTreeController extends Controller
       }
   
       //iterates through parent-child relationships, checks if both parent and child exist in familyTree array and adds their data to nodes' list of parents and children
-      
       foreach ($motherAndChildRelationships as $motherAndChild){
           if (isset($familyTree[$motherAndChild['mother_id']]) && isset($familyTree[$motherAndChild['child_id']])) {
               $familyTree[$motherAndChild['mother_id']]->addChild($familyTree[$motherAndChild['child_id']]);

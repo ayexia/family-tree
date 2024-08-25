@@ -15,49 +15,35 @@ class GedcomController extends Controller
 {
     /**
      * Handles the uploading of GEDCOM files, allowing them to be validated and parsed.
+     * 
+     * @param Request $request - HTTP request object containing the uploaded file along with any other data.
+     * @return \Illuminate\Http\RedirectResponse - Redirects back with success message if the uploading and parsing are complete without issues.
      */
     public function upload(Request $request) 
     {
         //checks and ensures the uploaded file type matches what's required (ged alone does not work and must be accompanied by "txt/text")
         $request->validate([
             'gedcom_file' => 'required|file|mimes:txt,text,ged', 
-            'family_tree_id' => 'nullable|exists:family_trees,id',
         ]);
 
-        $familyTreeId = $request->input('family_tree_id');
-
         $userId = auth()->user()->id;
-        if (!$familyTreeId) {
             // Create a new FamilyTree if none exists
-            $familyTree = FamilyTree::create([
+            $familyTree = FamilyTree::firstOrCreate([
                 'user_id' => $userId,
             ]);
-    
-            $familyTreeId = $familyTree->id;
-        } else {
-            $familyTree = FamilyTree::where('id', $familyTreeId)
-                ->where('user_id', $userId)
-                ->firstOrFail();
-        }
+
         //retrieves file path (location), creates new instance of the parser and parses the file
         $filePath = $request->file('gedcom_file')->getPathname();
         $parser = new GedcomParser();
-        $parser->parse($filePath, $familyTreeId); 
+        $parser->parse($filePath, $familyTree->id); 
 
         //redirects providing success message if completed with no issues
         return redirect()->back()->with('success', 'GEDCOM file imported successfully.');
 }
 
-    public function showUploadForm($familyTreeId = null)
+    public function showUploadForm()
 {
-    $userId = auth()->user()->id;
-
-    if ($familyTreeId) {
-        $familyTree = FamilyTree::where('id', $familyTreeId)
-            ->where('user_id', $userId)
-            ->first();
-    }
-    return view('import', ['familyTreeId' => $familyTreeId]);
+    return view('import');
 }
 
 public function index()
@@ -65,13 +51,8 @@ public function index()
     $userId = Auth::id();
     $familyTree = FamilyTree::where('user_id', $userId)->first();
     
-    $familyTreeId = null;
-    
-    if ($familyTree) {
-        $familyTreeId = $familyTree->id;
-        }     
     return view('homepage', [
-        'familyTreeId' => $familyTreeId,
+        'familyTreeId' => $familyTree ? $familyTree->id : null,
         ]);
     }
 }

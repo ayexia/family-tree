@@ -80,7 +80,7 @@
                 Family Tree
                 <span class="tooltip">View your family tree and explore your ancestry</span>
             </a>
-            <a href="{{ route('import.form', ['familyTreeId' => $familyTreeId ?? '']) }}" class="circle import-gedcom">
+            <a href="{{ route('import.form') }}" class="circle import-gedcom">
                 Import GEDCOM
                 <span class="tooltip">Import a GEDCOM file to build your family tree</span>
             </a>

@@ -16,8 +16,8 @@ Route::get('/home', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/home', [GedcomController::class, 'index'])->name('home');
-    Route::get('/import/{familyTreeId?}', [GedcomController::class, 'showUploadForm'])->name('import.form');
-    Route::post('/import', [GedcomController::class, 'upload'])->name('import');
+    Route::get('/import', [GedcomController::class, 'showUploadForm'])->name('import.form');
+    Route::post('/upload', [GedcomController::class, 'upload'])->name('upload');
     Route::get('/family-tree', [FamilyTreeController::class, 'displayFamilyTree'])->name('family.tree');
     Route::get('/family-graph', [FamilyTreeController:: class, 'displayFamilyTree'])->name('family.graph');
 });

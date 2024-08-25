@@ -169,9 +169,8 @@
             <li>If you encounter any issues, please make sure your file is properly formatted and the correct type.</li>
         </ol>
 
-    <form action="{{ route('import') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+    <form action="{{ route('upload') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
     @csrf
-    <input type="hidden" name="family_tree_id" value="{{ $familyTreeId ?? '' }}">
     <div>
         <label for="gedcom_file">Choose GEDCOM file</label>
         <input type="file" name="gedcom_file" id="gedcom_file" accept=".ged" style="margin-top: 0.25rem; display: block; width: 100%; font-size: 0.875rem; color: #1a202c; border: 1px solid #cbd5e0; border-radius: 0.375rem; cursor: pointer; background-color: #f7fafc;">

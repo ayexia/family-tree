@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Controller handling notifications for email verification - provided by Laravel Breeze.
+ */
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -14,7 +16,7 @@ class EmailVerificationNotificationController extends Controller
     public function store(Request $request): RedirectResponse
     {
         if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->intended(route('home', absolute: false));
+            return redirect()->intended(route('home', absolute: false)); //ensures if email is verified is directed to homepage
         }
 
         $request->user()->sendEmailVerificationNotification();

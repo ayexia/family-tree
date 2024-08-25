@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Handles profile update requests - provided by Laravel Breeze.
+ */
 namespace App\Http\Requests;
 
 use App\Models\User;

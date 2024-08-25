@@ -21,7 +21,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
     RedirectIfAuthenticated::redirectUsing(function () {
-        return route('home');
+        return route('home'); //if authenticated, redirects user to home
     });
     }
 }

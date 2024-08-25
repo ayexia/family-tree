@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Controller handling profile updates and account deletion with corresponding view - provided by Laravel Breeze.
+ */
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;

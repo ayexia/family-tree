@@ -8,15 +8,14 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\GedcomParser;
 use App\Models\FamilyTree;
-use Gedcom\Parser; 
-use Illuminate\Support\Facades\Auth;
+use Gedcom\Parser;
 
 class GedcomController extends Controller
 {
     /**
      * Handles the uploading of GEDCOM files, allowing them to be validated and parsed.
      * 
-     * @param Request $request - HTTP request object containing the uploaded file along with any other data.
+     * @param Request $request - HTTP request object containing the uploaded GEDCOM file.
      * @return \Illuminate\Http\RedirectResponse - Redirects back with success message if the uploading and parsing are complete without issues.
      */
     public function upload(Request $request) 
@@ -26,31 +25,44 @@ class GedcomController extends Controller
             'gedcom_file' => 'required|file|mimes:txt,text,ged', 
         ]);
 
+        //obtains current user's ID
         $userId = auth()->user()->id;
-            // Create a new FamilyTree if none exists
+            // Create a new FamilyTree if none exists after searching with corresponding user's ID for reference
             $familyTree = FamilyTree::firstOrCreate([
                 'user_id' => $userId,
             ]);
 
-        //retrieves file path (location), creates new instance of the parser and parses the file
+        //retrieves file path (location), creates new instance of the parser and parses the file, allocating a family tree ID to it which then refers to the user
         $filePath = $request->file('gedcom_file')->getPathname();
         $parser = new GedcomParser();
         $parser->parse($filePath, $familyTree->id); 
 
         //redirects providing success message if completed with no issues
         return redirect()->back()->with('success', 'GEDCOM file imported successfully.');
-}
+    }
 
+    /**
+     * Displays form for user to upload GEDCOM files.
+     * 
+     * @return \Illuminate\View\View - Returns view for GEDCOM file upload form.
+     */
     public function showUploadForm()
-{
-    return view('import');
-}
-
-public function index()
     {
-    $userId = Auth::id();
+    return view('import'); //view which contains GEDCOM file upload form
+    }
+
+    /**
+     * Displays homepage for the current user.
+     * 
+     * @return \Illuminate\View\View - Returns the homepage view and passes the user's family tree ID if it exists (to allow the user to be able to search through their family tree).
+     */
+    public function index()
+    {
+    //obtain user ID
+    $userId = auth()->user()->id;
+    //find family tree corresponding to user ID
     $familyTree = FamilyTree::where('user_id', $userId)->first();
-    
+    //returns the view for the homepage and passes the user's family tree ID if it exists to allow for appropriate searching
     return view('homepage', [
         'familyTreeId' => $familyTree ? $familyTree->id : null,
         ]);

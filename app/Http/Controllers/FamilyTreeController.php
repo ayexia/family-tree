@@ -1,5 +1,9 @@
 <?php
-
+/**
+* Controller method for handling functionalities dealing with constructing the family tree after fetching the queried people and assorting them.
+* These are then processed as specific data structures needed to be passed over to the frontend to be visualised (tree/graph).
+* Additionally handles editing people details and provides corresponding view. 
+*/
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
@@ -15,179 +19,71 @@ use Illuminate\Support\Facades\Auth;
 class FamilyTreeController extends Controller
 {
     /**
-     * Stores information of newly added family member - IN PROGRESS
-     * TODO: further checks, fixing DB variables and GEDCOM IDs, complete form and allocate arbitrary GEDCOM ID if unavailable
-     * CONT: ensure user can select from dropdown list (or manually write if possible but will require creating new individuals if they do not exist)
-     * CONT: once DB expands to be more inclusive will require additional checks
-     */
-    // public function store(Request $request)
-    // {
-    //     $data = $request->validate([
-    //         'name' => 'required',
-    //         'gedcom_id' => 'nullable',
-    //         'birth_date' => 'nullable|date',
-    //         'death_date' => 'nullable|date',
-    //         'gender' => 'nullable|in:M,F',
-    //         'mother_id' => 'nullable|numeric',
-    //         'father_id' => 'nullable|numeric',
-    //         'spouse_id' => 'nullable|numeric',
-    //         'marriage_date' => 'nullable|date',
-    //         'divorce_date' => 'nullable|date',
-    //         'child_id' => 'nullable|numeric',
-    //         'child_number' => 'nullable|numeric',
-    //       ]);
-          
-    //       $person = Person::create([
-    //         'name' => $data['name'],
-    //         'gedcom_id' => $data['gedcom_id'],
-    //         'birth_date' => $data['birth_date'],
-    //         'death_date' => $data['death_date'],
-    //         'gender' => $data['gender'],
-    //       ]);
-
-    //       if($data['mother_id']) {
-    //         $lastChild = MotherAndChild::where('mother_id', $data['mother_id'])->max('child_number');
-    //         $childNumber = $lastChild ? $lastChild + 1 : 1;
-
-    //         MotherAndChild::create([
-    //             'mother_id' => $data['mother_id'],
-    //             'child_id' => $person->id,
-    //             'child_number' => $childNumber,
-    //         ]);
-    //       }
-
-    //       if($data['father_id']) {
-    //         $lastChild = FatherAndChild::where('father_id', $data['father_id'])->max('child_number');
-    //         $childNumber = $lastChild ? $lastChild + 1 : 1;
-    //         FatherAndChild::create([
-    //             'father_id' => $data['father_id'],
-    //             'child_id' => $person->id,
-    //             'child_number' => $childNumber,
-    //         ]);
-    //       }
-
-    //       if($data['gender'] === 'M' && $data['spouse_id']){
-    //         Spouse::create([
-    //             'second_spouse_id' => $person->id,
-    //             'first_spouse_id' => $data['spouse_id'],
-    //             'marriage_date' => $data['marriage_date'],
-    //             'divorce_date' => $data['marriage_date'],
-    //         ]);
-    //       }
-
-    //       if($data['gender'] === 'F' && $data['spouse_id']){
-    //         Spouse::create([
-    //             'second_spouse_id' => $data['spouse_id'],
-    //             'first_spouse_id' => $person->id,
-    //             'marriage_date' => $data['marriage_date'],
-    //             'divorce_date' => $data['marriage_date'],
-    //         ]);
-    //       }
-
-    //       if($data['father_id'] && $data['mother_id']){
-    //         Spouse::create([
-    //             'second_spouse_id' => $data['father_id'],
-    //             'first_spouse_id' => $data['mother_id'],
-    //             'marriage_date' => $data['marriage_date'],
-    //             'divorce_date' => $data['marriage_date'],
-    //         ]);
-    //       }
-
-    //       if($data['gender'] === 'F' && $data['child_id']){
-    //         $lastChild = MotherAndChild::where('mother_id', $person->id)->max('child_number');
-    //         $childNumber = $lastChild ? $lastChild + 1 : 1;
-    //         MotherAndChild::create([
-    //             'mother_id' => $person->id,
-    //             'child_id' => $data['child_id'],
-    //             'child_number' => $childNumber,
-    //         ]);
-    //       }
-
-          
-    //       if($data['gender'] === 'M' && $data['child_id']){
-    //         $lastChild = FatherAndChild::where('father_id', $person->id)->max('child_number');
-    //         $childNumber = $lastChild ? $lastChild + 1 : 1;
-    //         FatherAndChild::create([
-    //             'father_id' => $person->id,
-    //             'child_id' => $data['child_id'],
-    //             'child_number' => $childNumber,
-    //         ]);
-    //       }
-
-    //       return redirect()->route('tree.index')
-    //         ->with('success', 'Family member created successfully.');
-    // }
-
-    /**
-     * IN PROGRESS - function to display the family tree in standard pedigree tree format.
-     * This involves processing all of the relationships between people (spouse, parent and child), storing them in adjacency list format.
-     * This consists of each person being a node, with details such as their name and containing lists of their parents, spouse(s) and children.
-     * Currently working on: 
-     * - a search function which allows users to search a person in the tree (by name/ID - TBC), and being able to select a level of relationships they wish to view revolving the chosen person. 
-     * - searching should allow parents to be shown of the queried person in their tree? how to indent the current node when retrieving parents -- might have a separate search function for this
-     * - searching should show all relationships, not just children and spouse -- can make multiple search functions perhaps showing different relationships (searched person as a leaf or a root), hyperlink and traverse this way building the hierarchy
-     * - how to avoid skipping nodes not fully visited? as there is missing relationship information -- duplicates may be necessary, may be useful for listing different families especially as contents for PDF book with hyperlinks
-     * - root nodes displaying below their children, is this fine? will formatting make this clearer? -- most likely
-     * - another way of displaying relationships with multiple spouses? -- may be easier when using library for visualisation
-     */
+    * Displays family tree based on user input, involving searching and filtering based on name, surname and generations.
+    * Additionally manages construction of family tree and conversion of data structures to JSON format for API responses.
+    *
+    * @param \Illuminate\Http\Request $request - HTTP request object containing user's input parameters.
+    * @return \Illuminate\Http\Response|\Illuminate\View\View - Returns appropriate JSON response for API requests or alternatively a view for web requests.
+    */
 
      public function displayFamilyTree(Request $request){
 
-      $userId = auth()->id();
+      $userId = auth()->id(); //obtains current user's ID
 
-      $familyTreeId = FamilyTree::where('user_id', $userId)->value('id');
+      $familyTreeId = FamilyTree::where('user_id', $userId)->value('id'); //finds family tree containing retrieved user's ID and fetches its ID
      
-      //initialises query by ensuring results will be displayed in order of DOB, null values first
-      $requestedPerson = Person::query()
-      ->join('family_trees', 'people.family_tree_id', '=', 'family_trees.id') // join family_trees table
-      ->leftJoin('father_and_children as fac', 'people.id', '=', 'fac.child_id') // join father_and_children
-      ->leftJoin('mother_and_children as mac', 'people.id', '=', 'mac.child_id') // join mother_and_children
+      //initialises query to retrieve relevant people of family tree in order of root first (no parents) and order of birth date
+      $requestedPerson = Person::query() //queries Person model (to obtain from people table)
+      ->join('family_trees', 'people.family_tree_id', '=', 'family_trees.id') // join family_trees table with people on family tree id ensuring only people of specific family tree are obtained
+      ->leftJoin('father_and_children as fac', 'people.id', '=', 'fac.child_id') // left join father_and_children, ensuring all attributes of people table are included. if any person is listed as a child in father_and_children the relationship will be included as well
+      ->leftJoin('mother_and_children as mac', 'people.id', '=', 'mac.child_id') // left join mother_and_children, ensuring all attributes of people table are included. if any person is listed as a child in mother_and_children the relationship will be included as well
       ->where('family_trees.id', $familyTreeId) // filter by family_tree_id
-      ->where('family_trees.user_id', $userId) // filter by user_id
-      ->select('people.*')
-      ->selectRaw('CASE WHEN fac.father_id IS NULL AND mac.mother_id IS NULL THEN 0 ELSE 1 END as has_parents')
-      ->orderByRaw('has_parents ASC')
-      ->orderByRaw('CASE WHEN people.birth_date IS NULL THEN 1 ELSE 0 END')
-      ->orderBy('people.birth_date', 'ASC');
-
+      ->where('family_trees.user_id', $userId) // filter by user_id of the corresponding family tree
+      ->select('people.*') //select all columns from people table 
+      ->selectRaw('CASE WHEN fac.father_id IS NULL AND mac.mother_id IS NULL THEN 0 ELSE 1 END as has_parents') //additional column added to check if a person has parents
+      ->orderByRaw('has_parents ASC') //orders so people with null values for parents appear first (insinuating they are the roots)
+      ->orderByRaw('CASE WHEN people.birth_date IS NULL THEN 1 ELSE 0 END') //order by birth date (nulls are provided first)
+      ->orderBy('people.birth_date', 'ASC'); //order by birth date (previous birthdates appear prior)
+    
+      //takes user input for name(s) and/or surname
       $desiredName = $request->input('desiredName');
       $desiredSurname = $request->input('desiredSurname');
   
       if ($desiredName) { //retrieves people based on name(s)
           $requestedPerson->where('name', 'like', '%' . $desiredName . '%');
       }
-      if ($desiredSurname) { 
+      if ($desiredSurname) { //retrieves people based on surname
         $requestedPerson->where('surname', 'like', '%' . $desiredSurname . '%');
     }
-
+      //retrieves number of generations for display based on user input (null otherwise)  
       $generations = $request->input('generations', null);
-      //retrieves people fitting the query criteria
-      $allPersons = $requestedPerson->get();
+     
+      $allPersons = $requestedPerson->get();  //retrieves all people fitting the query criteria
   
       $allPersonsIds = $allPersons->pluck('id'); //extracts IDs of the queried people
   
       //retrieves all mother-child, father-child and spouse relationships from respective Models (DB)
-      $marriages = Spouse::join('family_trees', 'spouses.family_tree_id', '=', 'family_trees.id')
-      ->where('family_trees.user_id', $userId)
-      ->where('spouses.family_tree_id', $familyTreeId)
+      $marriages = Spouse::join('family_trees', 'spouses.family_tree_id', '=', 'family_trees.id') //joins spouses with family_tree on family_tree_id
+      ->where('family_trees.user_id', $userId) //filter by user ID (corresponding to family tree)
+      ->where('spouses.family_tree_id', $familyTreeId) //filter by family tree ID 
       ->get();
 
     $motherAndChildRelationships = MotherAndChild::where('family_tree_id', $familyTreeId)->get();
     $fatherAndChildRelationships = FatherAndChild::where('family_tree_id', $familyTreeId)->get();
     
       //extracts IDs of relatives and merges with IDs of queried people to form a list of all relatives
-      $relativeIds = $allPersonsIds
-          ->merge($motherAndChildRelationships->pluck('mother_id'))
-          ->merge($motherAndChildRelationships->pluck('child_id'))
-          ->merge($fatherAndChildRelationships->pluck('father_id'))
-          ->merge($fatherAndChildRelationships->pluck('child_id'))
-          ->merge($marriages->pluck('first_spouse_id'))
-          ->merge($marriages->pluck('second_spouse_id'))
-          ->unique();
+      $relativeIds = $allPersonsIds //obtains all queried people's IDs
+          ->merge($motherAndChildRelationships->pluck('mother_id')) //adds mother IDs
+          ->merge($motherAndChildRelationships->pluck('child_id')) //adds child IDs from mother-child relationships
+          ->merge($fatherAndChildRelationships->pluck('father_id')) //adds father IDs
+          ->merge($fatherAndChildRelationships->pluck('child_id')) //adds child IDs from father-child relationships
+          ->merge($marriages->pluck('first_spouse_id')) //adds first spouse IDs
+          ->merge($marriages->pluck('second_spouse_id')) //adds second spouse IDs
+          ->unique(); //prevents duplicates
   
       //retrieves all people whose IDs are in the list of all relatives formed
-      $relatives = Person::whereIn('id', $relativeIds)
-      ->where('family_tree_id', $familyTreeId)
+      $relatives = Person::whereIn('id', $relativeIds) //obtain all people whose IDs are within relativeIds
+      ->where('family_tree_id', $familyTreeId) //filter to ensure they belong to correct family tree
       ->get();
   
       //initialises "familyTree" array, containing all information of an individual and their relationships
@@ -234,16 +130,18 @@ class FamilyTreeController extends Controller
           $trees[] = $this->buildFamilyTree($familyTree[$person->id], $visited);
       }
     }
-     //if request end route contains "api", convert the family tree data to an acceptable JSON format by iterating through all people and building nested arrays in a recursive manner, and store in jsonResponse array
+     //if request end route contains corresponding links, convert the family tree data to an acceptable JSON format by iterating through all people and building nested arrays in a recursive manner, and store in jsonResponse array
       if ($request->is('api/family-tree-json')) {
-        $jsonResponse = [];
-        foreach ($allPersons as $person) {
+        $jsonResponse = []; //initialises JSON response
+        foreach ($allPersons as $person) { //iterates through all people and converts to tree structure via convertToJsonTree method
             $jsonResponse[] = $this->convertToJsonTree($familyTree[$person->id], $generations);
         }
+        //returns JSON response with family tree data
           return response()->json($jsonResponse);
       }
-      if ($request->is('api/family-graph-json')) {
+      if ($request->is('api/family-graph-json')) { //this version iterates through all people and converts to graph structure instead via convertToJsonGraph method
         $graphData = $this->convertToJsonGraph($familyTree, $generations);
+       //returns JSON response with graph data
         return response()->json($graphData);
        }
       //otherwise returns the appropriate View, passing the data necessary for it
@@ -447,145 +345,4 @@ class FamilyTreeController extends Controller
     
         return redirect()->back()->with('success', 'Family member details updated successfully.');
     }    
-
-    // public function update(Request $request, $id)
-    // {
-    //     $data = $request->validate([
-    //         'name' => 'required',
-    //         'gedcom_id' => 'nullable',
-    //         'birth_date' => 'nullable|date',
-    //         'death_date' => 'nullable|date',
-    //         'gender' => 'nullable|in:M,F',
-    //         'mother_id' => 'nullable|numeric',
-    //         'father_id' => 'nullable|numeric',
-    //         'spouse_id' => 'nullable|numeric',
-    //         'marriage_date' => 'nullable|date',
-    //         'divorce_date' => 'nullable|date',
-    //         'child_id' => 'nullable|numeric',
-    //         'child_number' => 'nullable|numeric',
-    //       ]);
-          
-    //       $person = Person::findOrFail($id);
-    //       $person->update($data);
-    //       $mother_id = MotherAndChild::where('child_id', $id)->value('mother_id');
-    //       $father_id = FatherAndChild::where('child_id', $id)->value('father_id');
-          
-    //       if($data['mother_id']) {
-    //         $lastChild = MotherAndChild::where('mother_id', $data['mother_id'])->max('child_number');
-    //         $childNumber = $lastChild ? $lastChild + 1 : 1;
-
-    //         MotherAndChild::updateOrCreate([
-    //             'mother_id' => $data['mother_id'],
-    //             'child_id' => $person->id,
-    //             'child_number' => $childNumber,
-    //         ]);
-    //       } else {
-    //         MotherAndChild::where('child_id', $person->id)->delete();
-    //     }
-
-    //       if($data['father_id']) {
-    //         $lastChild = FatherAndChild::where('father_id', $data['father_id'])->max('child_number');
-    //         $childNumber = $lastChild ? $lastChild + 1 : 1;
-    //         FatherAndChild::updateOrCreate([
-    //             'father_id' => $data['father_id'],
-    //             'child_id' => $person->id,
-    //             'child_number' => $childNumber,
-    //         ]);
-    //     } else {
-    //         FatherAndChild::where('child_id', $person->id)->delete();
-    //     }
-
-    //       if($data['gender'] === 'M' && $data['spouse_id']){
-    //         Spouse::updateOrCreate([
-    //             'second_spouse_id' => $person->id,
-    //             'first_spouse_id' => $data['spouse_id'],
-    //             'marriage_date' => $data['marriage_date'],
-    //             'divorce_date' => $data['marriage_date'],
-    //         ]);
-    //     } else {
-    //         Spouse::where('second_spouse_id', $person->id)->delete();
-    //     }
-
-    //       if($data['gender'] === 'F' && $data['spouse_id']){
-    //         Spouse::updateOrCreate([
-    //             'second_spouse_id' => $data['spouse_id'],
-    //             'first_spouse_id' => $person->id,
-    //             'marriage_date' => $data['marriage_date'],
-    //             'divorce_date' => $data['marriage_date'],
-    //         ]);
-    //     } else {
-    //         Spouse::where('first_spouse_id', $person->id)->delete();
-    //     }
-
-    //       if($data['father_id'] && $data['mother_id']){
-    //         Spouse::updateOrCreate([
-    //             'second_spouse_id' => $data['father_id'],
-    //             'first_spouse_id' => $data['mother_id'],
-    //             'marriage_date' => $data['marriage_date'],
-    //             'divorce_date' => $data['marriage_date'],
-    //         ]);
-    //       } else {
-    //         Spouse::where('first_spouse_id', $mother_id)->orWhere('second_spouse_id', $father_id)->delete();}
-
-    //       if($data['gender'] === 'F' && $data['child_id']){
-    //         $lastChild = MotherAndChild::where('mother_id', $person->id)->max('child_number');
-    //         $childNumber = $lastChild ? $lastChild + 1 : 1;
-    //         MotherAndChild::updateOrCreate([
-    //             'mother_id' => $person->id,
-    //             'child_id' => $data['child_id'],
-    //             'child_number' => $childNumber,
-    //         ]);
-    //       } else {
-    //         MotherAndChild::where('mother_id', $person->id)->delete();
-    //     }
-
-          
-    //       if($data['gender'] === 'M' && $data['child_id']){
-    //         $lastChild = FatherAndChild::where('father_id', $person->id)->max('child_number');
-    //         $childNumber = $lastChild ? $lastChild + 1 : 1;
-    //         FatherAndChild::updateOrCreate([
-    //             'father_id' => $person->id,
-    //             'child_id' => $data['child_id'],
-    //             'child_number' => $childNumber,
-    //         ]);
-    //       } else {
-    //         FatherAndChild::where('father_id', $person->id)->delete();
-    //     }
-    //       return redirect()->route('tree.index')
-    //         ->with('success', 'Family member updated successfully.');
-
-    // }
-
-    /**
-     * Deletes family member from family tree and all associated relationships - IN PROGRESS
-     * TODO: fix depending on other methods, checks, add delete button to frontend page
-     */
-//     public function destroy($id)
-//     {
-//         $person = Person::findOrFail($id);
-//         $mother_id = MotherAndChild::where('child_id', $id)->value('mother_id');
-//         $father_id = FatherAndChild::where('child_id', $id)->value('father_id');
-    
-//         MotherAndChild::where('child_id', $id)->delete();
-//         MotherAndChild::where('mother_id', $id)->delete();
-    
-//         FatherAndChild::where('child_id', $id)->delete();
-//         FatherAndChild::where('father_id', $id)->delete();
-    
-//         Spouse::where('first_spouse_id', $id)->orWhere('second_spouse_id', $id)->delete();
-
-//         Spouse::where('first_spouse_id', $mother_id)->orWhere('second_spouse_id', $father_id)->delete();
-    
-//         $person->delete();
-    
-//         return redirect()->route('tree.index')
-//             ->with('success', 'Family member deleted successfully.');
-//     }
-
-//     public function show($id){
-//         //TODO: code for showing individuals, page to display person, modifications if necessary
-//         $person = Person::findOrFail($id);
-
-//         return view('person.show', compact('person'));
-//     }
 }

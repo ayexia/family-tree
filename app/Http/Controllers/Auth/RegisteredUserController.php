@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Controller handling registration along with corresponding view - provided by Laravel Breeze.
+ */
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -45,6 +47,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('home', absolute: false));
+        return redirect(route('home', absolute: false)); //ensures once registered is logged in and directed to homepage
     }
 }

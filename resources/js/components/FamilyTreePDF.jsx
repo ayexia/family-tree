@@ -102,6 +102,7 @@ const styles = StyleSheet.create({ //CSS
   biographyText: {
     fontSize: 9,
     lineHeight: 1.5,
+    wordBreak: 'break-word',
   },
   timelinePage: {
     padding: 40,
@@ -143,6 +144,10 @@ const styles = StyleSheet.create({ //CSS
     fontSize: 8,
     paddingLeft: 5,
   },
+  pageNumber: {
+    fontSize: 8,
+    textAlign: 'right'
+  }
 });
 
 const TitlePage = ({ title }) => ( //title page
@@ -155,16 +160,36 @@ const TitlePage = ({ title }) => ( //title page
   </Page>
 );
 
-const ContentsPage = ({ graph }) => ( //contents page
-  <Page size="A5" style={styles.page}>
-   <View style={styles.border}>
-      <Text style={styles.contentsTitle}>Contents</Text>
-      <View style={styles.content}>
-      {renderContents(graph)}
+const ITEMS_PER_PAGE = 20;
+
+const ContentsPage = ({ graph }) => { //contents page - allows 20 entries per page before breaking
+  const contentItems = renderContents(graph).filter(item => item !== null);
+  const pageCount = Math.ceil(contentItems.length / ITEMS_PER_PAGE);
+
+  return Array.from({ length: pageCount }, (_, pageIndex) => (
+    <Page key={`contents-${pageIndex}`} size="A5" style={styles.page}>
+      <View style={styles.border}>
+        {pageIndex === 0 && <Text style={styles.contentsTitle}>Contents</Text>}
+        <View style={styles.content}>
+          {contentItems
+            .slice(pageIndex * ITEMS_PER_PAGE, (pageIndex + 1) * ITEMS_PER_PAGE)
+            .map((item, itemIndex) => (
+              <React.Fragment key={itemIndex}>
+                {React.isValidElement(item) && item.type === Link ? (
+                  React.cloneElement(item, { style: styles.link })
+                ) : (
+                  <Text style={styles.contentItem}>{item}</Text>
+                )}
+              </React.Fragment>
+            ))}
+        </View>
+        {pageIndex < pageCount - 1 && (
+          <Text style={styles.pageNumber}>Continued on next page...</Text>
+        )}
       </View>
-    </View>
-  </Page>
-);
+    </Page>
+  ));
+};
 
 const renderContents = (graph) => { //render each person in contents
   const allPeople = new Set();
@@ -178,32 +203,25 @@ const renderContents = (graph) => { //render each person in contents
     const person = graph.nodes.find(node => node.id === id);
     if (!person) return null;
 
-    const mainPerson = (
-      <Link key={person.id} src={`#${person.id}`} style={styles.link}>
-        {person.data.name}
-      </Link>
-    );
+    const birthYear = person.data.birth_date ? new Date(person.data.birth_date).getFullYear() : null;
+    const deathYear = person.data.death_date ? new Date(person.data.death_date).getFullYear() : null;
 
-    const spouses = graph.edges
-      .filter(edge => edge.source === id && edge.label === 'Spouse')
-      .map(edge => {
-        const spouseId = edge.target;
-        if (allPeople.has(spouseId)) return null;
-        allPeople.add(spouseId);
-        const spouse = graph.nodes.find(node => node.id === spouseId);
-        return (
-          <Link key={spouse.id} src={`#${spouse.id}`} style={styles.link}>
-            {spouse.data.name}
-          </Link>
-        );
-      }).filter(spouse => spouse !== null); //only includes non-null spouses 
-
-    const couple = [mainPerson, ...spouses].reduce((prev, curr) => [prev, ' & ', curr]);
+    let yearInfo = '';
+    if (birthYear && deathYear) {
+      yearInfo = ` (${birthYear}-${deathYear})`;
+    } else if (birthYear) {
+      yearInfo = ` (b. ${birthYear})`;
+    } else if (deathYear) {
+      yearInfo = ` (d. ${deathYear})`;
+    }
 
     return (
       <React.Fragment key={person.id}>
         <Text style={styles.contentItem}>
-          {couple}
+          <Link src={`#${person.id}-0`} style={styles.link}>
+            {person.data.name}
+          </Link>
+          {yearInfo}
         </Text>
       </React.Fragment>
     );
@@ -230,22 +248,37 @@ const formatDate = (dateString) => {
   }
 };
 
-const TimelinePage = ({ person, events }) => (
-  <Page size="A5" style={styles.timelinePage}>
-   <View style={styles.border}>
-    <Text style={styles.timelineTitle}>{person.data.name}'s Timeline</Text>
-    <View style={styles.timelineContainer}>
-      <View style={styles.timelineLine} />
-      {events.map((event, index) => (
-        <View key={index} style={styles.timelineEvent}>
-          <Text style={styles.timelineDate}>{event.date || 'Unknown date'}</Text>
-          <Text style={styles.timelineDescription}>{event.description}</Text>
+const EVENTS_PER_PAGE = 20;
+
+const TimelinePage = ({ person, events }) => {
+  const pageCount = Math.ceil(events.length / EVENTS_PER_PAGE);
+
+  return Array.from({ length: pageCount }, (_, pageIndex) => (
+    <Page key={`timeline-${pageIndex}`} size="A5" style={styles.timelinePage}>
+      <View style={styles.border}>
+        <Text style={styles.timelineTitle}>
+          {person.data.name}'s Timeline {pageIndex > 0 ? `(continued)` : ''}
+        </Text>
+        <View style={styles.timelineContainer}>
+          <View style={styles.timelineLine} />
+          {events
+            .slice(pageIndex * EVENTS_PER_PAGE, (pageIndex + 1) * EVENTS_PER_PAGE)
+            .map((event, index) => (
+              <View key={index} style={styles.timelineEvent}>
+                <Text style={styles.timelineDate}>{event.date || 'Unknown date'}</Text>
+                <Text style={styles.timelineDescription}>{event.description}</Text>
+              </View>
+            ))}
         </View>
-      ))}
-    </View>
-    </View>
-  </Page>
-);
+        {pageIndex < pageCount - 1 && (
+          <Text style={styles.pageNumber}>Continued on next page...</Text>
+        )}
+      </View>
+    </Page>
+  ));
+};
+
+const MAX_CHARS_PER_PAGE = 750;
 
 const PersonPage = ({ person, graph }) => {
   if (!person || !person.data) {
@@ -279,99 +312,83 @@ const PersonPage = ({ person, graph }) => {
   const parents = data.parents && typeof data.parents === 'object' ? Object.values(data.parents) : [];
 
   const generateBiography = () => {
-    const bio = [];
+    let bio = '';
     
     const birthDate = formatDate(data.birth_date);
     const hasKnownParents = parents.length > 0;
   
     if (!birthDate && !hasKnownParents) {
-      bio.push(`${data.name}'s date of birth is unknown. `);
+      bio += `${data.name}'s date of birth is unknown. `;
     } else if (!birthDate && hasKnownParents) {
-      bio.push(`${data.name}'s date of birth is unknown, born to parents `);
-      parents.forEach((p, index) => {
-        if (index > 0) bio.push(' and ');
-        bio.push(
-          <Link key={p.id} src={`#${p.id}`} style={styles.link}>
-            {p.name}
-          </Link>
-        );
-      });
-      bio.push('. ');
+      bio += `${data.name}'s date of birth is unknown, born to parents ${parents.map(p => p.name).join(' and ')}. `;
     } else if (birthDate && !hasKnownParents) {
-      bio.push(`${data.name} was born ${birthDate.includes(' ') ? 'on' : 'in'} ${birthDate}. `);
+      bio += `${data.name} was born ${birthDate.includes(' ') ? 'on' : 'in'} ${birthDate}. `;
     } else if (birthDate && hasKnownParents) {
-      bio.push(`${data.name} was born ${birthDate.includes(' ') ? 'on' : 'in'} ${birthDate} to parents `);
-      parents.forEach((p, index) => {
-        if (index > 0) bio.push(' and ');
-        bio.push(
-          <Link key={p.id} src={`#${p.id}`} style={styles.link}>
-            {p.name}
-          </Link>
-        );
-      });
-      bio.push('. ');
+      bio += `${data.name} was born ${birthDate.includes(' ') ? 'on' : 'in'} ${birthDate} to parents ${parents.map(p => p.name).join(' and ')}. `;
     }
   
     if (spouses.length > 0) {
-      bio.push(`${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} `);
+      bio += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} `;
       if (spouses.length === 1) {
         const spouse = spouses[0];
-        bio.push(`married `);
-        bio.push(
-          <Link key={spouse.id} src={`#${spouse.id}`} style={styles.link}>
-            {spouse.data.name}
-          </Link>
-        );
+        bio += `married ${spouse.data.name}`;
         if (spouse.marriageDate) {
-          bio.push(` ${spouse.marriageDate.includes(' ') ? 'on' : 'in'} ${spouse.marriageDate}`);
+          bio += ` ${spouse.marriageDate.includes(' ') ? 'on' : 'in'} ${spouse.marriageDate}`;
         }
         if (spouse.divorceDate && !spouse.isCurrent) {
-          bio.push(` and divorced ${spouse.divorceDate.includes(' ') ? 'on' : 'in'} ${spouse.divorceDate}`);
+          bio += ` and divorced ${spouse.divorceDate.includes(' ') ? 'on' : 'in'} ${spouse.divorceDate}`;
         }
-        bio.push('. ');
+        bio += '. ';
       } else {
-        bio.push('married ');
+        bio += 'married ';
         spouses.forEach((spouse, index) => {
-          if (index > 0) bio.push(index === spouses.length - 1 ? ' and ' : ', ');
-          bio.push(
-            <Link key={spouse.id} src={`#${spouse.id}`} style={styles.link}>
-              {spouse.data.name}
-            </Link>
-          );
+          if (index > 0) bio += index === spouses.length - 1 ? ' and ' : ', ';
+          bio += spouse.data.name;
           if (spouse.marriageDate) {
-            bio.push(` ${spouse.marriageDate.includes(' ') ? 'on' : 'in'} ${spouse.marriageDate}`);
+            bio += ` ${spouse.marriageDate.includes(' ') ? 'on' : 'in'} ${spouse.marriageDate}`;
           }
           if (spouse.divorceDate && !spouse.isCurrent) {
-            bio.push(` (divorced ${spouse.divorceDate.includes(' ') ? 'on' : 'in'} ${spouse.divorceDate})`);
+            bio += ` (divorced ${spouse.divorceDate.includes(' ') ? 'on' : 'in'} ${spouse.divorceDate})`;
           }
           if (spouse.isCurrent) {
-            bio.push(' (current spouse)');
+            bio += ' (current spouse)';
           }
         });
-        bio.push('. ');
+        bio += '. ';
       }
     }
   
     if (children.length > 0) {
-      bio.push(`${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} had ${children.length} ${children.length === 1 ? 'child' : 'children'}: `);
-      children.forEach((child, index) => {
-        if (index > 0) bio.push(index === children.length - 1 ? ' and ' : ', ');
-        bio.push(
-          <Link key={child.id} src={`#${child.id}`} style={styles.link}>
-            {child.data.name}
-          </Link>
-        );
-      });
-      bio.push('. ');
+      bio += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} had ${children.length} ${children.length === 1 ? 'child' : 'children'}: `;
+      bio += children.map(child => child.data.name).join(', ') + '. ';
     }
   
     const deathDate = formatDate(data.death_date);
     if (deathDate) {
-      bio.push(`${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} passed away ${deathDate.includes(' ') ? 'on' : 'in'} ${deathDate}.`);
+      bio += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} passed away ${deathDate.includes(' ') ? 'on' : 'in'} ${deathDate}.`;
     }
   
     return bio;
-  };  
+  };
+
+  const splitBiographyIntoPages = (biography) => {
+    const pages = [];
+    let currentPage = '';
+    
+    for (const char of biography) {
+      if (currentPage.length >= MAX_CHARS_PER_PAGE) {
+        pages.push(currentPage);
+        currentPage = '';
+      }
+      currentPage += char;
+    }
+
+    if (currentPage.length > 0) {
+      pages.push(currentPage);
+    }
+
+    return pages;
+  };
 
   const generateTimeline = () => {
     const events = [];
@@ -419,33 +436,36 @@ const PersonPage = ({ person, graph }) => {
     return events;
   };
 
+  const biography = generateBiography();
+  const biographyPages = splitBiographyIntoPages(biography);
   const timelineEvents = generateTimeline();
 
+  
   return (
     <>
-      <Page size="A5" style={styles.page} id={person.id}>
-        <View style={styles.border}>
-          <Text style={styles.name}>{data.name}</Text>
-          
-          {data.image ? (
-            <Image
-              src={data.image}
-              style={styles.photo}
-            />
-          ) : (
-            <View style={styles.photoPlaceholder}>
-              <Text style={styles.photoText}>Photo</Text>
+      {biographyPages.map((pageContent, pageIndex) => (
+        <Page key={`person-${person.id}-page-${pageIndex}`} size="A5" style={styles.page} id={`${person.id}-0`}>
+          <View style={styles.border}>
+            <Text style={styles.name}>{data.name}</Text>
+            {data.image ? (
+              <Image src={data.image} style={styles.photo} />
+            ) : (
+              <View style={styles.photoPlaceholder}>
+                <Text style={styles.photoText}>Photo</Text>
+              </View>
+            )}
+            <Text style={styles.biographyTitle}>Biography {pageIndex > 0 ? `(continued)` : ''}</Text>
+            <View style={styles.biographyBox}>
+              <Text style={styles.biographyText}>
+                {pageContent}
+              </Text>
             </View>
-          )}
-
-          <Text style={styles.biographyTitle}>Biography</Text>
-          <View style={styles.biographyBox}>
-            <Text style={styles.biographyText}>
-              {generateBiography()}
-            </Text>
-          </View>
+            {pageIndex < biographyPages.length - 1 && (
+              <Text style={styles.pageNumber}>Continued on next page</Text>
+            )}
         </View>
       </Page>
+      ))}
       <TimelinePage person={person} events={timelineEvents} />
     </>
   );

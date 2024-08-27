@@ -342,7 +342,7 @@ const PersonPage = ({ person, graph }) => {
     } else if (birthDate && !hasKnownParents) {
       bio += `${data.name} was born ${birthDate.includes(' ') ? 'on' : 'in'} ${birthDate}. `;
     } else if (birthDate && hasKnownParents) {
-      bio += `${data.name} was born ${birthDate.includes(' ') ? 'on' : 'in'} ${birthDate} to parents tetetstststttett tetetstststttetttetetstststttetttetetstststttetttetetstststttetttetetstststttetttetetstststttett tetetstststttett vtetetstststttett vtetetstststttett tetetstststttetttetetstststttettv v tetetstststttett tetetstststttett tetetstststttettv tetetstststttettv tetetstststttettv tetetetdyegdieudgoeug hdudeie hdiehdihedihdeieh uhjusdueeu uhjusdueeuuhjusdueeuuhjusdueeuuhjusdueeuuhjusdueeuuhjusdueeuuhjusdueeuuhjusdueeuuhjusdueeu uhjusdueeuvuhjusdueeu ${parents.map(p => p.name).join(' and ')}. `;
+      bio += `${data.name} was born ${birthDate.includes(' ') ? 'on' : 'in'} ${birthDate} to parents ${parents.map(p => p.name).join(' and ')}. `;
     }
   
     if (spouses.length > 0) {

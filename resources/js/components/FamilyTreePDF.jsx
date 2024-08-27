@@ -47,7 +47,7 @@ const styles = StyleSheet.create({ //CSS
     fontSize: 8,
   },
   link: {
-    color: 'black',
+    color: 'blue',
     textDecoration: 'underline',
   },
   border: {
@@ -146,8 +146,21 @@ const styles = StyleSheet.create({ //CSS
   },
   pageNumber: {
     fontSize: 8,
-    textAlign: 'right'
-  }
+    textAlign: 'right',
+  },
+  backToContents: {
+    fontSize: 8,
+    color: 'blue',
+    textDecoration: 'underline',
+    position: 'absolute',
+    bottom: 10,
+    left: 10,
+  },
+  pageContent: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+  },
 });
 
 const TitlePage = ({ title }) => ( //title page
@@ -167,7 +180,7 @@ const ContentsPage = ({ graph }) => { //contents page - allows 20 entries per pa
   const pageCount = Math.ceil(contentItems.length / ITEMS_PER_PAGE);
 
   return Array.from({ length: pageCount }, (_, pageIndex) => (
-    <Page key={`contents-${pageIndex}`} size="A5" style={styles.page}>
+    <Page key={`contents-${pageIndex}`} size="A5" style={styles.page} id={pageIndex === 0 ? "contents" : undefined}>
       <View style={styles.border}>
         {pageIndex === 0 && <Text style={styles.contentsTitle}>Contents</Text>}
         <View style={styles.content}>
@@ -218,7 +231,7 @@ const renderContents = (graph) => { //render each person in contents
     return (
       <React.Fragment key={person.id}>
         <Text style={styles.contentItem}>
-          <Link src={`#${person.id}-0`} style={styles.link}>
+          <Link src={`#${person.id}`} style={styles.link}>
             {person.data.name}
           </Link>
           {yearInfo}
@@ -255,24 +268,29 @@ const TimelinePage = ({ person, events }) => {
 
   return Array.from({ length: pageCount }, (_, pageIndex) => (
     <Page key={`timeline-${pageIndex}`} size="A5" style={styles.timelinePage}>
-      <View style={styles.border}>
-        <Text style={styles.timelineTitle}>
-          {person.data.name}'s Timeline {pageIndex > 0 ? `(continued)` : ''}
-        </Text>
-        <View style={styles.timelineContainer}>
-          <View style={styles.timelineLine} />
-          {events
-            .slice(pageIndex * EVENTS_PER_PAGE, (pageIndex + 1) * EVENTS_PER_PAGE)
-            .map((event, index) => (
-              <View key={index} style={styles.timelineEvent}>
-                <Text style={styles.timelineDate}>{event.date || 'Unknown date'}</Text>
-                <Text style={styles.timelineDescription}>{event.description}</Text>
-              </View>
-            ))}
+      <View style={styles.pageContent}>
+        <View style={styles.border}>
+          <Text style={styles.timelineTitle}>
+            {person.data.name}'s Timeline {pageIndex > 0 ? `(continued)` : ''}
+          </Text>
+          <View style={styles.timelineContainer}>
+            <View style={styles.timelineLine} />
+            {events
+              .slice(pageIndex * EVENTS_PER_PAGE, (pageIndex + 1) * EVENTS_PER_PAGE)
+              .map((event, index) => (
+                <View key={index} style={styles.timelineEvent}>
+                  <Text style={styles.timelineDate}>{event.date || 'Unknown date'}</Text>
+                  <Text style={styles.timelineDescription}>{event.description}</Text>
+                </View>
+              ))}
+          </View>
+          {pageIndex < pageCount - 1 && (
+            <Text style={styles.pageNumber}>Continued on next page...</Text>
+          )}
         </View>
-        {pageIndex < pageCount - 1 && (
-          <Text style={styles.pageNumber}>Continued on next page...</Text>
-        )}
+        <Link src="#contents" style={styles.backToContents}>
+          Back to Contents
+        </Link>
       </View>
     </Page>
   ));
@@ -324,7 +342,7 @@ const PersonPage = ({ person, graph }) => {
     } else if (birthDate && !hasKnownParents) {
       bio += `${data.name} was born ${birthDate.includes(' ') ? 'on' : 'in'} ${birthDate}. `;
     } else if (birthDate && hasKnownParents) {
-      bio += `${data.name} was born ${birthDate.includes(' ') ? 'on' : 'in'} ${birthDate} to parents ${parents.map(p => p.name).join(' and ')}. `;
+      bio += `${data.name} was born ${birthDate.includes(' ') ? 'on' : 'in'} ${birthDate} to parents tetetstststttett tetetstststttetttetetstststttetttetetstststttetttetetstststttetttetetstststttetttetetstststttett tetetstststttett vtetetstststttett vtetetstststttett tetetstststttetttetetstststttettv v tetetstststttett tetetstststttett tetetstststttettv tetetstststttettv tetetstststttettv tetetetdyegdieudgoeug hdudeie hdiehdihedihdeieh uhjusdueeu uhjusdueeuuhjusdueeuuhjusdueeuuhjusdueeuuhjusdueeuuhjusdueeuuhjusdueeuuhjusdueeuuhjusdueeu uhjusdueeuvuhjusdueeu ${parents.map(p => p.name).join(' and ')}. `;
     }
   
     if (spouses.length > 0) {
@@ -360,7 +378,13 @@ const PersonPage = ({ person, graph }) => {
   
     if (children.length > 0) {
       bio += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} had ${children.length} ${children.length === 1 ? 'child' : 'children'}: `;
-      bio += children.map(child => child.data.name).join(', ') + '. ';
+      if (children.length === 1) {
+        bio += children[0].data.name + '. ';
+      } else if (children.length === 2) {
+        bio += `${children[0].data.name} and ${children[1].data.name}. `;
+      } else {
+        bio += children.slice(0, -1).map(child => child.data.name).join(', ') + ', and ' + children[children.length - 1].data.name + '. ';
+      }
     }
   
     const deathDate = formatDate(data.death_date);
@@ -443,8 +467,9 @@ const PersonPage = ({ person, graph }) => {
   
   return (
     <>
-      {biographyPages.map((pageContent, pageIndex) => (
-        <Page key={`person-${person.id}-page-${pageIndex}`} size="A5" style={styles.page} id={`${person.id}-0`}>
+    {biographyPages.map((pageContent, pageIndex) => (
+      <Page key={`person-${person.id}-page-${pageIndex}`} size="A5" style={styles.page} id={pageIndex === 0 ? `${person.id}` : `${person.id}-${pageIndex}`}>
+        <View style={styles.pageContent}>
           <View style={styles.border}>
             <Text style={styles.name}>{data.name}</Text>
             {data.image ? (
@@ -461,8 +486,12 @@ const PersonPage = ({ person, graph }) => {
               </Text>
             </View>
             {pageIndex < biographyPages.length - 1 && (
-              <Text style={styles.pageNumber}>Continued on next page</Text>
+              <Text style={styles.pageNumber}>Continued on next page...</Text>
             )}
+          </View>
+          <Link src="#contents" style={styles.backToContents}>
+            Back to Contents
+          </Link>
         </View>
       </Page>
       ))}

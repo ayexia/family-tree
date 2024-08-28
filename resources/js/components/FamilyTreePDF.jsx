@@ -175,8 +175,8 @@ const TitlePage = ({ title }) => ( //title page
 
 const ITEMS_PER_PAGE = 20;
 
-const ContentsPage = ({ graph }) => { //contents page - allows 20 entries per page before breaking
-  const contentItems = renderContents(graph).filter(item => item !== null);
+const ContentsPage = ({ graph, selectedPeople }) => { //contents page - allows 20 entries per page before breaking to new page
+  const contentItems = renderContents(graph, selectedPeople).filter(item => item !== null);
   const pageCount = Math.ceil(contentItems.length / ITEMS_PER_PAGE);
 
   return Array.from({ length: pageCount }, (_, pageIndex) => (
@@ -204,7 +204,7 @@ const ContentsPage = ({ graph }) => { //contents page - allows 20 entries per pa
   ));
 };
 
-const renderContents = (graph) => { //render each person in contents
+const renderContents = (graph, selectedPeople) => { //render each person in contents
   const allPeople = new Set();
 
   const renderContentsItem = (id) => {
@@ -214,7 +214,7 @@ const renderContents = (graph) => { //render each person in contents
     allPeople.add(id);
 
     const person = graph.nodes.find(node => node.id === id);
-    if (!person) return null;
+    if (!person || (selectedPeople.length > 0 && !selectedPeople.includes(id))) return null;
 
     const birthYear = person.data.birth_date ? new Date(person.data.birth_date).getFullYear() : null;
     const deathYear = person.data.death_date ? new Date(person.data.death_date).getFullYear() : null;
@@ -298,7 +298,7 @@ const TimelinePage = ({ person, events }) => {
 
 const MAX_CHARS_PER_PAGE = 750;
 
-const PersonPage = ({ person, graph }) => {
+const PersonPage = ({ person, graph, biographyLevel }) => {
   if (!person || !person.data) {
     return (
       <Page size="A5" style={styles.page}>
@@ -315,36 +315,33 @@ const PersonPage = ({ person, graph }) => {
     .filter(edge => edge.source === person.id && edge.label === 'Spouse')
     .map((edge, index) => {
       const spouseNode = graph.nodes.find(node => node.id === edge.target);
-      return {
+      return spouseNode ? {
         ...spouseNode,
         marriageDate: data.marriage_dates && data.marriage_dates[index] ? formatDate(data.marriage_dates[index]) : null,
         divorceDate: data.divorce_dates && data.divorce_dates[index] ? formatDate(data.divorce_dates[index]) : null,
         isCurrent: edge.is_current
-      };
-    });
+      } : null;
+    }).filter(Boolean); //filters null spouses
 
   const children = graph.edges
     .filter(edge => edge.source === person.id && edge.label === 'Child')
-    .map(edge => graph.nodes.find(node => node.id === edge.target));
+    .map(edge => graph.nodes.find(node => node.id === edge.target))
+    .filter(Boolean); //filters null children
 
-  const parents = data.parents && typeof data.parents === 'object' ? Object.values(data.parents) : [];
+  const parents = data.parents && typeof data.parents === 'object' ? Object.values(data.parents).filter(Boolean) : [];
 
   const generateBiography = () => {
     let bio = '';
     
     const birthDate = formatDate(data.birth_date);
-    const hasKnownParents = parents.length > 0;
-  
-    if (!birthDate && !hasKnownParents) {
-      bio += `${data.name}'s date of birth is unknown. `;
-    } else if (!birthDate && hasKnownParents) {
-      bio += `${data.name}'s date of birth is unknown, born to parents ${parents.map(p => p.name).join(' and ')}. `;
-    } else if (birthDate && !hasKnownParents) {
-      bio += `${data.name} was born ${birthDate.includes(' ') ? 'on' : 'in'} ${birthDate}. `;
-    } else if (birthDate && hasKnownParents) {
-      bio += `${data.name} was born ${birthDate.includes(' ') ? 'on' : 'in'} ${birthDate} to parents ${parents.map(p => p.name).join(' and ')}. `;
+    const deathDate = formatDate(data.death_date);
+    
+    bio += `${data.name || 'Unknown'} was born ${birthDate ? (birthDate.includes(' ') ? 'on' : 'in') + ' ' + birthDate : 'on an unknown date'}. `;
+
+    if (parents.length > 0) {
+      bio += `${data.gender === 'M' ? 'His' : data.gender === 'F' ? 'Her' : 'Their'} parents were ${parents.map(p => p.name).join(' and ')}. `;
     }
-  
+
     if (spouses.length > 0) {
       bio += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} `;
       if (spouses.length === 1) {
@@ -386,10 +383,25 @@ const PersonPage = ({ person, graph }) => {
         bio += children.slice(0, -1).map(child => child.data.name).join(', ') + ', and ' + children[children.length - 1].data.name + '. ';
       }
     }
-  
-    const deathDate = formatDate(data.death_date);
+
     if (deathDate) {
       bio += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} passed away ${deathDate.includes(' ') ? 'on' : 'in'} ${deathDate}.`;
+    }
+
+    if (biographyLevel === 'comprehensive') {
+      const grandparents = parents.flatMap(parent => (parent.parents || []).filter(Boolean));
+      if (grandparents.length > 0) {
+        bio += `${data.name}'s grandparents were ${grandparents.map(gp => gp.name).join(', ')}. `;
+      }
+
+      const grandchildren = children.flatMap(child => 
+        graph.edges
+          .filter(edge => edge.source === child.id && edge.label === 'Child')
+          .map(edge => graph.nodes.find(node => node.id === edge.target))
+      ).filter(Boolean);
+      if (grandchildren.length > 0) {
+        bio += `${data.gender === 'M' ? 'His' : data.gender === 'F' ? 'Her' : 'Their'} grandchildren are ${grandchildren.map(gc => gc.data.name).join(', ')}. `;
+      }
     }
   
     return bio;
@@ -464,7 +476,6 @@ const PersonPage = ({ person, graph }) => {
   const biographyPages = splitBiographyIntoPages(biography);
   const timelineEvents = generateTimeline();
 
-  
   return (
     <>
     {biographyPages.map((pageContent, pageIndex) => (
@@ -503,12 +514,17 @@ const PersonPage = ({ person, graph }) => {
 const FamilyTreePDF = ({ onClose }) => { //fetch family data from backend
   const [familyData, setFamilyData] = useState({ nodes: [], edges: [] });
   const [bookTitle, setBookTitle] = useState('');
+  const [generations, setGenerations] = useState(3);
+  const [selectedPeople, setSelectedPeople] = useState([]);
+  const [biographyLevel, setBiographyLevel] = useState('basic');
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('/api/family-graph-json');
+        const response = await axios.get('/api/family-graph-json', {
+          params: { generations }
+        });
         setFamilyData(response.data);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -516,39 +532,46 @@ const FamilyTreePDF = ({ onClose }) => { //fetch family data from backend
     };
 
     fetchData();
-  }, []);
+  }, [generations]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsFormSubmitted(true);
   };
 
+  const handlePersonSelection = (personId) => {
+    setSelectedPeople(prev => 
+      prev.includes(personId) 
+        ? prev.filter(id => id !== personId)
+        : [...prev, personId]
+    );
+  };
+
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedPeople(familyData.nodes.map(node => node.id));
+    } else {
+      setSelectedPeople([]);
+    }
+  };
+
   const renderPages = (graph) => {
     const allPeople = new Set();
     
     const renderPerson = (person) => {
-      if (allPeople.has(person.id)) {
+      if (!person || allPeople.has(person.id) || (selectedPeople.length > 0 && !selectedPeople.includes(person.id))) {
         return [];
       }
       allPeople.add(person.id);
 
-      const pages = [<PersonPage key={person.id} person={person} graph={graph} />];
+      const pages = [<PersonPage key={person.id} person={person} graph={graph} biographyLevel={biographyLevel} />];
 
       graph.edges.forEach(edge => {
-        if (edge.source === person.id && edge.label === 'Spouse') {
-          const spouse = graph.nodes.find(node => node.id === edge.target);
-          if (spouse && !allPeople.has(spouse.id)) {
-            pages.push(<PersonPage key={spouse.id} person={spouse} graph={graph} />);
-            allPeople.add(spouse.id);
-          }
-        }
-      });
-
-      graph.edges.forEach(edge => {
-        if (edge.source === person.id && edge.label === 'Child') {
-          const child = graph.nodes.find(node => node.id === edge.target);
-          if (child) {
-            pages.push(...renderPerson(child));
+        if (edge.source === person.id && (edge.label === 'Spouse' || edge.label === 'Child')) {
+          const relatedPerson = graph.nodes.find(node => node.id === edge.target);
+          if (relatedPerson && !allPeople.has(relatedPerson.id) && 
+              (selectedPeople.length === 0 || selectedPeople.includes(relatedPerson.id))) {
+            pages.push(...renderPerson(relatedPerson));
           }
         }
       });
@@ -619,9 +642,10 @@ const FamilyTreePDF = ({ onClose }) => { //fetch family data from backend
   return (
     <div style={overlay}>
       <button style={closeButton} onClick={onClose}>Close</button>
-      {!isFormSubmitted ? (
+    <div style={{ display: 'flex', width: '100%', height: '100%' }}>
+      <div style={{ width: '300px', backgroundColor: 'white', padding: '20px', overflowY: 'auto' }}>
+        <h2>Create Family Book</h2>
         <form onSubmit={handleSubmit} style={formStyle}>
-          <h2>Create Family Book</h2>
           <input
             type="text"
             value={bookTitle}
@@ -630,17 +654,61 @@ const FamilyTreePDF = ({ onClose }) => { //fetch family data from backend
             style={inputStyle}
             required
           />
+          <input
+            type="number"
+            value={generations}
+            onChange={(e) => setGenerations(Number(e.target.value))}
+            placeholder="Number of generations"
+            style={inputStyle}
+            min="1"
+            max="100"
+            required
+          />
+          <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+          <div>
+            <input
+              type="checkbox"
+              id="select-all"
+              checked={selectedPeople.length === familyData.nodes.length}
+              onChange={handleSelectAll}
+            />
+            <label htmlFor="select-all">Select All</label>
+          </div>
+            {familyData.nodes.map(node => (
+              <div key={node.id}>
+                <input
+                  type="checkbox"
+                  id={`person-${node.id}`}
+                  checked={selectedPeople.includes(node.id)}
+                  onChange={() => handlePersonSelection(node.id)}
+                />
+                <label htmlFor={`person-${node.id}`}>{node.data.name}</label>
+              </div>
+            ))}
+          </div>
+          <select
+            value={biographyLevel}
+            onChange={(e) => setBiographyLevel(e.target.value)}
+            style={inputStyle}
+          >
+            <option value="basic">Basic (Parents, Spouses, Children)</option>
+            <option value="comprehensive">Comprehensive (Including Grandparents and Grandchildren)</option>
+          </select>
           <button type="submit" style={buttonStyle}>Create PDF</button>
         </form>
-      ) : (
-      <PDFViewer width="80%" height="80%">
-        <Document>
-            <TitlePage title={bookTitle} />
-            <ContentsPage graph={familyData} />
-            {renderPages(familyData)}
-          </Document>
-        </PDFViewer>
-      )}
+      </div>
+        <div style={{ flex: 1 }}>
+          {isFormSubmitted && (
+            <PDFViewer width="100%" height="100%">
+              <Document>
+                <TitlePage title={bookTitle} />
+                <ContentsPage graph={familyData} selectedPeople={selectedPeople} />
+                {renderPages(familyData)}
+              </Document>
+            </PDFViewer>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

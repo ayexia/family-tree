@@ -557,29 +557,22 @@ const FamilyTreePDF = ({ onClose }) => { //fetch family data from backend
 
   const renderPages = (graph) => {
     const allPeople = new Set();
-    
-    const renderPerson = (person) => {
+    const pages = [];
+
+    const addPersonPage = (person) => {
       if (!person || allPeople.has(person.id) || (selectedPeople.length > 0 && !selectedPeople.includes(person.id))) {
-        return [];
+        return;
       }
       allPeople.add(person.id);
-
-      const pages = [<PersonPage key={person.id} person={person} graph={graph} biographyLevel={biographyLevel} />];
-
-      graph.edges.forEach(edge => {
-        if (edge.source === person.id && (edge.label === 'Spouse' || edge.label === 'Child')) {
-          const relatedPerson = graph.nodes.find(node => node.id === edge.target);
-          if (relatedPerson && !allPeople.has(relatedPerson.id) && 
-              (selectedPeople.length === 0 || selectedPeople.includes(relatedPerson.id))) {
-            pages.push(...renderPerson(relatedPerson));
-          }
-        }
-      });
-  
-      return pages;
+      pages.push(<PersonPage key={person.id} person={person} graph={graph} biographyLevel={biographyLevel} />);
     };
-  
-    return graph.nodes.flatMap(node => renderPerson(node));
+
+    (selectedPeople.length > 0 ? selectedPeople : graph.nodes.map(node => node.id)).forEach(id => {
+      const person = graph.nodes.find(node => node.id === id);
+      addPersonPage(person);
+    });
+
+    return pages;
   };
 
   const overlay = { // position when viewing PDF
@@ -664,7 +657,7 @@ const FamilyTreePDF = ({ onClose }) => { //fetch family data from backend
             max="100"
             required
           />
-          <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+      <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
           <div>
             <input
               type="checkbox"

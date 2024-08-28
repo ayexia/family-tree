@@ -3,6 +3,7 @@ import Tree from 'react-d3-tree'; //Uses react-d3-tree package for visual repres
 import axios from 'axios'; //used to fetch api data through making http requests
 import Tippy from '@tippyjs/react'; //uses tippyjs package to customise tooltip
 import { Cake } from 'lucide-react';
+import ReactCountryFlag from 'react-country-flag';
 import 'tippy.js/dist/tippy.css';
 import "../../css/treeCustomisation.css";
 import Sidebar from './Sidebar';
@@ -18,6 +19,13 @@ const FamilyTree = ({ generations, query, lineStyles }) => {
   const [hoveredNode, setHoveredNode] = useState(null);
   const [images, setImages] = useState({});
   const [highlightQuery, setHighlightQuery] = useState('');
+
+  const cityToCountryCode = {
+    'New York': 'US',
+    'Stratford-upon-Avon': 'GB',
+    'Shottery, Warwickshire': 'GB',
+    'Paris': 'FR',
+  };
 
   useEffect(() => {
     if (hasSearched) {
@@ -79,6 +87,7 @@ const FamilyTree = ({ generations, query, lineStyles }) => {
     const isFemale = nodeDatum.attributes.gender === 'F';
     const isHighlighted = highlightQuery && nodeDatum.name.toLowerCase().includes(highlightQuery);
     const isTodayBirthday = isBirthday(nodeDatum.attributes.DOB);
+    const countryCode = nodeDatum.attributes.birth_place ? cityToCountryCode[nodeDatum.attributes.birth_place] : null;
 
     const shouldHighlight = isHighlighted || isTodayBirthday;
     const nodeStyle = {
@@ -169,6 +178,15 @@ const FamilyTree = ({ generations, query, lineStyles }) => {
                   }}
                 />
                 )}
+                {countryCode && (
+                  <foreignObject x="-60" y="-60" width="24" height="24">
+                    <ReactCountryFlag 
+                      countryCode={countryCode}
+                      svg 
+                      style={{ width: '1.5em', height: '1.5em' }}
+                    />
+                  </foreignObject>
+                )}
                 <defs>
                   <clipPath id="clipCircle">
                     <circle cx="0" cy="0" r={nodeRadius} />
@@ -197,6 +215,7 @@ const FamilyTree = ({ generations, query, lineStyles }) => {
                   (spouse.attributes.divorce_dates && spouse.attributes.divorce_dates.length > 0) ? lineStyles.divorced : 
                   lineStyles.current;                  
                   const isSpouseBirthday = isBirthday(spouse.attributes.DOB);
+                  const spouseCountryCode = spouse.attributes.birth_place ? cityToCountryCode[spouse.attributes.birth_place] : null;
 
                   return (
                     <g key={spouse.id}
@@ -241,6 +260,15 @@ const FamilyTree = ({ generations, query, lineStyles }) => {
                             transform: 'translate(30px, -60px)',
                           }}
                         />
+                      )}
+                      {spouseCountryCode && (
+                        <foreignObject x="-60" y="-60" width="24" height="24">
+                          <ReactCountryFlag 
+                            countryCode={spouseCountryCode}
+                            svg 
+                            style={{ width: '1.5em', height: '1.5em' }}
+                          />
+                        </foreignObject>
                       )}
                         <defs>
                           <clipPath id="clipCircle">

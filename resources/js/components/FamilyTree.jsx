@@ -102,28 +102,86 @@ const FamilyTree = ({ generations, query, lineStyles }) => {
     const nodeRadius = 50;
     const line = nodeRadius + 10;
 
-  const toolTip = (node) => (//customises tooltip, containing names and marriage info (if applicable)
-      <div style={{ 
-        padding: '10px', 
-        background: 'linear-gradient(135deg, #92B08E, #6C9661, #37672F)',
-        color: '#fff', 
-        borderRadius: '10px' 
-      }}>
+const toolTip = (node) => { //customises tooltip, containing names and marriage info (if applicable)
+  const formatDate = (date) => {
+    return date && date !== 'Unknown date' ? date : 'Unknown date';
+  };
+
+  const getTimelineEvents = (person) => {
+    let events = [
+      { date: formatDate(person.attributes.DOB), event: 'Born', sortDate: person.attributes.DOB || '0000-00-00', order: 0 }
+    ];
+
+    (person.attributes.marriage_dates || []).forEach((date, index) => {
+      events.push({
+        date: formatDate(date),
+        event: `Married (${index + 1})`,
+        sortDate: date || '9998-99-99',
+        order: date ? 1 : 2
+      });
+    });
+
+    (person.attributes.divorce_dates || []).forEach((date, index) => {
+      if (date && date !== 'Unknown date') {
+        events.push({
+          date: formatDate(date),
+          event: `Divorced (${index + 1})`,
+          sortDate: date,
+          order: 1
+        });
+      }
+    });
+
+    if (person.attributes.DOD) {
+      events.push({
+        date: formatDate(person.attributes.DOD),
+        event: 'Died',
+        sortDate: person.attributes.DOD,
+        order: 3
+      });
+    }
+
+    return events.sort((a, b) => {
+      if (a.order !== b.order) {
+        return a.order - b.order;
+      }
+      return a.sortDate.localeCompare(b.sortDate);
+    });
+  };
+
+  const timelineEvents = getTimelineEvents(node);
+
+  return (
+    <div style={{ 
+      padding: '10px', 
+      background: 'linear-gradient(135deg, #92B08E, #6C9661, #37672F)',
+      color: '#fff', 
+      borderRadius: '10px',
+      width: '300px'
+     }}>
       <strong style={{ fontSize: '20px', fontFamily: 'Times New Roman' }}>{node.name}</strong><br />
-      {node.attributes.marriage_dates && node.attributes.marriage_dates.length > 0 ? (
-          node.attributes.marriage_dates.map((marriage, index) => (
-            <div key={index}>
-              <p>Marriage {index + 1}: {marriage || 'Unknown date'}</p>
-              {node.attributes.divorce_dates && node.attributes.divorce_dates[index] && (
-                <p>Divorce {index + 1}: {node.attributes.divorce_dates[index]}</p>
-              )}
+      {timelineEvents.length > 0 && (
+        <div style={{ marginTop: '10px', borderLeft: '2px solid #fff', paddingLeft: '10px' }}>
+          {timelineEvents.map((event, index) => (
+            <div key={index} style={{ marginBottom: '5px', position: 'relative' }}>
+              <div style={{ 
+                width: '10px', 
+                height: '10px', 
+                borderRadius: '50%', 
+                background: '#fff', 
+                position: 'absolute', 
+                left: '-16px', 
+                top: '5px' 
+              }}></div>
+              <strong>{event.date}</strong>: {event.event}
             </div>
-          ))
-        ) : (
-          <p>No marriages</p>
-        )}
+          ))}
+        </div>
+      )}
+      <div style={{ marginTop: '10px' }}>
+        <strong>Parents:</strong>
         {node.attributes.parents && Object.keys(node.attributes.parents).length > 0 ? (
-            <ul>
+            <ul style={{ paddingLeft: '20px', marginTop: '5px' }}>
               {Object.values(node.attributes.parents).map(parent => {
                 let parentType = parent.gender === 'F' ? 'Mother' : parent.gender === 'M' ? 'Father' : 'Parent';
                 return (
@@ -134,13 +192,15 @@ const FamilyTree = ({ generations, query, lineStyles }) => {
               })}
             </ul>
           ) : (
-            <ul>
+          <ul style={{ paddingLeft: '20px', marginTop: '5px' }}>
             <li>Mother: Unknown person</li>
             <li>Father: Unknown person</li>
             </ul>
           )}
       </div>
+    </div>
     );
+};
 
   const nodeHover = (node, isSpouse = false) => {
     setHoveredNode({ node, isSpouse });

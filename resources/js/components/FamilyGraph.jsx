@@ -12,10 +12,18 @@ import 'reactflow/dist/style.css';
 import axios from 'axios';
 import GraphSidebar from './GraphSidebar.jsx';
 import { Cake } from 'lucide-react';
+import ReactCountryFlag from 'react-country-flag';
 
 const nodeWidth = 300;
 const nodeHeight = 150;
 const defaultImage = '/images/user.png';
+
+const cityToCountryCode = {
+  'New York': 'US',
+  'Stratford-upon-Avon': 'GB',
+  'Shottery, Warwickshire': 'GB',
+  'Paris': 'FR',
+};
 
 const FamilyGraph = ({ 
   generations, 
@@ -46,6 +54,7 @@ const FamilyGraph = ({
 
   const customNode = useCallback(({ data }) => {
     const isTodayBirthday = isBirthday(data.birth_date);
+    const countryCode = data.birth_place ? cityToCountryCode[data.birth_place] : null;
     return (
     <div style={{ 
       padding: 10, 
@@ -61,6 +70,15 @@ const FamilyGraph = ({
             <Cake size={24} color="#FFD700" />
           </div>
         )}
+         {countryCode && (
+        <div style={{ position: 'absolute', top: 0, left: 10 }}>
+          <ReactCountryFlag 
+            countryCode={countryCode}
+            svg 
+            style={{ width: '1.5em', height: '1.5em' }}
+          />
+        </div>
+      )}
       <img src={data.image ? data.image : defaultImage} style={{ width: '50px', height: '50px', borderRadius: '25%' }} />
          <div>{data.label}</div>
       <Handle type="target" position={Position.Top} id="top" />

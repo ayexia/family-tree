@@ -43,7 +43,8 @@ class GedcomParser
                 $name = reset($names); //retrieves first name of individual
                 $birth = $individual->getBirt(); //retrieves birth information via getBirt ('BIRT' tag is used for this)
                 $death = $individual->getDeat(); //retrieves death information via getDeat ('DEAT' tag is used for this)
-                
+                $birthPlace = $birth ? $birth->getPlac() : null;
+                $deathPlace = $death ? $death->getPlac() : null;
                 /**retrieves the birth and death dates for individual through getDate ('DATE' tag is used for this)
                  * method extractQual is called and the birth/death dates are passed as parameters for this if they are not null
                  * otherwise null is passed
@@ -61,7 +62,9 @@ class GedcomParser
                     $birthDate['date'], //DOB obtained from extractQual (after conversion via getDate)
                     $birthDate['qualifier'], //qualifier (ABT, BEF, AFT, used when dates are approximate) obtained from extractQual associated with DOB
                     $deathDate['date'], //DOD obtained from extractQual (after conversion via getDate)
-                    $deathDate['qualifier'] //qualifier (ABT, BEF, AFT, used when dates are approximate) obtained from extractQual associated with DOD
+                    $deathDate['qualifier'], //qualifier (ABT, BEF, AFT, used when dates are approximate) obtained from extractQual associated with DOD
+                    $birthPlace,
+                    $deathPlace
                 );
             }
         }
@@ -170,7 +173,7 @@ class GedcomParser
     /**
     * Stores the extracted information from the parser into the People table, creating or updating a Person record within it.
     */
-    private function storePerson($familyTreeId, $gedcomId, $name, $surname, $gender, $birth, $birthDateQualifier, $death, $deathDateQualifier)
+    private function storePerson($familyTreeId, $gedcomId, $name, $surname, $gender, $birth, $birthDateQualifier, $death, $deathDateQualifier, $birthPlace, $deathPlace)
     {
         $person = Person::updateOrCreate( //updates/creates Person record with corresponding information for each column in People table
             ['gedcom_id' => $gedcomId],
@@ -183,6 +186,8 @@ class GedcomParser
                 'birth_date_qualifier' => $birthDateQualifier,
                 'death_date' => $this->convertToDate($death),
                 'death_date_qualifier' => $deathDateQualifier,
+                'birth_place' => $birthPlace,
+                'death_place' => $deathPlace
             ]
         );
         /** STILL NEEDS WORKING/TESTING

@@ -80,7 +80,7 @@ const [errorMessage, setErrorMessage] = useState('');
             gap: '10px'
           }}>
             <Cake size={24} />
-            <span>It's {node.name}'s birthday today!</span>
+            <span>{node.name} was born today!</span>
           </div>
         )}
         <h3>{node.name || 'Unknown'}</h3>
@@ -115,8 +115,10 @@ const [errorMessage, setErrorMessage] = useState('');
           </button>
         </div>
 
-        <p>Date of birth: {node.attributes.DOB}</p>
-        <p>Date of death: {node.attributes.DOD}</p>
+        <p>Date of birth: {node.attributes.DOB || "Unknown date"}</p>
+        <p>Birthplace: {node.attributes.birth_place || "Unknown"}</p>
+        <p>Date of death: {node.attributes.DOD || "Unknown date"}</p>
+        <p>Resting place: {node.attributes.death_place || "Unknown"}</p>
         {node.attributes.marriage_dates && node.attributes.marriage_dates.length > 0 ? (
           node.attributes.marriage_dates.map((marriage, index) => (
             <div key={index}>

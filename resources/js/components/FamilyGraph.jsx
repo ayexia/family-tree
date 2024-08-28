@@ -13,8 +13,8 @@ import axios from 'axios';
 import GraphSidebar from './GraphSidebar.jsx';
 import { Cake } from 'lucide-react';
 
-const nodeWidth = 150;
-const nodeHeight = 50;
+const nodeWidth = 300;
+const nodeHeight = 150;
 const defaultImage = '/images/user.png';
 
 const FamilyGraph = ({ 
@@ -61,7 +61,7 @@ const FamilyGraph = ({
             <Cake size={24} color="#FFD700" />
           </div>
         )}
-      <img src={data.image ? data.image : defaultImage} style={{ width: '35px', height: '35px', borderRadius: '25%' }} />
+      <img src={data.image ? data.image : defaultImage} style={{ width: '50px', height: '50px', borderRadius: '25%' }} />
          <div>{data.label}</div>
       <Handle type="target" position={Position.Top} id="top" />
       <Handle type="source" position={Position.Bottom} id="bottom" />

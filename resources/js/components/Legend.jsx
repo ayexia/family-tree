@@ -35,11 +35,9 @@ const Legend = ({ lineStyles }) => {
 
   const lineStyle = (style) => ({
     width: '40px',
-    height: `${style.width}px`,
+    height: '0px',
     marginRight: '5px',
-    backgroundColor: style.color,
-    border: 'none',
-    strokeDasharray: style.dashArray,
+    borderBottom: `${style.width}px ${style.dashArray === 'none' ? 'solid' : 'dashed'} ${style.color}`,
   });
 
   return (

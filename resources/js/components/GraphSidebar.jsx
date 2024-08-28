@@ -79,7 +79,7 @@ const GraphSidebar = ({ node, onClose, setImages, images }) => {
             gap: '10px'
           }}>
             <Cake size={24} />
-            <span>It's {node.data.name}'s birthday today!</span>
+            <span>{node.data.name} was born today!</span>
           </div>
         )}
         <h3>{node.data.name || 'Unknown'}</h3>
@@ -115,7 +115,9 @@ const GraphSidebar = ({ node, onClose, setImages, images }) => {
         </div>
 
         <p>Date of birth: {node.data.birth_date || 'Unknown date'}</p>
+        <p>Birthplace: {node.data.birth_place || 'Unknown'}</p>
         <p>Date of death: {node.data.death_date || 'Unknown date'}</p>
+        <p>Resting place: {node.data.death_place || 'Unknown'}</p>
         {node.data.marriage_dates && node.data.marriage_dates.length > 0 ? (
           node.data.marriage_dates.map((marriage, index) => (
             <div key={index}>

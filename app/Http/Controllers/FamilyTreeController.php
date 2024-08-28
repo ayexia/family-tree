@@ -91,7 +91,7 @@ class FamilyTreeController extends Controller
   
       //iterates through each person creating Node objects for them, then assigned to familyTree array using their ID as key
       foreach ($relatives as $relative){
-        $familyTree[$relative->id] = new Node($relative->id, $relative->name, $relative->surname, $relative->birth_date, $relative->death_date, $relative->gender, $relative->father_id, $relative->mother_id, $relative->image);
+        $familyTree[$relative->id] = new Node($relative->id, $relative->name, $relative->surname, $relative->birth_date, $relative->death_date, $relative->birth_place, $relative->death_place, $relative->gender, $relative->father_id, $relative->mother_id, $relative->image);
     }
       //iterates through spouse relationships, checks if both spouses exist in the familyTree array
       foreach ($marriages as $marriage){
@@ -172,6 +172,8 @@ class FamilyTreeController extends Controller
               'gender' => $person->gender,
               'DOB' => $person->birth_date,
               'DOD' => $person->death_date,
+              'birth_place' => $person->birth_place,
+              'death_place' => $person->death_place,
               'marriage_dates' => $person->marriage_dates,
               'divorce_dates' => $person->divorce_dates,
               'image' => $person->image,
@@ -192,6 +194,8 @@ class FamilyTreeController extends Controller
                       'gender' => $spouse->gender,
                       'DOB' => $spouse->birth_date,
                       'DOD' => $spouse->death_date,
+                      'birth_place' => $spouse->birth_place,
+                      'death_place' => $spouse->death_place,
                       'marriage_dates' => $spouse->marriage_dates,
                       'divorce_dates' => $spouse->divorce_dates,
                       'image' => $spouse->image,
@@ -251,6 +255,8 @@ class FamilyTreeController extends Controller
                 'gender' => $person->gender,
                 'birth_date' => $person->birth_date,
                 'death_date' => $person->death_date,
+                'birth_place' => $person->birth_place,
+                'death_place' => $person->death_place,
                 'image' => $person->image,
                 'marriage_dates' => $person->marriage_dates,
                 'divorce_dates' => $person->divorce_dates,
@@ -381,6 +387,8 @@ class FamilyTreeController extends Controller
             'marriages.*.divorce_date' => 'nullable|date', //divorce dates are optional and must be in date format
             'marriages.*.first_spouse_id' => 'nullable|exists:people,id', //first spouse ID is optional however must exist in people table
             'marriages.*.second_spouse_id' => 'nullable|exists:people,id', //second spouse ID is optional however must exist in people table
+            'birth_place' => 'nullable|string|max:255',
+            'death_place' => 'nullable|string|max:255',
         ]);
     
         //retrieves the family member with the given ID from DB, otherwise gives 404 error if fails
@@ -388,6 +396,8 @@ class FamilyTreeController extends Controller
         $person->name = $data['name']; //updates person's name with new name from update request data 
         $person->birth_date = !empty($data['birth_date']) ? $data['birth_date'] : null; //updates DOB with update request data, if empty sets to null
         $person->death_date = !empty($data['death_date']) ? $data['death_date'] : null; //updates DOD with update request data, if empty sets to null
+        $person->birth_place = $data['birth_place'];
+        $person->death_place = $data['death_place'];
         $person->save(); //saves details
     
         $marriages = $request->input('marriages', []); //retrieves marriages data from request

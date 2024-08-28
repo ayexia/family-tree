@@ -169,6 +169,16 @@
                 <input type="date" id="death_date" name="death_date" class="form-control" value="{{ old('death_date', $person->death_date ? $person->death_date->format('Y-m-d') : '') }}">
             </div>
 
+            <div>
+                <label for="birth_place">Birth Place</label>
+                <input type="text" name="birth_place" id="birth_place" class="form-control" value="{{ old('birth_place', $person->birth_place) }}">
+            </div>
+
+            <div>
+                <label for="death_place">Death Place</label>
+                <input type="text" name="death_place" id="death_place" class="form-control" value="{{ old('death_place', $person->death_place) }}">
+            </div>
+
             <div id="marriages-container">
                 @foreach ($person->firstSpouses as $index => $spouse)
                     <div class="marriage-group">

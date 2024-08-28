@@ -40,6 +40,7 @@
         "lodash": "^4.17.21",
         "lucide-react": "^0.429.0",
         "puppeteer": "^22.15.0",
+        "react-country-flag": "^3.1.0",
         "react-d3-tree": "^3.6.2",
         "react-family-tree": "^3.2.0",
         "react-flow-renderer": "^10.3.17",

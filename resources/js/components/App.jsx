@@ -84,7 +84,7 @@ const App = () => {
 
     const controlsContainer = {
         width: '160px',
-        height: '100vh',
+        height: '85vh',
         padding: '20px',
         display: 'flex',
         flexDirection: 'column',
@@ -100,7 +100,7 @@ const App = () => {
         marginLeft: '160px',
         marginTop: '0px',
         width: 'calc(100vw - 160px)',
-        height: '100vh',
+        height: '77vh',
         overflow: 'hidden',
     };
 

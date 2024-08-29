@@ -261,7 +261,9 @@ class FamilyTreeController extends Controller
                 'marriage_dates' => $person->marriage_dates,
                 'divorce_dates' => $person->divorce_dates,
                 'parents' => array_map(function($parent) {
-                 return ['id' => $parent->id, 'name' => $parent->name, 'gender' => $parent->gender];
+                 return ['id' => $parent->id, 'name' => $parent->name, 'gender' => $parent->gender, 'parents' => array_map(function($grandparent) {
+                return ['id' => $grandparent->id, 'name' => $grandparent->name, 'gender' => $grandparent->gender];
+                 }, $parent->getParents() ?? []),];
               }, $person->getParents() ?? []),
             ],
             'position' => ['x' => 0, 'y' => 0], //initial position of the node (this is set to 0 by default as the frontend will handle the positioning)

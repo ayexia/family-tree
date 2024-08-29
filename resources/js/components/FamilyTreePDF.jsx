@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Document, Page, Text, View, StyleSheet, Font, PDFViewer, Link, Image } from '@react-pdf/renderer';
 import axios from 'axios';
+import Tippy from '@tippyjs/react';
+import 'tippy.js/dist/tippy.css'; 
 
 Font.register({
   family: 'Great Vibes',
@@ -657,7 +659,9 @@ const FamilyTreePDF = ({ onClose }) => { //fetch family data from backend
 
   return (
     <div style={overlay}>
+    <Tippy content="Close the PDF viewer">
       <button style={closeButton} onClick={onClose}>Close</button>
+    </Tippy>
     <div style={{ display: 'flex', width: '100%', height: '100%' }}>
       <div style={{ width: '300px', backgroundColor: 'white', padding: '20px', overflowY: 'auto' }}>
         <h2>Create Family Book</h2>
@@ -670,6 +674,7 @@ const FamilyTreePDF = ({ onClose }) => { //fetch family data from backend
             style={inputStyle}
             required
           />
+        <Tippy content="Choose the level of detail for each person's biography">
           <select
             value={biographyLevel}
             onChange={handleBiographyLevelChange}
@@ -678,33 +683,40 @@ const FamilyTreePDF = ({ onClose }) => { //fetch family data from backend
           <option value="basic">Basic (Parents, Spouses, Children)</option>
           <option value="comprehensive">Comprehensive (Including Grandparents and Grandchildren)</option>
           </select>
+        </Tippy>
         <h3>Select People to Include:</h3>
       <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
           <div>
+          <Tippy content="Select or deselect all people">
             <input
               type="checkbox"
               id="select-all"
               checked={selectedPeople.length === availablePeople.length}
               onChange={handleSelectAll}
             />
+          </Tippy>
             <label htmlFor="select-all">Select All</label>
           </div>
           {availablePeople.map(id => {
             const node = familyData.nodes.find(node => node.id === id);
             return (
               <div key={id}>
+              <Tippy content={`Include or exclude ${node.data.name} from the book`}>
                 <input
                   type="checkbox"
                   id={`person-${id}`}
                   checked={selectedPeople.includes(id)}
                   onChange={() => handlePersonSelection(id)}
                 />
+                </Tippy>
                 <label htmlFor={`person-${id}`}>{node.data.name}</label>
               </div>
-               );
-             })}
+              );
+            })}
           </div>
+        <Tippy content="Generate the PDF with the selected options">
           <button type="submit" style={buttonStyle}>Create PDF</button>
+        </Tippy>
         </form>
       </div>
         <div style={{ flex: 1 }}>

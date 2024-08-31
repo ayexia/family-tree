@@ -180,10 +180,6 @@
     .home-button.import-gedcom {
         left: 22.75%;
     }
-
-    .info-text {
-        display: none;
-    }
 </style>
 </head>
 <body>

@@ -324,16 +324,17 @@ const PersonPage = ({ person, graph, biographyLevel }) => {
 
   const generateBiography = () => {
     let bio = '';
+    let deathInfo = '';
     
     const birthDate = formatDate(data.birth_date);
     const deathDate = formatDate(data.death_date);
     
     if (deathDate && data.death_place) {
-      bio += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} passed away ${deathDate.includes(' ') ? 'on' : 'in'} ${deathDate} in ${data.death_place}. `;
+      deathInfo += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} passed away ${deathDate.includes(' ') ? 'on' : 'in'} ${deathDate} in ${data.death_place}. `;
     } else if (deathDate) {
-      bio += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} passed away ${deathDate.includes(' ') ? 'on' : 'in'} ${deathDate}. `;
+      deathInfo += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} passed away ${deathDate.includes(' ') ? 'on' : 'in'} ${deathDate}. `;
     } else if (data.death_place) {
-      bio += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} passed away in ${data.death_place}. `;
+      deathInfo += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} passed away in ${data.death_place}. `;
     }  
 
     if (parents.length > 0) {
@@ -382,15 +383,7 @@ const PersonPage = ({ person, graph, biographyLevel }) => {
       }
     }
 
-    if (deathDate && data.death_place) {
-      bio += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} passed away on ${deathDate} in ${data.death_place}. `;
-    } else if (deathDate) {
-      bio += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} passed away on ${deathDate}. `;
-    } else if (data.death_place) {
-      bio += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} passed away in ${data.death_place}. `;
-    }
-
-    if (biographyLevel === 'comprehensive') {
+    if (biographyLevel === 'comprehensive' || biographyLevel === 'detailed') {
       const grandparents = parents.flatMap(parent => 
         (parent.parents && typeof parent.parents === 'object') 
           ? Object.values(parent.parents).filter(Boolean) 
@@ -424,13 +417,34 @@ const PersonPage = ({ person, graph, biographyLevel }) => {
     }
   }
 
-    if (deathDate && data.death_place) {
-      bio += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} passed away on ${deathDate} in ${data.death_place}. `;
-    } else if (deathDate) {
-      bio += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} passed away on ${deathDate}. `;
-    } else if (data.death_place) {
-      bio += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} passed away in ${data.death_place}. `;
+    if (biographyLevel === 'detailed') {
+      if (data.pets && data.pets.length > 0) {
+        if (data.pets.length === 1) {
+          bio += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} had a pet: ${data.pets[0]}. `;
+        } else {
+          bio += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} had the following pets: ${data.pets.slice(0, -1).join(', ')}, and ${data.pets[data.pets.length - 1]}. `;
+        }
+      }
+
+      if (data.hobbies && data.hobbies.length > 0) {
+        if (data.hobbies.length === 1) {
+          bio += `${data.gender === 'M' ? 'His' : data.gender === 'F' ? 'Her' : 'Their'} hobby was ${data.hobbies[0]}. `;
+        } else {
+          bio += `${data.gender === 'M' ? 'His' : data.gender === 'F' ? 'Her' : 'Their'} hobbies included ${data.hobbies.slice(0, -1).join(', ')}, and ${data.hobbies[data.hobbies.length - 1]}. `;
+        }
+      }
+
+      if (data.notes) {
+        const notes = Array.isArray(data.notes) ? data.notes : [data.notes];
+        if (notes.length === 1) {
+          bio += `Additional note: ${notes[0]} `;
+        } else if (notes.length > 1) {
+          bio += `Additional notes: ${notes.join(' ')} `;
+        }
+      }
     }
+
+    bio += deathInfo;
 
     return bio;
   };
@@ -682,6 +696,7 @@ const FamilyTreePDF = ({ onClose }) => { //fetch family data from backend
           >
           <option value="basic">Basic (Parents, Spouses, Children)</option>
           <option value="comprehensive">Comprehensive (Including Grandparents and Grandchildren)</option>
+          <option value="detailed">Detailed (Including Pets, Hobbies, and Notes)</option>
           </select>
         </Tippy>
         <h3>Select People to Include:</h3>

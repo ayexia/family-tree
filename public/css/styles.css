@@ -169,7 +169,7 @@ body {
     color: #EDECD7;
     cursor: pointer;
     transition: border-color 0.3s;
-    position: relative;
+    position: absolute;
 }
 
 .circle:hover {
@@ -177,11 +177,13 @@ body {
 }
 
 .family-tree {
-    margin-right: 20px;
+    margin-right: -500px;
+    margin-top: 275px;
 }
 
 .import-gedcom {
-    margin-left: 20px;
+    margin-left: -500px;
+    margin-top: 275px;
 }
 
 .textbox {

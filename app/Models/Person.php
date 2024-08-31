@@ -20,12 +20,17 @@ class Person extends Model
         'image',
         'family_tree_id',
         'birth_place',
-        'death_place'
+        'death_place',
+        'pets',
+        'hobbies',
+        'notes',
     ];
 
     protected $casts = [
         'birth_date' => 'date',
-        'death_date' => 'date',
+        'death_date' => 'date',        
+        'pets' => 'array',
+        'hobbies' => 'array',
     ];
     
     public function firstSpouses()

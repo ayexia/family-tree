@@ -151,6 +151,38 @@ const [errorMessage, setErrorMessage] = useState('');
             </ul>
           )}
         </div>
+          <div>
+            <p>Pets:</p>            
+        {node.attributes.pets && node.attributes.pets.length > 0 ? (
+            <ul>
+              {node.attributes.pets.map((pet, index) => (
+                <li key={index}>{pet}</li>
+              ))}
+            </ul>
+        ) : (
+          <p>No pets</p>
+        )}        
+        </div>
+          <div>
+            <p>Hobbies:</p>            
+        {node.attributes.hobbies && node.attributes.hobbies.length > 0 ? (
+            <ul>
+              {node.attributes.hobbies.map((hobby, index) => (
+                <li key={index}>{hobby}</li>
+              ))}
+            </ul>
+        ) : (
+          <p>No hobbies</p>
+        )}        
+        </div>
+          <div>
+            <p>Notes:</p>
+        {node.attributes.notes ? (
+            <p>{node.attributes.notes}</p>
+        ) : (
+          <p>No notes</p>
+        )}        
+        </div>
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
       </div>
     </div>

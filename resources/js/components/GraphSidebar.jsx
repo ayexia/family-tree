@@ -151,6 +151,38 @@ const GraphSidebar = ({ node, onClose, setImages, images }) => {
             </ul>
           )}
         </div>
+          <div>
+            <p>Pets:</p>            
+            {node.data.pets && node.data.pets.length > 0 ? (
+              <ul>
+                {node.data.pets.map((pet, index) => (
+                  <li key={index}>{pet}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>No pets</p>
+            )}        
+          </div>
+          <div>
+            <p>Hobbies:</p>            
+            {node.data.hobbies && node.data.hobbies.length > 0 ? (
+              <ul>
+                {node.data.hobbies.map((hobby, index) => (
+                  <li key={index}>{hobby}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>No hobbies</p>
+            )}        
+          </div>
+          <div>
+            <p>Notes:</p>
+            {node.data.notes ? (
+              <p>{node.data.notes}</p>
+            ) : (
+              <p>No notes</p>
+            )}        
+          </div>
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
       </div>
     </div>

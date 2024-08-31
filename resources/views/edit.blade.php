@@ -19,7 +19,7 @@
     .back-to-tree-button {
         position: absolute;
         left: 5%;
-        bottom: 50px;
+        top: 20%;
         background-color: #587353;
         color: #EDECD7;
         font-family: "Inika", serif;
@@ -204,7 +204,20 @@
                     </div>
                 @endforeach
             </div>
+            <div>
+                <label for="pets">Pets (comma-separated)</label>
+                <input type="text" id="pets" name="pets" class="form-control" value="{{ old('pets', $person->pets ? implode(', ', $person->pets) : '') }}">
+            </div>
 
+            <div>
+                <label for="hobbies">Hobbies (comma-separated)</label>
+                <input type="text" id="hobbies" name="hobbies" class="form-control" value="{{ old('hobbies', $person->hobbies ? implode(', ', $person->hobbies) : '') }}">
+            </div>
+
+            <div>
+                <label for="notes">Special Notes</label>
+                <textarea id="notes" name="notes" class="form-control" rows="4">{{ old('notes', $person->notes) }}</textarea>
+            </div>
             <button type="submit" class="custom-button">
                 Save Changes
             </button>

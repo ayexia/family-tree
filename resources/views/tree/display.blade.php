@@ -143,8 +143,14 @@
         position: absolute;
         left: 34%;
         top: 25px;
+        transform: translate(-50%, -50%);
+        transition: none;
+        z-index: 1000;
     }
 
+    .circle.info-tooltip:hover {
+        transform: translate(-50%, -50%);
+    }
     .circle .tooltip {
         visibility: hidden;
         width: 300px;

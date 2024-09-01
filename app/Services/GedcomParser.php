@@ -93,9 +93,10 @@ class GedcomParser
             }
         }
         //Alternative manual parsing for relationships
+        $counter = 0;
             $fileContent = file_get_contents($filePath); //reads file into string
             $lines = explode("\n", $fileContent); //splits string via delimiter "\n" (new line)
-            $counter = 0; 
+            $counter++;
         //for loop going through each split line
             foreach ($lines as $line) {
                 $line = trim($line); //removes whitespaces from beginning and end of line
@@ -160,7 +161,6 @@ class GedcomParser
                  } elseif ($tag === 'ADOP') {
                     $isAdopted = true; // mark child as adopted
                  } 
-                 
                 } elseif ($level === 2 && $tag === 'DATE'){ //if level is 2 and contains the tag 'DATE'
                     if (isset($isMarried)) { //if a defined value is found for isMarried (i.e. true)
                     $marriageDate = $this->extractQual($value); //extract marriage date and pass to convertToDate method
@@ -169,12 +169,12 @@ class GedcomParser
                     $divorceDate = $this->extractQual($value); //extract divorce date and pass to convertToDate method
                     unset($isDivorced); //removes value for isDivorced
             }
-        } 
-                $counter++;
-                if ($counter % 1000 == 0) {
-                    gc_collect_cycles();
-                }
-            }
+        }
+        
+        if ($counter % 1000 == 0) {
+            gc_collect_cycles();
+        }
+    
             if (isset($id)) { //passes all data extracted of final family record to storeSpouse, storeMotherAndChild and storeFatherAndChild methods
                 $this->storeSpouses(  
                 $this->familyTreeId,
@@ -204,6 +204,7 @@ class GedcomParser
             );
             }
         }
+    }
     /**
     * Stores the extracted information from the parser into the People table, creating or updating a Person record within it.
     */

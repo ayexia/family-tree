@@ -101,7 +101,6 @@ class Node {
     }
 
     private function updateSpouseDivorceDate($personId, $divorceDate) {
-        try {
             $spouseRecord = Spouse::where(function ($query) use ($personId) {
                 $query->where(function ($q) use ($personId) {
                     $q->where('first_spouse_id', $this->id)
@@ -114,13 +113,7 @@ class Node {
 
             if ($spouseRecord) {
                 $spouseRecord->update(['divorce_date' => $divorceDate]);
-            } else {
-                Log::warning('Spouse record not found for IDs', ['person_id' => $personId]);
-            }
-        } catch (\Exception $e) {
-            Log::error('Error updating spouse divorce date: ' . $e->getMessage());
-            throw $e;
-        }
+            } 
     }
     
     public function addChild(Node $child, $isAdopted = false) {

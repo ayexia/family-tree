@@ -1,4 +1,7 @@
 <?php
+/**
+ * Controller handling authentication sessions and provides view for login - provided by Laravel Breeze.
+ */
 
 namespace App\Http\Controllers\Auth;
 
@@ -28,7 +31,9 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('home', absolute: false));
+        $request->user()->update(['last_login_at' => now()]);
+
+        return redirect()->intended(route('home', absolute: false)); //ensures once logged in is directed to homepage
     }
 
     /**

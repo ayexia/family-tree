@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Controller handling profile updates and account deletion with corresponding view - provided by Laravel Breeze.
+ */
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
@@ -58,13 +60,4 @@ class ProfileController extends Controller
         return Redirect::to('/');
     }
 
-    public function getUserName(Request $request)
-    {
-        $user = $request->user();
-            if ($user) {
-                return response()->json([
-                    'name' => $user->name,
-            ]);
-        }
-    }
 }

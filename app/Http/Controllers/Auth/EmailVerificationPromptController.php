@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Controller handling email verification requests - provided by Laravel Breeze.
+ */
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -15,7 +17,7 @@ class EmailVerificationPromptController extends Controller
     public function __invoke(Request $request): RedirectResponse|View
     {
         return $request->user()->hasVerifiedEmail()
-                    ? redirect()->intended(route('home', absolute: false))
+                    ? redirect()->intended(route('home', absolute: false)) //ensures if email is verified directed to homepage otherwise taken to verify email page
                     : view('auth.verify-email');
     }
 }

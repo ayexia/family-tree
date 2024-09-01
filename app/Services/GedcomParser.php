@@ -24,6 +24,16 @@ use Carbon\Carbon;
  */
 class GedcomParser
 {
+    private function deleteFamilyTreeData($familyTreeId)
+    {
+        MotherAndChild::where('family_tree_id', $familyTreeId)->delete();
+        
+        FatherAndChild::where('family_tree_id', $familyTreeId)->delete();
+        
+        Spouse::where('family_tree_id', $familyTreeId)->delete();
+        
+        Person::where('family_tree_id', $familyTreeId)->delete();
+    } 
  /**
  * Parses the file - individuals' information is extracted via parser library php-gedcom,
  * and manual parsing is used to extract relationship information by splitting and reading each line, 
@@ -32,6 +42,8 @@ class GedcomParser
     public function parse($filePath, $familyTreeId)
     {
         $this->familyTreeId = $familyTreeId; 
+        $this->deleteFamilyTreeData($familyTreeId);
+        
         //Parser (php-gedcom) extracts the file which is uploaded on website
         $parser = new Parser();
         $gedcom = $parser->parse($filePath);
@@ -41,9 +53,22 @@ class GedcomParser
             $names = $individual->getName();
             if (!empty($names)) { //if names array is not empty (individual may have multiple names/aliases)
                 $name = reset($names); //retrieves first name of individual
+                $givenName = $name->getGivn();
+                $surname = $name->getSurn();                
+                if (!empty($givenName) || !empty($surname)) {
+                    $fullName = trim($givenName . ' ' . $surname);
+                } else {
+                    $fullName = $name->getName();
+                }
+                $fullName = str_replace('/', '', $fullName);
+                if (empty($surname)) {
+                    $nameParts = explode(' ', trim($fullName));
+                    $surname = end($nameParts);
+                }
                 $birth = $individual->getBirt(); //retrieves birth information via getBirt ('BIRT' tag is used for this)
                 $death = $individual->getDeat(); //retrieves death information via getDeat ('DEAT' tag is used for this)
-                
+                $birthPlace = $birth ? $birth->getPlac() : null;
+                $deathPlace = $death ? $death->getPlac() : null;
                 /**retrieves the birth and death dates for individual through getDate ('DATE' tag is used for this)
                  * method extractQual is called and the birth/death dates are passed as parameters for this if they are not null
                  * otherwise null is passed
@@ -55,20 +80,22 @@ class GedcomParser
                 $this->storePerson(
                     $this->familyTreeId,
                     $individual->getId(), //obtains GEDCOM ID for individual (characterised by @Ixxxx@)
-                    $name->getGivn() . ' ' . $name->getSurn(), //obtains and concatenates first name and surname
-                    $name->getSurn(),
+                    $fullName, //obtains and concatenates first name and surname
+                    $surname,
                     $individual->getSex(), //obtains gender
                     $birthDate['date'], //DOB obtained from extractQual (after conversion via getDate)
                     $birthDate['qualifier'], //qualifier (ABT, BEF, AFT, used when dates are approximate) obtained from extractQual associated with DOB
                     $deathDate['date'], //DOD obtained from extractQual (after conversion via getDate)
-                    $deathDate['qualifier'] //qualifier (ABT, BEF, AFT, used when dates are approximate) obtained from extractQual associated with DOD
+                    $deathDate['qualifier'], //qualifier (ABT, BEF, AFT, used when dates are approximate) obtained from extractQual associated with DOD
+                    $birthPlace,
+                    $deathPlace
                 );
             }
         }
         //Alternative manual parsing for relationships
             $fileContent = file_get_contents($filePath); //reads file into string
             $lines = explode("\n", $fileContent); //splits string via delimiter "\n" (new line)
-            
+            $counter = 0; 
         //for loop going through each split line
             foreach ($lines as $line) {
                 $line = trim($line); //removes whitespaces from beginning and end of line
@@ -97,14 +124,16 @@ class GedcomParser
                             $id,
                             $mother_id ?? null,
                             $child_id ?? null,
-                            $child_number ?? null
+                            $child_number ?? null,
+                            $isAdopted ?? false
                         );
                         $this->storeFatherAndChild(
                             $this->familyTreeId,
                             $id,
                             $father_id ?? null,
                             $child_id ?? null,
-                            $child_number ?? null
+                            $child_number ?? null,
+                            $isAdopted ?? false
                         );
                     }
                     $id = trim($tag, '@'); //extracts ID and removes '@'
@@ -127,9 +156,11 @@ class GedcomParser
                  } elseif ($tag === 'CHIL') { //if tag equals 'CHIL' (indicating child)
                     $child_id = trim($value, '@'); //extracts child's individual ID
                     $child_number++; //increases number of children by one for families with multiple children
-                 } else {
-                    echo "Tag not found";
-                 }
+                    $isAdopted = false; // initialise adoption status
+                 } elseif ($tag === 'ADOP') {
+                    $isAdopted = true; // mark child as adopted
+                 } 
+                 
                 } elseif ($level === 2 && $tag === 'DATE'){ //if level is 2 and contains the tag 'DATE'
                     if (isset($isMarried)) { //if a defined value is found for isMarried (i.e. true)
                     $marriageDate = $this->extractQual($value); //extract marriage date and pass to convertToDate method
@@ -138,7 +169,12 @@ class GedcomParser
                     $divorceDate = $this->extractQual($value); //extract divorce date and pass to convertToDate method
                     unset($isDivorced); //removes value for isDivorced
             }
-        }
+        } 
+                $counter++;
+                if ($counter % 1000 == 0) {
+                    gc_collect_cycles();
+                }
+            }
             if (isset($id)) { //passes all data extracted of final family record to storeSpouse, storeMotherAndChild and storeFatherAndChild methods
                 $this->storeSpouses(  
                 $this->familyTreeId,
@@ -155,22 +191,23 @@ class GedcomParser
                 $id,
                 $mother_id ?? null,
                 $child_id ?? null,
-                $child_number ?? null
+                $child_number ?? null,
+                $isAdopted ?? false,
             );
             $this->storeFatherAndChild(
                 $this->familyTreeId,
                 $id,
                 $father_id ?? null,
                 $child_id ?? null,
-                $child_number ?? null
+                $child_number ?? null,
+                $isAdopted ?? false
             );
             }
         }
-    }
     /**
     * Stores the extracted information from the parser into the People table, creating or updating a Person record within it.
     */
-    private function storePerson($familyTreeId, $gedcomId, $name, $surname, $gender, $birth, $birthDateQualifier, $death, $deathDateQualifier)
+    private function storePerson($familyTreeId, $gedcomId, $name, $surname, $gender, $birth, $birthDateQualifier, $death, $deathDateQualifier, $birthPlace, $deathPlace)
     {
         $person = Person::updateOrCreate( //updates/creates Person record with corresponding information for each column in People table
             ['gedcom_id' => $gedcomId],
@@ -183,6 +220,8 @@ class GedcomParser
                 'birth_date_qualifier' => $birthDateQualifier,
                 'death_date' => $this->convertToDate($death),
                 'death_date_qualifier' => $deathDateQualifier,
+                'birth_place' => $birthPlace,
+                'death_place' => $deathPlace
             ]
         );
         /** STILL NEEDS WORKING/TESTING
@@ -224,7 +263,7 @@ class GedcomParser
     /**
     * Stores the extracted information from the parser into the MotherAndChildren table, creating or updating a Mother/Child record within it.
     */
-            private function storeMotherAndChild($familyTreeId, $gedcomId, $mother_id, $child_id, $child_number)
+            private function storeMotherAndChild($familyTreeId, $gedcomId, $mother_id, $child_id, $child_number, $isAdopted)
             {
                 if ($mother_id && $child_id) { //if mother_id and child_id were extracted searches for respective GEDCOM IDs in People table and obtains details
                     $mother = Person::where('gedcom_id', $mother_id)->first();
@@ -235,7 +274,8 @@ class GedcomParser
                         [   'family_tree_id' => $familyTreeId, 
                             'mother_id' => $mother->id,
                             'child_id' => $child->id,
-                            'child_number' => $child_number
+                            'child_number' => $child_number,
+                            'is_adopted' => $isAdopted
                         ]
                     );
                 }
@@ -244,7 +284,7 @@ class GedcomParser
     /**
     * Stores the extracted information from the parser into the FatherAndChildren table, creating or updating a Father/Child record within it.
     */
-        private function storeFatherAndChild($familyTreeId, $gedcomId, $father_id, $child_id, $child_number)
+        private function storeFatherAndChild($familyTreeId, $gedcomId, $father_id, $child_id, $child_number, $isAdopted)
         {
                 if ($father_id && $child_id) { //if father_id and child_id were extracted searches for respective GEDCOM IDs in People table and obtains details
                 $father = Person::where('gedcom_id', $father_id)->first();
@@ -255,7 +295,8 @@ class GedcomParser
                 [   'family_tree_id' => $familyTreeId,
                     'father_id' => $father->id,
                     'child_id' => $child->id,
-                    'child_number' => $child_number
+                    'child_number' => $child_number,
+                    'is_adopted' => $isAdopted
                 ]
             );
             }

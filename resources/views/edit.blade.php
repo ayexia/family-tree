@@ -19,7 +19,7 @@
     .back-to-tree-button {
         position: absolute;
         left: 5%;
-        bottom: 2%;
+        top: 20%;
         background-color: #587353;
         color: #EDECD7;
         font-family: "Inika", serif;
@@ -169,6 +169,16 @@
                 <input type="date" id="death_date" name="death_date" class="form-control" value="{{ old('death_date', $person->death_date ? $person->death_date->format('Y-m-d') : '') }}">
             </div>
 
+            <div>
+                <label for="birth_place">Birth Place</label>
+                <input type="text" name="birth_place" id="birth_place" class="form-control" value="{{ old('birth_place', $person->birth_place) }}">
+            </div>
+
+            <div>
+                <label for="death_place">Death Place</label>
+                <input type="text" name="death_place" id="death_place" class="form-control" value="{{ old('death_place', $person->death_place) }}">
+            </div>
+
             <div id="marriages-container">
                 @foreach ($person->firstSpouses as $index => $spouse)
                     <div class="marriage-group">
@@ -194,7 +204,20 @@
                     </div>
                 @endforeach
             </div>
+            <div>
+                <label for="pets">Pets (comma-separated)</label>
+                <input type="text" id="pets" name="pets" class="form-control" value="{{ old('pets', $person->pets ? implode(', ', $person->pets) : '') }}">
+            </div>
 
+            <div>
+                <label for="hobbies">Hobbies (comma-separated)</label>
+                <input type="text" id="hobbies" name="hobbies" class="form-control" value="{{ old('hobbies', $person->hobbies ? implode(', ', $person->hobbies) : '') }}">
+            </div>
+
+            <div>
+                <label for="notes">Special Notes</label>
+                <textarea id="notes" name="notes" class="form-control" rows="4">{{ old('notes', $person->notes) }}</textarea>
+            </div>
             <button type="submit" class="custom-button">
                 Save Changes
             </button>
@@ -208,6 +231,6 @@
 </a>
 
 <div class="footer">
-    <p>Copyright 2024 | <a href="{{ route('about') }}">About MyStory</a></p>
+    <p>Copyright 2024 | <a href="{{ route('about') }}">About MyStory</a> | <a href="{{ route('feedback.create') }}">Submit Feedback</a></p>
 </div>
 @endsection

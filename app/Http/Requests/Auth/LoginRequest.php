@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Handles login requests - provided by Laravel Breeze.
+ */
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Auth\Events\Lockout;

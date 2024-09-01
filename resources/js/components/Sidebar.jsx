@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios'; 
+import { Cake } from 'lucide-react';
 
 const Sidebar = ({ node, onClose, setImages, images }) => {
 const [errorMessage, setErrorMessage] = useState('');
@@ -29,6 +30,15 @@ const [errorMessage, setErrorMessage] = useState('');
   const edit = () => {
     window.location.href = `/person/${node.id}/edit`;
   };
+
+  const isBirthday = (birthDate) => {
+    if (!birthDate) return false;
+    const today = new Date();
+    const birth = new Date(birthDate);
+    return today.getMonth() === birth.getMonth() && today.getDate() === birth.getDate();
+  };
+
+  const isTodayBirthday = isBirthday(node.attributes.DOB);
   
   return (
     <div style={{
@@ -42,6 +52,7 @@ const [errorMessage, setErrorMessage] = useState('');
       overflowY: 'auto',
       transition: 'transform .3s',
       transform: 'translate(0px)',
+      zIndex: '500',
     }}>
       <button onClick={onClose} style={{
         backgroundColor: '#37672F',
@@ -58,6 +69,20 @@ const [errorMessage, setErrorMessage] = useState('');
         &times;
       </button>
       <div style={{ padding: '20px' }}>
+        {isTodayBirthday && (
+          <div style={{ 
+            backgroundColor: '#FFD700', 
+            padding: '10px', 
+            borderRadius: '5px', 
+            marginBottom: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px'
+          }}>
+            <Cake size={24} />
+            <span>{node.name} was born today!</span>
+          </div>
+        )}
         <h3>{node.name || 'Unknown'}</h3>
         <p><img src={images[node.id] || node.attributes.image ||'/images/user.png'} height={250} width={250}></img></p>
         <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
@@ -90,8 +115,10 @@ const [errorMessage, setErrorMessage] = useState('');
           </button>
         </div>
 
-        <p>DOB: {node.attributes.DOB}</p>
-        <p>DOD: {node.attributes.DOD}</p>
+        <p>Date of birth: {node.attributes.DOB || "Unknown date"}</p>
+        <p>Birthplace: {node.attributes.birth_place || "Unknown"}</p>
+        <p>Date of death: {node.attributes.DOD || "Unknown date"}</p>
+        <p>Resting place: {node.attributes.death_place || "Unknown"}</p>
         {node.attributes.marriage_dates && node.attributes.marriage_dates.length > 0 ? (
           node.attributes.marriage_dates.map((marriage, index) => (
             <div key={index}>
@@ -104,18 +131,58 @@ const [errorMessage, setErrorMessage] = useState('');
         ) : (
           <p>No marriages</p>
         )}
-         {node.attributes.parents && Object.keys(node.attributes.parents).length > 0 ? (
-          <div>
-            <p>Parents:</p>
+         <div>
+          <p>Parents:</p>
+          {node.attributes.parents && Object.keys(node.attributes.parents).length > 0 ? (
             <ul>
-              {Object.values(node.attributes.parents).map(parent => (
-                <li key={parent.id}>{parent.name || 'Unknown person'}</li>
+              {Object.values(node.attributes.parents).map(parent => {
+                let parentType = parent.gender === 'F' ? 'Mother' : parent.gender === 'M' ? 'Father' : 'Parent';
+                return (
+                  <li key={parent.id}>
+                    {parentType}: {parent.name || 'Unknown person'}
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <ul>
+            <li>Mother: Unknown person</li>
+            <li>Father: Unknown person</li>
+            </ul>
+          )}
+        </div>
+          <div>
+            <p>Pets:</p>            
+        {node.attributes.pets && node.attributes.pets.length > 0 ? (
+            <ul>
+              {node.attributes.pets.map((pet, index) => (
+                <li key={index}>{pet}</li>
               ))}
             </ul>
-          </div>
         ) : (
-          <p>Unknown parents</p>
-        )}
+          <p>No pets</p>
+        )}        
+        </div>
+          <div>
+            <p>Hobbies:</p>            
+        {node.attributes.hobbies && node.attributes.hobbies.length > 0 ? (
+            <ul>
+              {node.attributes.hobbies.map((hobby, index) => (
+                <li key={index}>{hobby}</li>
+              ))}
+            </ul>
+        ) : (
+          <p>No hobbies</p>
+        )}        
+        </div>
+          <div>
+            <p>Notes:</p>
+        {node.attributes.notes ? (
+            <p>{node.attributes.notes}</p>
+        ) : (
+          <p>No notes</p>
+        )}        
+        </div>
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
       </div>
     </div>

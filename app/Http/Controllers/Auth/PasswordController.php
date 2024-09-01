@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Controller handling password updates - provided by Laravel Breeze.
+ */
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;

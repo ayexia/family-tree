@@ -20,6 +20,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'is_admin',
+        'last_login_at'
     ];
 
     /**
@@ -42,11 +44,18 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
+            'last_login_at' => 'datetime',
         ];
     }
 
     public function familyTree()
     {
         return $this->hasOne(FamilyTree::class);
+    }
+
+    public function isAdmin()
+    {
+        return $this->is_admin;
     }
 }

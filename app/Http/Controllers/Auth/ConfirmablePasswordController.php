@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Controller handling password confirmation and provides corresponding view - provided by Laravel Breeze.
+ */
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -35,6 +37,6 @@ class ConfirmablePasswordController extends Controller
 
         $request->session()->put('auth.password_confirmed_at', time());
 
-        return redirect()->intended(route('home', absolute: false));
+        return redirect()->intended(route('home', absolute: false)); //ensures password confirmed is directed to homepage
     }
 }

@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Controller handling requests for password resets, along with corresponding view - provided by Laravel Breeze.
+ */
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;

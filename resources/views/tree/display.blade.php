@@ -10,7 +10,7 @@
 <style>
     .title {
         left: 515px;
-        top: 50px;
+        top: 0px;
         position: absolute;
         font-family: "Inika", serif;
         font-size: 40px;
@@ -35,8 +35,8 @@
         margin: 10px;
         font-family: "Inika", serif;
         position: absolute;
-        top: 161.67px;
-        left: 12%;
+        left: 6.75%;
+        top: 25px;
     }
 
     .home-button img {
@@ -57,27 +57,7 @@
         right: 0%;
         padding: 0.53rem;
         color: #EDECD7;
-    }
-
-    .info-text {
-        background-color: #9BB08C;
-        padding: 15px;
-        border-radius: 15px;
-        max-width: 600px;
-        width: 90%;
-        margin: 125px auto;
-        color: #EDECD7;
-        text-align: center;
-        font-family: "Inika", serif;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        font-size: 0.8em;
-    }
-
-    .info-text p {
-        margin: 10px 0;
+        z-index: 1000;
     }
 
     .search-results .family-tree li {
@@ -141,9 +121,70 @@
         padding: 20px;
         border-radius: 15px;
         max-width: 1200px;
-        width: 80%;
+        width: 100%;
         margin: 0px auto 80px;
         position: relative;
+        top: 45px;
+    }
+    
+    .circle.info-tooltip {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #587353;
+        color: #EDECD7;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 16px;
+        font-family: "Inika", serif;
+        font-weight: bold;
+        cursor: pointer;
+        position: absolute;
+        left: 34%;
+        top: 25px;
+        transform: translate(-50%, -50%);
+        transition: none;
+        z-index: 1000;
+    }
+
+    .circle.info-tooltip:hover {
+        transform: translate(-50%, -50%);
+    }
+    .circle .tooltip {
+        visibility: hidden;
+        width: 300px;
+        background-color: #9BB08C;
+        color: #EDECD7;
+        text-align: left;
+        padding: 10px;
+        border-radius: 6px;
+        position: absolute;
+        z-index: 1;
+        top: 125%;
+        left: 50%;
+        font-size: 0.8em;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .circle .tooltip::after {
+        content: "";
+        position: absolute;
+        top: 125%;
+        left: 50%;
+        border-width: 5px;
+        border-style: solid;
+        border-color: #9BB08C transparent transparent transparent;
+    }
+
+    .circle:hover .tooltip {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .home-button.import-gedcom {
+        left: 22.75%;
     }
 </style>
 </head>
@@ -160,21 +201,28 @@
             <img src="{{ asset('images/home.png') }}" alt="Home">
             Home
         </a>
+        <a href="{{ route('import.form') }}" class="profile-button home-button import-gedcom">
+            Import GEDCOM
+        </a>
+        <div class="circle info-tooltip">
+            ?
+            <span class="tooltip">
+                <p>Welcome to your Family Tree page! Here you can:</p>
+                <p>- View and explore your family tree</p>
+                <p>- Search for specific family lines</p>
+                <p>- Adjust the number of visible generations</p>
+                <p>- Switch between tree and graph views</p>
+                <p>- Edit family members and upload images/memories</p>
+                <p>- Search for specific individuals</p>
+                <p>- Export as PDF book</p>
+            </span>
+        </div>
     </header>
-
-    <div class="info-text">
-        <p>Welcome to your Family Tree page! Here you can:</p>
-        <p>View and explore your family tree - the default tree view allows you to search for a specific family line (surname). After clicking "search" this then automatically updates when typing a new name. You are also able to adjust the number of generations in your family that you wish to see. Hovering over each member will give you additional details.</p>
-        <p>Click to switch views to alternate between the tree and graph views, which displays all members of the family tree. This can also be filtered via generations.</p>
-        <p>Edit family members - clicking on a person will open up a sidebar which displays more information. Through this you can upload images and memories of that person, and open a page to update information.</p>
-        <p>Search for specific individuals - feel like your family is too large? No problem! The additional searchbar will allow you to search for a family member and centre the focus on them.</p>
-        <p>Export as PDF book - click to lead to a page to print your personalised family tree book, with the details you wish to include.</p>
-    </div>
 
     <div id="root"></div>
 
     <footer class="footer">
-        <p>Copyright 2024 | <a href="{{ route('about') }}">About MyStory</a></p>
+    <p>Copyright 2024 | <a href="{{ route('about') }}">About MyStory</a> | <a href="{{ route('feedback.create') }}">Submit Feedback</a></p>
     </footer>
 </body>
 </html>

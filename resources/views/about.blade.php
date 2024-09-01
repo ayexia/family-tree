@@ -19,12 +19,14 @@
     <div class="container">
         <div class="header">
             <h1 class="subheading">About MyStory</h1>
+            @auth
             <div class="profile">
             <a href="{{route('profile.edit') }}" class="profile-button">
                 <img src="{{ asset('images/user-profile.png') }}" alt="User">
                 Profile
             </a>
             </div>
+            @endauth
         </div>
         <a href="{{ route('home') }}" class="profile-button home-button">
                 <img src="{{ asset('images/home.png') }}" alt="Home">
@@ -51,7 +53,7 @@
         </div>
     </div>
     <div class="footer">
-        <p>Copyright 2024 | <a href="#">About</a></p>
+    <p>Copyright 2024 | <a href="#">About MyStory</a> | <a href="{{ route('feedback.create') }}">Submit Feedback</a></p>
     </div>
 </body>
 </html>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { Cake } from 'lucide-react';
 
 const GraphSidebar = ({ node, onClose, setImages, images }) => {
   const [errorMessage, setErrorMessage] = useState('');
@@ -30,6 +31,15 @@ const GraphSidebar = ({ node, onClose, setImages, images }) => {
     window.location.href = `/person/${node.id}/edit`;
   };
 
+  const isBirthday = (birthDate) => {
+    if (!birthDate) return false;
+    const today = new Date();
+    const birth = new Date(birthDate);
+    return today.getMonth() === birth.getMonth() && today.getDate() === birth.getDate();
+  };
+
+  const isTodayBirthday = isBirthday(node.data.birth_date);
+
   return (
     <div style={{
       width: '300px',
@@ -58,6 +68,20 @@ const GraphSidebar = ({ node, onClose, setImages, images }) => {
         &times;
       </button>
       <div style={{ padding: '20px' }}>
+        {isTodayBirthday && (
+          <div style={{ 
+            backgroundColor: '#FFD700', 
+            padding: '10px', 
+            borderRadius: '5px', 
+            marginBottom: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px'
+          }}>
+            <Cake size={24} />
+            <span>{node.data.name} was born today!</span>
+          </div>
+        )}
         <h3>{node.data.name || 'Unknown'}</h3>
         <p><img src={images[node.id] || node.data.image || '/images/user.png'} height={250} width={250} /></p>  
       <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
@@ -90,8 +114,10 @@ const GraphSidebar = ({ node, onClose, setImages, images }) => {
           </button>
         </div>
 
-        <p>DOB: {node.data.birth_date || 'Unknown date'}</p>
-        <p>DOD: {node.data.death_date || 'Unknown date'}</p>
+        <p>Date of birth: {node.data.birth_date || 'Unknown date'}</p>
+        <p>Birthplace: {node.data.birth_place || 'Unknown'}</p>
+        <p>Date of death: {node.data.death_date || 'Unknown date'}</p>
+        <p>Resting place: {node.data.death_place || 'Unknown'}</p>
         {node.data.marriage_dates && node.data.marriage_dates.length > 0 ? (
           node.data.marriage_dates.map((marriage, index) => (
             <div key={index}>
@@ -104,18 +130,59 @@ const GraphSidebar = ({ node, onClose, setImages, images }) => {
         ) : (
           <p>No marriages</p>
         )}
-         {node.data.parents && Object.keys(node.data.parents).length > 0 ? (
-          <div>
-            <p>Parents:</p>
+        
+        <div>
+          <p>Parents:</p>
+          {node.data.parents && Object.keys(node.data.parents).length > 0 ? (
             <ul>
-              {Object.values(node.data.parents).map(parent => (
-                <li key={parent.id}>{parent.name || 'Unknown person'}</li>
-              ))}
+              {Object.values(node.data.parents).map(parent => {
+                let parentType = parent.gender === 'F' ? 'Mother' : parent.gender === 'M' ? 'Father' : 'Parent';
+                return (
+                  <li key={parent.id}>
+                    {parentType}: {parent.name || 'Unknown person'}
+                  </li>
+                );
+              })}
             </ul>
+          ) : (
+            <ul>
+            <li>Mother: Unknown person</li>
+            <li>Father: Unknown person</li>
+            </ul>
+          )}
+        </div>
+          <div>
+            <p>Pets:</p>            
+            {node.data.pets && node.data.pets.length > 0 ? (
+              <ul>
+                {node.data.pets.map((pet, index) => (
+                  <li key={index}>{pet}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>No pets</p>
+            )}        
           </div>
-        ) : (
-          <p>Unknown parents</p>
-        )}
+          <div>
+            <p>Hobbies:</p>            
+            {node.data.hobbies && node.data.hobbies.length > 0 ? (
+              <ul>
+                {node.data.hobbies.map((hobby, index) => (
+                  <li key={index}>{hobby}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>No hobbies</p>
+            )}        
+          </div>
+          <div>
+            <p>Notes:</p>
+            {node.data.notes ? (
+              <p>{node.data.notes}</p>
+            ) : (
+              <p>No notes</p>
+            )}        
+          </div>
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
       </div>
     </div>

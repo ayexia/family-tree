@@ -14,6 +14,7 @@ class MotherAndChild extends Model
     'child_id',
     'child_number',
     'family_tree_id',
+    'is_adopted'
     ];
 
     public function mother()

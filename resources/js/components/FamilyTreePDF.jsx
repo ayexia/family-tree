@@ -374,14 +374,18 @@ const PersonPage = ({ person, graph, biographyLevel }) => {
   
     if (children.length > 0) {
       bio += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} had ${children.length} ${children.length === 1 ? 'child' : 'children'}: `;
+      const adoptedChildren = children.map(child => {
+          const adoptionInfo = child.data.isAdopted ? ' (adopted)' : '';
+          return child.data.name + adoptionInfo;
+      });
       if (children.length === 1) {
-        bio += children[0].data.name + '. ';
+          bio += adoptedChildren[0] + '. ';
       } else if (children.length === 2) {
-        bio += `${children[0].data.name} and ${children[1].data.name}. `;
+          bio += `${adoptedChildren[0]} and ${adoptedChildren[1]}. `;
       } else {
-        bio += children.slice(0, -1).map(child => child.data.name).join(', ') + ', and ' + children[children.length - 1].data.name + '. ';
+          bio += adoptedChildren.slice(0, -1).join(', ') + ', and ' + adoptedChildren[adoptedChildren.length - 1] + '. ';
       }
-    }
+  }
 
     if (biographyLevel === 'comprehensive' || biographyLevel === 'detailed') {
       const grandparents = parents.flatMap(parent => 

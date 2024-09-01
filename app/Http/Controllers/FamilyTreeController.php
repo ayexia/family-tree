@@ -91,7 +91,7 @@ class FamilyTreeController extends Controller
   
       //iterates through each person creating Node objects for them, then assigned to familyTree array using their ID as key
       foreach ($relatives as $relative){
-        $familyTree[$relative->id] = new Node($relative->id, $relative->name, $relative->surname, $relative->birth_date, $relative->death_date, $relative->birth_place, $relative->death_place, $relative->pets, $relative->hobbies, $relative->notes, $relative->gender, $relative->father_id, $relative->mother_id, $relative->image);
+        $familyTree[$relative->id] = new Node($relative->id, $relative->name, $relative->surname, $relative->birth_date, $relative->death_date, $relative->birth_place, $relative->death_place, $relative->pets, $relative->hobbies, $relative->gender, $relative->father_id, $relative->mother_id, $relative->image, $relative->is_adopted, $relative->notes);
     }
       //iterates through spouse relationships, checks if both spouses exist in the familyTree array
       foreach ($marriages as $marriage){
@@ -108,14 +108,14 @@ class FamilyTreeController extends Controller
       //iterates through parent-child relationships, checks if both parent and child exist in familyTree array and adds their data to nodes' list of parents and children
       foreach ($motherAndChildRelationships as $motherAndChild){
           if (isset($familyTree[$motherAndChild['mother_id']]) && isset($familyTree[$motherAndChild['child_id']])) {
-              $familyTree[$motherAndChild['mother_id']]->addChild($familyTree[$motherAndChild['child_id']]);
+              $familyTree[$motherAndChild['mother_id']]->addChild($familyTree[$motherAndChild['child_id']], $motherAndChild['is_adopted']);
               $familyTree[$motherAndChild['child_id']]->addParent($familyTree[$motherAndChild['mother_id']]);
           }
       }
   
       foreach ($fatherAndChildRelationships as $fatherAndChild){
           if (isset($familyTree[$fatherAndChild['father_id']]) && isset($familyTree[$fatherAndChild['child_id']])) {
-              $familyTree[$fatherAndChild['father_id']]->addChild($familyTree[$fatherAndChild['child_id']]);
+              $familyTree[$fatherAndChild['father_id']]->addChild($familyTree[$fatherAndChild['child_id']], $fatherAndChild['is_adopted']);
               $familyTree[$fatherAndChild['child_id']]->addParent($familyTree[$fatherAndChild['father_id']]);
           }
       }        
@@ -179,6 +179,7 @@ class FamilyTreeController extends Controller
               'notes' => $person->notes, 
               'marriage_dates' => $person->marriage_dates,
               'divorce_dates' => $person->divorce_dates,
+              'isAdopted' => $person->isAdopted,
               'image' => $person->image,
               'parents' => array_map(function($parent) { //iterates through person's parents (if they have any), storing them into an array which retruns their ID, name and gender
                   return ['id' => $parent->id, 'name' => $parent->name, 'gender' => $parent->gender];
@@ -204,6 +205,7 @@ class FamilyTreeController extends Controller
                       'notes' => $spouse->notes, 
                       'marriage_dates' => $spouse->marriage_dates,
                       'divorce_dates' => $spouse->divorce_dates,
+                      'isAdopted' => $spouse->isAdopted,
                       'image' => $spouse->image,
                       'parents' => array_map(function($parent) {
                           return ['id' => $parent->id, 'name' => $parent->name, 'gender' => $parent->gender];
@@ -274,6 +276,7 @@ class FamilyTreeController extends Controller
                 return ['id' => $grandparent->id, 'name' => $grandparent->name, 'gender' => $grandparent->gender];
                  }, $parent->getParents() ?? []),];
               }, $person->getParents() ?? []),
+            'isAdopted' => $person->isAdopted,
             ],
             'position' => ['x' => 0, 'y' => 0], //initial position of the node (this is set to 0 by default as the frontend will handle the positioning)
         ];
@@ -295,7 +298,8 @@ class FamilyTreeController extends Controller
                 'source' => (string)$id,
                 'target' => (string)$child->id,
                 'type' => 'smoothstep', //curved line going down from parent to child
-                'label' => 'Child'
+                'label' => 'Child',
+                'isAdopted' => $child->isAdopted
             ];
         }
     }

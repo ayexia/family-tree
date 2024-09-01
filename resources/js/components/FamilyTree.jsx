@@ -88,6 +88,8 @@ const FamilyTree = ({ generations, query, lineStyles }) => {
     const isHighlighted = highlightQuery && nodeDatum.name.toLowerCase().includes(highlightQuery);
     const isTodayBirthday = isBirthday(nodeDatum.attributes.DOB);
     const countryCode = nodeDatum.attributes.birth_place ? cityToCountryCode[nodeDatum.attributes.birth_place] : null;
+    const isAdopted = nodeDatum.attributes.isAdopted;
+    const nodeShape = isAdopted ? 'polygon' : 'circle';
 
     const shouldHighlight = isHighlighted || isTodayBirthday;
     const nodeStyle = {
@@ -220,7 +222,14 @@ const toolTip = (node) => { //customises tooltip, containing names and marriage 
               <g onClick={() => openSidebar(nodeDatum)}
                 onMouseEnter={() => nodeHover(nodeDatum)}
                 onMouseLeave={() => setHoveredNode(null)}>
-                <circle r={nodeRadius} style={nodeStyle} />
+                {nodeShape === 'circle' ? (
+                  <circle r={nodeRadius} style={nodeStyle} />
+                ) : (
+                  <polygon 
+                    points={`0,-${nodeRadius} ${nodeRadius},-${nodeRadius/2} ${nodeRadius},${nodeRadius/2} 0,${nodeRadius} -${nodeRadius},${nodeRadius/2} -${nodeRadius},-${nodeRadius/2}`} 
+                    style={nodeStyle} 
+                  />
+                )}
                 <image
                   href={selectedImage}
                   x="-50"
@@ -276,7 +285,9 @@ const toolTip = (node) => { //customises tooltip, containing names and marriage 
                   lineStyles.current;                  
                   const isSpouseBirthday = isBirthday(spouse.attributes.DOB);
                   const spouseCountryCode = spouse.attributes.birth_place ? cityToCountryCode[spouse.attributes.birth_place] : null;
-
+                  const isSpouseAdopted = spouse.attributes.isAdopted;
+                  const spouseNodeShape = isSpouseAdopted ? 'polygon' : 'circle';
+            
                   return (
                     <g key={spouse.id}
                       transform={`translate(${horizontalPosition}, ${verticalPosition})`}
@@ -299,11 +310,22 @@ const toolTip = (node) => { //customises tooltip, containing names and marriage 
                         strokeWidth={spouseLineStyle.width}
                         strokeDasharray={spouseLineStyle.dashArray}
                       />
-                        <circle r={nodeRadius} style={{
-                          stroke: isSpouseHighlighted || isSpouseBirthday ? (isSpouseBirthday ? '#FFD700' : 'yellow') : spouse.attributes.gender === 'M' ? '#97EBE6' : spouse.attributes.gender === 'F' ? '#EB97CF' : '#EBC097',
-                          fill: 'none',
-                          strokeWidth: isSpouseHighlighted || isSpouseBirthday ? 15 : 10,
-                        }} />
+                         {spouseNodeShape === 'circle' ? (
+                          <circle r={nodeRadius} style={{
+                            stroke: isSpouseHighlighted || isSpouseBirthday ? (isSpouseBirthday ? '#FFD700' : 'yellow') : spouse.attributes.gender === 'M' ? '#97EBE6' : spouse.attributes.gender === 'F' ? '#EB97CF' : '#EBC097',
+                            fill: 'none',
+                            strokeWidth: isSpouseHighlighted || isSpouseBirthday ? 15 : 10,
+                          }} />
+                        ) : (
+                          <polygon 
+                            points={`0,-${nodeRadius} ${nodeRadius},-${nodeRadius/2} ${nodeRadius},${nodeRadius/2} 0,${nodeRadius} -${nodeRadius},${nodeRadius/2} -${nodeRadius},-${nodeRadius/2}`} 
+                            style={{
+                              stroke: isSpouseHighlighted || isSpouseBirthday ? (isSpouseBirthday ? '#FFD700' : 'yellow') : spouse.attributes.gender === 'M' ? '#97EBE6' : spouse.attributes.gender === 'F' ? '#EB97CF' : '#EBC097',
+                              fill: 'none',
+                              strokeWidth: isSpouseHighlighted || isSpouseBirthday ? 15 : 10,
+                            }} 
+                          />
+                        )}
                         <image
                           href={images[spouse.id] || spouse.attributes.image || '/images/user.png'}
                           x="-50"

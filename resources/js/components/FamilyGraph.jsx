@@ -131,11 +131,17 @@ const FamilyGraph = ({
       edges: edges.map(edge => ({
         ...edge,
         style: {
-          stroke: edge.label === 'Spouse' ? (edge.is_current ? 'red' : 'blue') : '#000000',
+          stroke: edge.label === 'Spouse' 
+            ? (edge.is_current ? 'red' : 'blue') 
+            : edge.isAdopted ? '#FF00FF' : '#000000',
           strokeWidth: edge.label === 'Spouse' ? '0.5' : '0.2',
-          strokeDasharray: edge.label === 'Spouse' ? (edge.is_current ? 'none' : '5,5') : 'none',             
+          strokeDasharray: edge.label === 'Spouse' 
+            ? (edge.is_current ? 'none' : '5,5') 
+            : edge.isAdopted ? '5,5' : 'none',
         },
-        label: edge.label === 'Spouse' ? (edge.is_current ? 'Spouse' : 'Former Spouse') : edge.label,
+        label: edge.label === 'Spouse' 
+          ? (edge.is_current ? 'Spouse' : 'Divorced') 
+          : edge.isAdopted ? 'Adopted Child' : 'Child',
       }))
     };
   };

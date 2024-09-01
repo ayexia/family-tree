@@ -100,14 +100,16 @@ class GedcomParser
                             $id,
                             $mother_id ?? null,
                             $child_id ?? null,
-                            $child_number ?? null
+                            $child_number ?? null,
+                            $isAdopted ?? false
                         );
                         $this->storeFatherAndChild(
                             $this->familyTreeId,
                             $id,
                             $father_id ?? null,
                             $child_id ?? null,
-                            $child_number ?? null
+                            $child_number ?? null,
+                            $isAdopted ?? false
                         );
                     }
                     $id = trim($tag, '@'); //extracts ID and removes '@'
@@ -130,6 +132,9 @@ class GedcomParser
                  } elseif ($tag === 'CHIL') { //if tag equals 'CHIL' (indicating child)
                     $child_id = trim($value, '@'); //extracts child's individual ID
                     $child_number++; //increases number of children by one for families with multiple children
+                    $isAdopted = false; // initialise adoption status
+                 } elseif ($tag === 'ADOP') {
+                    $isAdopted = true; // mark child as adopted
                  } else {
                     echo "Tag not found";
                  }
@@ -158,14 +163,16 @@ class GedcomParser
                 $id,
                 $mother_id ?? null,
                 $child_id ?? null,
-                $child_number ?? null
+                $child_number ?? null,
+                $isAdopted ?? false,
             );
             $this->storeFatherAndChild(
                 $this->familyTreeId,
                 $id,
                 $father_id ?? null,
                 $child_id ?? null,
-                $child_number ?? null
+                $child_number ?? null,
+                $isAdopted ?? false
             );
             }
         }
@@ -229,7 +236,7 @@ class GedcomParser
     /**
     * Stores the extracted information from the parser into the MotherAndChildren table, creating or updating a Mother/Child record within it.
     */
-            private function storeMotherAndChild($familyTreeId, $gedcomId, $mother_id, $child_id, $child_number)
+            private function storeMotherAndChild($familyTreeId, $gedcomId, $mother_id, $child_id, $child_number, $isAdopted)
             {
                 if ($mother_id && $child_id) { //if mother_id and child_id were extracted searches for respective GEDCOM IDs in People table and obtains details
                     $mother = Person::where('gedcom_id', $mother_id)->first();
@@ -240,7 +247,8 @@ class GedcomParser
                         [   'family_tree_id' => $familyTreeId, 
                             'mother_id' => $mother->id,
                             'child_id' => $child->id,
-                            'child_number' => $child_number
+                            'child_number' => $child_number,
+                            'is_adopted' => $isAdopted
                         ]
                     );
                 }
@@ -249,7 +257,7 @@ class GedcomParser
     /**
     * Stores the extracted information from the parser into the FatherAndChildren table, creating or updating a Father/Child record within it.
     */
-        private function storeFatherAndChild($familyTreeId, $gedcomId, $father_id, $child_id, $child_number)
+        private function storeFatherAndChild($familyTreeId, $gedcomId, $father_id, $child_id, $child_number, $isAdopted)
         {
                 if ($father_id && $child_id) { //if father_id and child_id were extracted searches for respective GEDCOM IDs in People table and obtains details
                 $father = Person::where('gedcom_id', $father_id)->first();
@@ -260,7 +268,8 @@ class GedcomParser
                 [   'family_tree_id' => $familyTreeId,
                     'father_id' => $father->id,
                     'child_id' => $child->id,
-                    'child_number' => $child_number
+                    'child_number' => $child_number,
+                    'is_adopted' => $isAdopted
                 ]
             );
             }

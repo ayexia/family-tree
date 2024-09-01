@@ -25,12 +25,14 @@ const Legend = ({ lineStyles }) => {
     marginRight: '15px',
   };
 
-  const colourBoxStyle = (colour) => ({
-    width: '20px',
-    height: '20px',
-    backgroundColor: colour,
+  const colourBoxStyle = (colour, isHexagon = false) => ({
+    width: '10px',
+    height: '10px',
+    backgroundColor: isHexagon ? 'transparent' : colour,
     marginRight: '5px',
-    borderRadius: '50%',
+    borderRadius: isHexagon ? '0' : '50%',
+    clipPath: isHexagon ? 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' : 'none',
+    border: isHexagon ? '2px solid black' : 'none',
   });
 
   const lineStyle = (style) => ({
@@ -62,10 +64,14 @@ const Legend = ({ lineStyles }) => {
         <div style={colourBoxStyle('#FFD700')}></div>
         <span>Birthday</span>
       </div>
+      <div style={legendItemStyle}>
+        <div style={colourBoxStyle('transparent', true)}></div>
+        <span>Adopted</span>
+      </div>
       {lineStyles && Object.entries(lineStyles).map(([key, style]) => (
         <div key={key} style={legendItemStyle}>
           <div style={lineStyle(style)}></div>
-          <span>{key === 'parentChild' ? 'Parent-Child' : key === 'current' ? 'Current Spouse' : 'Divorced Spouse'}</span>
+          <span>{key === 'parentChild' ? 'Parent-Child' : key === 'current' ? 'Current Spouse' : 'Divorced'}</span>
         </div>
       ))}
     </div>

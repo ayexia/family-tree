@@ -19,6 +19,7 @@ class Node {
     public $mother_id;
     public $gender;
     public $image;
+    public $isAdopted;
     
     public $marriage_dates = [];
     public $divorce_dates = [];
@@ -26,7 +27,7 @@ class Node {
     public $hobbies = [];
     public $notes = ''; 
 
-    public function __construct($id, $name, $surname, $birth_date, $death_date, $birth_place, $death_place, $pets, $hobbies, $notes, $gender, $father_id = null, $mother_id = null, $image = null) {
+    public function __construct($id, $name, $surname, $birth_date, $death_date, $birth_place, $death_place, $pets, $hobbies, $gender, $father_id = null, $mother_id = null, $image = null, $isAdopted, $notes) {
         $this->id = $id;
         $this->name = $name;
         $this->surname = $surname;
@@ -39,6 +40,7 @@ class Node {
         $this->father_id = $father_id;
         $this->mother_id = $mother_id;
         $this->image = $image;
+        $this->isAdopted = $isAdopted;
         $this->pets = $pets;
         $this->hobbies = $hobbies;
         $this->notes = $notes; 
@@ -121,8 +123,9 @@ class Node {
         }
     }
     
-    public function addChild(Node $child) {
+    public function addChild(Node $child, $isAdopted = false) {
         $this->children[$child->id] = $child;
+        $child->isAdopted = $isAdopted;
         if ($this->gender === 'M') {
             $child->father_id = $this->id;
         } else {

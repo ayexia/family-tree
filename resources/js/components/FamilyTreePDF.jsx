@@ -337,6 +337,14 @@ const PersonPage = ({ person, graph, biographyLevel }) => {
       deathInfo += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} passed away in ${data.death_place}. `;
     }  
 
+    if (birthDate && data.birth_place) {
+      bio += `${data.name} was born on ${birthDate} in ${data.birth_place}. `;
+    } else if (birthDate) {
+      bio += `${data.name} was born on ${birthDate}. `;
+    } else if (data.birth_place) {
+      bio += `${data.name} was born in ${data.birth_place}. `;
+    }
+
     if (parents.length > 0) {
       bio += `${data.gender === 'M' ? 'His' : data.gender === 'F' ? 'Her' : 'Their'} parents were ${parents.map(p => p.name).join(' and ')}. `;
     }

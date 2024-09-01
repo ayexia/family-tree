@@ -31,6 +31,8 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        $request->user()->update(['last_login_at' => now()]);
+
         return redirect()->intended(route('home', absolute: false)); //ensures once logged in is directed to homepage
     }
 

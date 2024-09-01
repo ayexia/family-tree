@@ -264,7 +264,7 @@
         </div>
         @endif
         <div class="footer">
-            <p>Copyright 2024</p>
+            <p>Copyright 2024 | <a href="{{ route('feedback.create') }}">Submit Feedback</a></p>
         </div>
     </div>
     

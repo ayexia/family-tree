@@ -53,7 +53,7 @@
         </div>
     </div>
     <div class="footer">
-        <p>Copyright 2024 | <a href="#">About</a></p>
+    <p>Copyright 2024 | <a href="#">About MyStory</a> | <a href="{{ route('feedback.create') }}">Submit Feedback</a></p>
     </div>
 </body>
 </html>

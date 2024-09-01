@@ -222,7 +222,7 @@
     <div id="root"></div>
 
     <footer class="footer">
-        <p>Copyright 2024 | <a href="{{ route('about') }}">About MyStory</a></p>
+    <p>Copyright 2024 | <a href="{{ route('about') }}">About MyStory</a> | <a href="{{ route('feedback.create') }}">Submit Feedback</a></p>
     </footer>
 </body>
 </html>

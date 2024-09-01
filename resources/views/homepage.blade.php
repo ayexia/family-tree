@@ -52,6 +52,24 @@
         left: -20px;
         position: relative;
     }
+    .admin-button {
+        background-color: #587353;
+        color: #EDECD7;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 50px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 0.8em;
+        font-family: "Inika", serif;
+        text-decoration: none;
+        left: 20px;
+        top: 10px;
+        position: absolute;
+    }
+    .admin-button:hover {
+        background-color: #4a6848;
+    }
 </style>
 <body>
     <div class="container">
@@ -63,6 +81,9 @@
                     Profile
                 </a>
             </div>
+            @if(Auth::user()->isAdmin())
+                    <a href="{{ route('admin.dashboard') }}" class="admin-button">For Admin</a>
+                @endif
         </div>
         <div class="search-container">
             <p>This is your dashboard - you can start your journey by uploading a GEDCOM file, view or edit your tree, and search for family members.</p>
@@ -87,7 +108,7 @@
         </div>
     </div>
     <div class="footer">
-        <p>Copyright 2024 | <a href="{{ route('about') }}">About MyStory</a></p>
+        <p>Copyright 2024 | <a href="{{ route('about') }}">About MyStory</a> | <a href="{{ route('feedback.create') }}">Submit Feedback</a></p>
     </div>
 </body>
 </html>

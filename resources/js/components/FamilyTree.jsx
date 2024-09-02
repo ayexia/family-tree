@@ -261,13 +261,13 @@ const toolTip = (node) => { //customises tooltip, containing names and marriage 
                     <circle cx="0" cy="0" r={nodeRadius} />
                   </clipPath>
                 </defs>
-                <text fill="#37672F" stroke="none" x="60" y="-5" style={{ fontSize: '24px', fontFamily: 'Times New Roman' }}>
+                <text fill="#37672F" stroke="none" x="60" y="-5" style={{ fontSize: '28px', fontFamily: 'Times New Roman' }}>
                   {nodeDatum.name}
                 </text>
-                <text fill="#37672F" stroke="none" x="60" y="15" style={{ fontSize: '20px' }}>
+                <text fill="#37672F" stroke="none" x="60" y="15" style={{ fontSize: '24px' }}>
                   DOB: {nodeDatum.attributes.DOB}
                 </text>
-                <text fill="#37672F" stroke="none" x="60" y="35" style={{ fontSize: '20px' }}>
+                <text fill="#37672F" stroke="none" x="60" y="35" style={{ fontSize: '24px' }}>
                   DOD: {nodeDatum.attributes.DOD}
                 </text>
               </g>
@@ -357,13 +357,13 @@ const toolTip = (node) => { //customises tooltip, containing names and marriage 
                             <circle cx="0" cy="0" r={nodeRadius} />
                           </clipPath>
                         </defs>
-                        <text fill="#37672F" stroke="none" x="60" y="-5" style={{ fontSize: '24px', fontFamily: 'Times New Roman' }}>
+                        <text fill="#37672F" stroke="none" x="60" y="-5" style={{ fontSize: '28px', fontFamily: 'Times New Roman' }}>
                           {spouse.name}
                         </text>
-                        <text fill="#37672F" stroke="none" x="60" y="15" style={{ fontSize: '20px' }}>
+                        <text fill="#37672F" stroke="none" x="60" y="15" style={{ fontSize: '24px' }}>
                           DOB: {spouse.attributes.DOB}
                         </text>
-                        <text fill="#37672F" stroke="none" x="60" y="35" style={{ fontSize: '20px' }}>
+                        <text fill="#37672F" stroke="none" x="60" y="35" style={{ fontSize: '24px' }}>
                           DOD: {spouse.attributes.DOD}
                         </text>
                       </g>

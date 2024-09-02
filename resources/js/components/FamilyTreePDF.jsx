@@ -163,6 +163,13 @@ const styles = StyleSheet.create({ //CSS
     display: 'flex',
     flexDirection: 'column',
   },
+  generationHeading: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginTop: 15,
+    marginBottom: 10,
+    textDecoration: 'underline',
+  },
 });
 
 const TitlePage = ({ title }) => ( //title page
@@ -177,7 +184,7 @@ const TitlePage = ({ title }) => ( //title page
 
 const ITEMS_PER_PAGE = 20;
 
-const ContentsPage = ({ graph, selectedPeople }) => { //contents page - allows 20 entries per page before breaking to new page
+const ContentsPage = ({ graph, selectedPeople }) => { //contents page - allows 20 items per page before breaking to new page
   const contentItems = renderContents(graph, selectedPeople).filter(item => item !== null);
   const pageCount = Math.ceil(contentItems.length / ITEMS_PER_PAGE);
 
@@ -207,32 +214,64 @@ const ContentsPage = ({ graph, selectedPeople }) => { //contents page - allows 2
 };
 
 const renderContents = (graph, selectedPeople) => { //render each person in contents
-return graph.nodes
-  .filter(node => selectedPeople.length === 0 || selectedPeople.includes(node.id))
-  .map(person => {
-    const birthYear = person.data.birth_date ? new Date(person.data.birth_date).getFullYear() : null;
-    const deathYear = person.data.death_date ? new Date(person.data.death_date).getFullYear() : null;
+  const calculateGeneration = (personId, visited = new Set()) => {
+    if (visited.has(personId)) return 0;
+    visited.add(personId);
+    const parents = graph.edges
+      .filter(edge => edge.target === personId && edge.label === 'Child')
+      .map(edge => edge.source);
+    if (parents.length === 0) return 0;
+    return 1 + Math.max(...parents.map(parentId => calculateGeneration(parentId, visited)));
+  };
 
-    let yearInfo = '';
-    if (birthYear && deathYear) {
-      yearInfo = ` (${birthYear}-${deathYear})`;
-    } else if (birthYear) {
-      yearInfo = ` (b. ${birthYear})`;
-    } else if (deathYear) {
-      yearInfo = ` (d. ${deathYear})`;
+  const processedNodes = graph.nodes
+    .filter(node => selectedPeople.length === 0 || selectedPeople.includes(node.id))
+    .map(person => {
+      const generation = calculateGeneration(person.id);
+      const birthYear = person.data.birth_date ? new Date(person.data.birth_date).getFullYear() : null;
+      const deathYear = person.data.death_date ? new Date(person.data.death_date).getFullYear() : null;
+
+      let yearInfo = '';
+      if (birthYear && deathYear) {
+        yearInfo = ` (${birthYear}-${deathYear})`;
+      } else if (birthYear) {
+        yearInfo = ` (b. ${birthYear})`;
+      } else if (deathYear) {
+        yearInfo = ` (d. ${deathYear})`;
+      }
+
+      return { ...person, generation, yearInfo };
+    });
+
+  const groupedByGeneration = processedNodes.reduce((generationGroup, person) => {
+    if (!generationGroup[person.generation]) {
+      generationGroup[person.generation] = [];
     }
+    generationGroup[person.generation].push(person);
+    return generationGroup;
+  }, {});
 
-    return (
-      <React.Fragment key={person.id}>
-        <Text style={styles.contentItem}>
-          <Link src={`#${person.id}`} style={styles.link}>
-            {person.data.name}
-          </Link>
-          {yearInfo}
-        </Text>
-      </React.Fragment>
-    );
+  Object.values(groupedByGeneration).forEach(group => {
+    group.sort((a, b) => {
+      const dateA = a.data.birth_date ? new Date(a.data.birth_date) : new Date(9999, 11, 31);
+      const dateB = b.data.birth_date ? new Date(b.data.birth_date) : new Date(9999, 11, 31);
+      return dateA - dateB;
+    });
   });
+
+  return Object.entries(groupedByGeneration).flatMap(([generation, people]) => [
+    <Text key={`gen-${generation}`} style={styles.generationHeading}>
+      Generation {parseInt(generation) + 1}
+    </Text>,
+    ...people.map(person => (
+      <Text key={person.id} style={styles.contentItem}>
+        <Link src={`#${person.id}`} style={styles.link}>
+          {person.data.name}
+        </Link>
+        {person.yearInfo}
+      </Text>
+    ))
+  ]);
 };
 
 const formatDate = (dateString) => {
@@ -446,17 +485,17 @@ const PersonPage = ({ person, graph, biographyLevel }) => {
         }
       }
 
-      if (data.notes) {
-        const notes = Array.isArray(data.notes) ? data.notes : [data.notes];
-        if (notes.length === 1) {
-          bio += `Additional note: ${notes[0]} `;
-        } else if (notes.length > 1) {
-          bio += `Additional notes: ${notes.join(' ')} `;
-        }
+    bio += deathInfo;
+    
+    if (data.notes) {
+      const notes = Array.isArray(data.notes) ? data.notes : [data.notes];
+      if (notes.length === 1) {
+        bio += `Additional note: ${notes[0]} `;
+      } else if (notes.length > 1) {
+        bio += `Additional notes: ${notes.join(' ')} `;
       }
     }
-
-    bio += deathInfo;
+  }
 
     return bio;
   };

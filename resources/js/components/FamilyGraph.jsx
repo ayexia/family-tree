@@ -253,7 +253,7 @@ const FamilyGraph = ({
         onNodeClick={onNodeClick}
         fitView
         nodeTypes={nodeTypes}
-        minZoom={0.1}
+        minZoom={0.01}
         maxZoom={2}
       >
         <Background variant="dots" gap={12} size={1} />

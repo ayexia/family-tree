@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Family Tree</title>
+    <title>{{ $surname }}'s Family Tree</title>
     @viteReactRefresh 
     @vite('resources/js/app.jsx')
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
 <style>
     .title {
-        left: 515px;
+        left: 450px;
         top: 0px;
         position: absolute;
         font-family: "Inika", serif;
@@ -190,7 +190,7 @@
 </head>
 <body>
     <header class="header">
-        <h1 class="title">Family Tree</h1>
+        <h1 class="title">{{ $surname }}'s Family Tree</h1>
         <div class="profile">
             <a href="{{route('profile.edit') }}" class="profile-button">
                 <img src="{{ asset('images/user-profile.png') }}" alt="User">

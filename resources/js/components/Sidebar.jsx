@@ -80,7 +80,7 @@ const [errorMessage, setErrorMessage] = useState('');
             gap: '10px'
           }}>
             <Cake size={24} />
-            <span>{node.name} was born today!</span>
+            <span>It's {node.name}'s birthday today!</span>
           </div>
         )}
         <h3>{node.name || 'Unknown'}</h3>

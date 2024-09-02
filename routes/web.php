@@ -31,10 +31,6 @@ Route::get('/about', function () {
     return view('about');
 })->name('about');
 
-Route::get('/display', function () {
-    return view('tree.display');
-})->middleware(['auth', 'verified'])->name('display');
-
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -49,6 +45,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/feedback', [FeedbackController::class, 'create'])->name('feedback.create');
     Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
+    Route::get('/display', [FamilyTreeController::class, 'familyTreeSurname'])->name('display');
 });
 
 Route::post('/upload', [GedcomController::class, 'upload'])->name('upload')->middleware(['auth', 'verified']);

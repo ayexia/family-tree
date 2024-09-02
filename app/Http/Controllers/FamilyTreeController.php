@@ -435,5 +435,11 @@ class FamilyTreeController extends Controller
         }
     
         return redirect()->back()->with('success', 'Family member details updated successfully.'); //returns to previous page with success message
-    }    
+    }  
+    
+        public function familyTreeSurname()
+    {
+        $firstPerson = Person::first();
+        return view('tree.display', ['surname' => $firstPerson->surname]);
+    }
 }

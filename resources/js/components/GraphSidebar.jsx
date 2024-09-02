@@ -79,7 +79,7 @@ const GraphSidebar = ({ node, onClose, setImages, images }) => {
             gap: '10px'
           }}>
             <Cake size={24} />
-            <span>{node.data.name} was born today!</span>
+            <span>It's {node.data.name}'s birthday today!</span>
           </div>
         )}
         <h3>{node.data.name || 'Unknown'}</h3>

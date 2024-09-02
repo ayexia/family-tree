@@ -93,7 +93,10 @@ const FamilyTree = ({ generations, query, lineStyles }) => {
 
     const shouldHighlight = isHighlighted || isTodayBirthday;
     const nodeStyle = {
-      stroke: shouldHighlight ? (isTodayBirthday ? '#FFD700' : 'yellow') : (isMale ? '#97EBE6' : isFemale ? '#EB97CF' : '#EBC097'),
+      stroke: shouldHighlight ? (isTodayBirthday ? '#FFD700' : 'yellow') : 
+        (isMale ? lineStyles.nodeMale.color : 
+         isFemale ? lineStyles.nodeFemale.color : 
+         lineStyles.nodeOther.color),
       fill: 'none',
       strokeWidth: shouldHighlight ? 15 : 10,
     };
@@ -312,7 +315,10 @@ const toolTip = (node) => { //customises tooltip, containing names and marriage 
                       />
                          {spouseNodeShape === 'circle' ? (
                           <circle r={nodeRadius} style={{
-                            stroke: isSpouseHighlighted || isSpouseBirthday ? (isSpouseBirthday ? '#FFD700' : 'yellow') : spouse.attributes.gender === 'M' ? '#97EBE6' : spouse.attributes.gender === 'F' ? '#EB97CF' : '#EBC097',
+                            stroke: isSpouseHighlighted || isSpouseBirthday ? (isSpouseBirthday ? '#FFD700' : 'yellow') : 
+                              spouse.attributes.gender === 'M' ? lineStyles.nodeMale.color : 
+                              spouse.attributes.gender === 'F' ? lineStyles.nodeFemale.color : 
+                              lineStyles.nodeOther.color,
                             fill: 'none',
                             strokeWidth: isSpouseHighlighted || isSpouseBirthday ? 15 : 10,
                           }} />
@@ -320,7 +326,10 @@ const toolTip = (node) => { //customises tooltip, containing names and marriage 
                           <polygon 
                             points={`0,-${nodeRadius} ${nodeRadius},-${nodeRadius/2} ${nodeRadius},${nodeRadius/2} 0,${nodeRadius} -${nodeRadius},${nodeRadius/2} -${nodeRadius},-${nodeRadius/2}`} 
                             style={{
-                              stroke: isSpouseHighlighted || isSpouseBirthday ? (isSpouseBirthday ? '#FFD700' : 'yellow') : spouse.attributes.gender === 'M' ? '#97EBE6' : spouse.attributes.gender === 'F' ? '#EB97CF' : '#EBC097',
+                              stroke: isSpouseHighlighted || isSpouseBirthday ? (isSpouseBirthday ? '#FFD700' : 'yellow') : 
+                                spouse.attributes.gender === 'M' ? lineStyles.nodeMale.color : 
+                                spouse.attributes.gender === 'F' ? lineStyles.nodeFemale.color : 
+                                lineStyles.nodeOther.color,
                               fill: 'none',
                               strokeWidth: isSpouseHighlighted || isSpouseBirthday ? 15 : 10,
                             }} 

@@ -7,6 +7,15 @@ import FamilyTree from './FamilyTree';
 import FamilyGraph from './FamilyGraph';
 import FamilyTreePDF from './FamilyTreePDF';
 
+const DEFAULT_LINE_STYLES = {
+    parentChild: { color: '#000000', width: 2, dashArray: 'none' },
+    current: { color: '#FF0000', width: 2, dashArray: 'none' },
+    divorced: { color: '#808080', width: 2, dashArray: '5,5' },
+    nodeMale: { color: '#97EBE6' },
+    nodeFemale: { color: '#EB97CF' },
+    nodeOther: { color: '#EBC097' }
+};
+
 const App = () => {
     const [view, setView] = useState('graph');
     const [showPDF, setShowPDF] = useState(false);
@@ -20,11 +29,7 @@ const App = () => {
     const [centerView, setCenterView] = useState(() => {});
     const [lineStyles, setLineStyles] = useState(() => {
         const savedStyles = localStorage.getItem('lineStyles');
-        return savedStyles ? JSON.parse(savedStyles) : {
-        parentChild: { color: '#000000', width: 2, dashArray: 'none' },
-        current: { color: '#FF0000', width: 2, dashArray: 'none' },
-        divorced: { color: '#808080', width: 2, dashArray: '5,5' }
-        };
+        return savedStyles ? { ...DEFAULT_LINE_STYLES, ...JSON.parse(savedStyles) } : DEFAULT_LINE_STYLES;
     });
 
     useEffect(() => {
@@ -68,31 +73,38 @@ const App = () => {
     const buttonStyle = {
         backgroundColor: '#CCE7BD',
         color: '#A7B492',
-        padding: '10px 20px',
+        padding: '5px 10px',
         border: 'none',
-        borderRadius: '50px',
+        borderRadius: '25px',
         cursor: 'pointer',
         fontSize: '0.85em',
         fontFamily: '"Inika", serif',
         fontWeight: 'bold',
         transition: 'background-color 0.3s',
-        margin: '10px 0',
+        margin: '5px 0',
         display: 'flex',
         alignItems: 'center',
-        gap: '0px',
+        gap: '5px',
         width: '100%',
     };
 
+    const topButtonStyle = {
+        ...buttonStyle,
+        fontSize: '1em',
+        padding: '6px 10px',
+        marginBottom: '3px',
+    };
+
     const imgStyle = {
-        width: '25px',
-        height: '25px',
+        width: '20px',
+        height: '20px',
         opacity: 0.3,
     };
 
     const controlsContainer = {
-        width: '160px',
+        width: '180px',
         height: '85vh',
-        padding: '20px',
+        padding: '40px 10px 10px 10px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'flex-start',
@@ -104,33 +116,33 @@ const App = () => {
     };
 
     const mainContentStyle = {
-        marginLeft: '160px',
+        marginLeft: '180px',
         marginTop: '0px',
-        width: 'calc(100vw - 160px)',
+        width: 'calc(100vw - 180px)',
         height: '77vh',
         overflow: 'hidden',
     };
 
     const inputStyle = {
-        padding: '5px',
-        margin: '2.5px 0',
-        borderRadius: '5px',
-        border: '1px solid #ccc',
-        fontSize: '0.85em',
-        fontFamily: '"Inika", serif',
+        padding: '3px',
+        margin: '1px 0',
+        borderRadius: '3px',
         border: '1px solid #CCE7BD',
+        fontSize: '0.8em',
+        fontFamily: '"Inika", serif',
     };
 
     const lineStyleContainer = {
         display: 'flex',
         flexDirection: 'column',
-        marginBottom: '10px',
+        marginBottom: '2px',
     };
 
     const lineStyleInputs = {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
+        width: '100%',
     };
 
     const currentViewStyle = {
@@ -144,9 +156,9 @@ const App = () => {
         marginBottom: '0px'
     };
 
-    const TippyButton = ({ onClick, content, children }) => (
+    const TippyButton = ({ onClick, content, children, isTopButton = false }) => (
         <Tippy content={content} placement="right" arrow={true}>
-            <button style={buttonStyle} onClick={onClick}>
+            <button style={isTopButton ? topButtonStyle : buttonStyle} onClick={onClick}>
                 {children}
             </button>
         </Tippy>
@@ -162,121 +174,87 @@ const App = () => {
                         <TippyButton
                             onClick={switchView}
                             content="Switch between Tree and Graph view"
+                            isTopButton={true}
                         >
                             <img src="/images/grid.png" alt="Grid" style={imgStyle} />
-                            Switch to {view === 'graph' ? 'Tree View' : 'Graph View'}
+                            Switch View
                         </TippyButton>                        
+                        <TippyButton
+                            onClick={exportToPDF}
+                            content="Export your family tree to a PDF book"
+                            isTopButton={true}
+                        >
+                            <img src="/images/printing.png" alt="PDF" style={imgStyle} />
+                            Export PDF
+                        </TippyButton>
+                        <div style={{ marginTop: '5px' }}>
+                            <label htmlFor="generations" style={{fontSize: '0.8em'}}>Generations: </label>
+                            <Tippy content="Specify the number of generations to display">
+                            <input
+                                type="number"
+                                id="generations"
+                                value={generations}
+                                onChange={(e) => setGenerations(Number(e.target.value))}
+                                min="1"
+                                max="100"
+                                style={{...inputStyle, width: '50px'}}
+                            />
+                            </Tippy>
+                        </div>
+                        <Tippy content="Search for a person in the family tree">
+                        <input
+                            type="text"
+                            placeholder="Search person"
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            style={{...inputStyle, width: '95%', marginTop: '3px'}}
+                        />
+                        </Tippy>
                         {view === 'graph' && (
                             <>
-                                <TippyButton
-                                    onClick={exportToPDF}
-                                    content="Export your family tree to a PDF book"
+                                <Tippy content="Select a person from the search results">
+                                <select 
+                                    onChange={resultSelect}
+                                    value={highlightedNode || ''}
+                                    style={{...inputStyle, width: '100%', marginTop: '3px'}}
                                 >
-                                    <img src="/images/printing.png" alt="PDF" style={imgStyle} />
-                                    Export to PDF book
-                                </TippyButton>
-                                <div>
-                                    <label htmlFor="generations">Generations: </label>
-                                    <Tippy content="Specify the number of generations to display">
-                                    <input
-                                        type="number"
-                                        id="generations"
-                                        value={generations}
-                                        onChange={(e) => setGenerations(Number(e.target.value))}
-                                        min="1"
-                                        max="100"
-                                        style={{...inputStyle, width: '80%'}}
-                                    />
-                                    </Tippy>
-                                </div>
-                                <div>
-                                    <Tippy content="Search for a person in the family tree">
-                                    <input
-                                        type="text"
-                                        placeholder="Search for a person"
-                                        value={query}
-                                        onChange={(e) => setQuery(e.target.value)}
-                                        style={{...inputStyle, width: '80%'}}
-                                    />
-                                    </Tippy>
-                                    <Tippy content="Select a person from the search results">
-                                    <select 
-                                        onChange={resultSelect}
-                                        value={highlightedNode || ''}
-                                        style={{...inputStyle, width: '80%'}}
-                                    >
-                                        <option value="">Select a person</option>
-                                        {formatOptions(searchResults).map(node => (
-                                            <option key={node.id} value={node.id}>
-                                                {node.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    </Tippy>
-                                </div>
+                                    <option value="">Select a person</option>
+                                    {formatOptions(searchResults).map(node => (
+                                        <option key={node.id} value={node.id}>
+                                            {node.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                </Tippy>
                                 <TippyButton
                                 onClick={() => setShowStatistics(true)}
                                 content="Show statistics related to the family tree"
-                            >
+                                >
                                 Show Statistics
                                 </TippyButton>
-                                <div>
                                 <TippyButton onClick={handleZoomIn} content="Zoom in to the view">Zoom In</TippyButton>
                                 <TippyButton onClick={handleZoomOut} content="Zoom out of the view">Zoom Out</TippyButton>
                                 <TippyButton onClick={handleCenterView} content="Center the view on the current focus">Center View</TippyButton>
-                                </div>
                             </>
                         )}
                         {view === 'tree' && (
                             <>
-                                <TippyButton
-                                    onClick={exportToPDF}
-                                    content="Export your family tree to a PDF book"
-                                >
-                                    <img src="/images/printing.png" alt="PDF" style={imgStyle} />
-                                    Export to PDF book
-                                </TippyButton>
-                                <div>
-                                    <label htmlFor="generations">Generations: </label>
-                                    <Tippy content="Specify the number of generations to display">
-                                    <input
-                                        type="number"
-                                        id="generations"
-                                        value={generations}
-                                        onChange={(e) => setGenerations(Number(e.target.value))}
-                                        min="1"
-                                        max="100"
-                                        style={{...inputStyle, width: '80%'}}
-                                    />
-                                    </Tippy>
-                                </div>
-                                <div>
-                                    <Tippy content="Search for a person in the family tree">
-                                    <input
-                                        type="text"
-                                        placeholder="Search for a person"
-                                        value={query}
-                                        onChange={(e) => setQuery(e.target.value)}
-                                        style={{...inputStyle, width: '80%'}}
-                                    />
-                                    </Tippy>                                    
-                                </div>
-                                <div>
-                                    <h4>Line Styles:</h4>
-                                    <h5>Colour, Width, Dash level</h5>
+                                <div style={{ marginTop: '5px' }}>
+                                    <h4 style={{fontSize: '0.85em', marginBottom: '2px'}}>Line Styles:</h4>
+                                    <h5 style={{fontSize: '0.85em', marginTop: '1px', marginBottom: '2px'}}>Colour, Width, Dash level</h5>
                                     {['Parent-Child', 'Current Spouse', 'Divorced Spouse'].map((type, index) => {
                                         const key = Object.keys(lineStyles)[index];
                                         const style = lineStyles[key];
                                         return (
-                                            <div key={key} style={lineStyleContainer}>
-                                                <label>{type}</label>
+                                            <div key={key} style={{...lineStyleContainer, marginBottom: '1px'}}>
+                                                <label style={{fontSize: '0.75em'}}>{type}</label>
                                                 <div style={lineStyleInputs}>
                                                     <Tippy content={`Set the colour for ${type} line`}>
                                                     <input
                                                         type="color"
                                                         value={style.color}
                                                         onChange={handleLineStyleChange(key, 'color')}
-                                                        style={{ ...inputStyle, width: '30px', padding: '0' }}
+                                                        style={{ ...inputStyle, width: '20%', padding: '0' }}
                                                     />
                                                     </Tippy>
                                                     <Tippy content={`Set the width for ${type} line`}>
@@ -286,7 +264,7 @@ const App = () => {
                                                         onChange={handleLineStyleChange(key, 'width')}
                                                         min="1"
                                                         max="10"
-                                                        style={{ ...inputStyle, width: '40px' }}
+                                                        style={{ ...inputStyle, width: '30%' }}
                                                     />
                                                     </Tippy>
                                                     <Tippy content={`Set the dash pattern for ${type} line (e.g., 5,5 for dashed line)`}>
@@ -295,7 +273,7 @@ const App = () => {
                                                         value={style.dashArray}
                                                         onChange={handleLineStyleChange(key, 'dashArray')}
                                                         placeholder="e.g., 5,5"
-                                                        style={{ ...inputStyle, width: '70px' }}
+                                                        style={{ ...inputStyle, width: '40%' }}
                                                     />
                                                     </Tippy>
                                                 </div>
@@ -303,6 +281,22 @@ const App = () => {
                                         );
                                     })}
                                 </div>
+                            <div style={{ marginTop: '5px' }}>
+                                <h4 style={{fontSize: '0.85em', marginBottom: '2px'}}>Gender Icon Colours:</h4>
+                                {['Male', 'Female', 'Other'].map((type) => (
+                                    <div key={type} style={{...lineStyleContainer, marginBottom: '1px'}}>
+                                        <label style={{fontSize: '0.75em'}}>{type}</label>
+                                        <Tippy content={`Set the colour for ${type} gender icons`}>
+                                            <input
+                                                type="color"
+                                                value={lineStyles[`node${type}`].color}
+                                                onChange={handleLineStyleChange(`node${type}`, 'color')}
+                                                style={{ ...inputStyle, width: '100%', padding: '0' }}
+                                            />
+                                        </Tippy>
+                                    </div>
+                                ))}
+                            </div>
                             </>
                         )}
                     </div>

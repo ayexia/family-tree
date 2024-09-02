@@ -45,15 +45,15 @@ const Legend = ({ lineStyles }) => {
   return (
     <div style={legendStyles}>
       <div style={legendItemStyle}>
-        <div style={colourBoxStyle('#97EBE6')}></div>
+        <div style={colourBoxStyle(lineStyles?.nodeMale?.color || '#97EBE6')}></div>
         <span>Male</span>
       </div>
       <div style={legendItemStyle}>
-        <div style={colourBoxStyle('#EB97CF')}></div>
+        <div style={colourBoxStyle(lineStyles?.nodeFemale?.color || '#EB97CF')}></div>
         <span>Female</span>
       </div>
       <div style={legendItemStyle}>
-        <div style={colourBoxStyle('#EBC097')}></div>
+        <div style={colourBoxStyle(lineStyles?.nodeOther?.color || '#EBC097')}></div>
         <span>Other/Unknown</span>
       </div>
       <div style={legendItemStyle}>
@@ -68,12 +68,28 @@ const Legend = ({ lineStyles }) => {
         <div style={colourBoxStyle('transparent', true)}></div>
         <span>Adopted</span>
       </div>
-      {lineStyles && Object.entries(lineStyles).map(([key, style]) => (
-        <div key={key} style={legendItemStyle}>
-          <div style={lineStyle(style)}></div>
-          <span>{key === 'parentChild' ? 'Parent-Child' : key === 'current' ? 'Current Spouse' : 'Divorced'}</span>
-        </div>
-      ))}
+      {lineStyles && (
+        <>
+          {lineStyles.parentChild && (
+            <div style={legendItemStyle}>
+              <div style={lineStyle(lineStyles.parentChild)}></div>
+              <span>Parent-Child</span>
+            </div>
+          )}
+          {lineStyles.current && (
+            <div style={legendItemStyle}>
+              <div style={lineStyle(lineStyles.current)}></div>
+              <span>Current Spouse</span>
+            </div>
+          )}
+          {lineStyles.divorced && (
+            <div style={legendItemStyle}>
+              <div style={lineStyle(lineStyles.divorced)}></div>
+              <span>Divorced</span>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };

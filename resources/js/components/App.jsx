@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { ReactFlowProvider } from 'reactflow';
 import Tippy from '@tippyjs/react';
@@ -18,11 +18,18 @@ const App = () => {
     const [zoomIn, setZoomIn] = useState(() => {});
     const [zoomOut, setZoomOut] = useState(() => {});
     const [centerView, setCenterView] = useState(() => {});
-    const [lineStyles, setLineStyles] = useState({
+    const [lineStyles, setLineStyles] = useState(() => {
+        const savedStyles = localStorage.getItem('lineStyles');
+        return savedStyles ? JSON.parse(savedStyles) : {
         parentChild: { color: '#000000', width: 2, dashArray: 'none' },
         current: { color: '#FF0000', width: 2, dashArray: 'none' },
         divorced: { color: '#808080', width: 2, dashArray: '5,5' }
+        };
     });
+
+    useEffect(() => {
+        localStorage.setItem('lineStyles', JSON.stringify(lineStyles));
+    }, [lineStyles]);
 
     const handleLineStyleChange = (type, property) => (event) => {
         setLineStyles(prevStyles => ({

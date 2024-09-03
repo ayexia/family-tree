@@ -35,7 +35,8 @@ const FamilyGraph = ({
   setSearchResults,
   setZoomIn,
   setZoomOut,
-  setCenterView
+  setCenterView,
+  lineStyles
 }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -55,11 +56,14 @@ const FamilyGraph = ({
   const customNode = useCallback(({ data }) => {
     const isTodayBirthday = isBirthday(data.birth_date);
     const countryCode = data.birth_place ? cityToCountryCode[data.birth_place] : null;
+    const nodeColour = data.gender === 'M' ? lineStyles.nodeMale.color : 
+                      data.gender === 'F' ? lineStyles.nodeFemale.color : 
+                      lineStyles.nodeOther.color;
     return (
     <div style={{ 
       padding: 10, 
       borderRadius: 5, 
-      background: data.gender === 'M' ? '#97EBE6' : data.gender === 'F' ? '#EB97CF' : '#EBC097', 
+      background: nodeColour,
       border: '1px solid #ccc', 
       whiteSpace: 'pre-wrap', 
       textAlign: 'center',
@@ -87,7 +91,7 @@ const FamilyGraph = ({
       <Handle type="source" position={Position.Right} id="right" />
     </div>
   );
- }, []);
+ }, [lineStyles]);
 
   const nodeTypes = useMemo(() => ({ custom: customNode }), [customNode]);
 
@@ -128,21 +132,25 @@ const FamilyGraph = ({
 
     return {
       nodes: positionedNodes,
-      edges: edges.map(edge => ({
-        ...edge,
-        style: {
-          stroke: edge.label === 'Spouse' 
-            ? (edge.is_current ? 'red' : 'blue') 
-            : edge.isAdopted ? '#FF00FF' : '#000000',
-          strokeWidth: edge.label === 'Spouse' ? '0.5' : '0.2',
-          strokeDasharray: edge.label === 'Spouse' 
-            ? (edge.is_current ? 'none' : '5,5') 
-            : edge.isAdopted ? '5,5' : 'none',
-        },
-        label: edge.label === 'Spouse' 
-          ? (edge.is_current ? 'Spouse' : 'Divorced') 
-          : edge.isAdopted ? 'Adopted Child' : 'Child',
-      }))
+      edges: edges.map(edge => {
+        let style = {};
+        if (edge.label === 'Spouse') {
+          style = edge.is_current ? lineStyles.current : lineStyles.divorced;
+        } else {
+          style = edge.isAdopted ? lineStyles.adopted: lineStyles.parentChild;
+        }
+        return {
+          ...edge,
+          style: {
+            stroke: style.color,
+            strokeWidth: style.width,
+            strokeDasharray: style.dashArray,
+          },
+          label: edge.label === 'Spouse' 
+            ? (edge.is_current ? 'Spouse' : 'Divorced') 
+            : edge.isAdopted ? 'Adopted Child' : 'Child',
+        };
+      })
     };
   };
 
@@ -169,7 +177,7 @@ const FamilyGraph = ({
       console.error('Error fetching data:', error);
       setErrorMessage('An error occurred while fetching data.');
     }
-  }, [images, generations]);
+  }, [images, generations, lineStyles]);
 
   useEffect(() => {
     fetchFamilyTreeData();

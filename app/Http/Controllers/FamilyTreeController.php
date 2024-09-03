@@ -408,6 +408,48 @@ class FamilyTreeController extends Controller
             'hobbies' => 'nullable|string',
             'notes' => 'nullable|string',
         ]);
+
+        $birthDate = $data['birth_date'] ?? null;
+        $deathDate = $data['death_date'] ?? null;
+    
+        if ($birthDate) {
+            if ($deathDate && $birthDate > $deathDate) {
+                return redirect()->back()->withErrors(['death_date' => 'The date of death cannot be before the date of birth.']);
+            }
+        }
+    
+        if (!empty($data['marriages'])) {
+            foreach ($data['marriages'] as $marriage) {
+                $marriageDate = $marriage['marriage_date'] ?? null;
+                $divorceDate = $marriage['divorce_date'] ?? null;
+    
+                if ($birthDate) {
+                    if ($marriageDate && $birthDate > $marriageDate) {
+                        return redirect()->back()->withErrors(['marriages.*.marriage_date' => 'The marriage date cannot be before the date of birth.']);
+                    }
+    
+                    if ($divorceDate && $birthDate > $divorceDate) {
+                        return redirect()->back()->withErrors(['marriages.*.divorce_date' => 'The divorce Date cannot be before the date of birth.']);
+                    }
+                }
+    
+                if ($marriageDate) {
+                    if ($deathDate && $marriageDate > $deathDate) {
+                        return redirect()->back()->withErrors(['marriages.*.marriage_date' => 'The marriage date cannot be after the date of death.']);
+                    }
+    
+                    if ($divorceDate && $marriageDate > $divorceDate) {
+                        return redirect()->back()->withErrors(['marriages.*.divorce_date' => 'The divorce date cannot be before the marriage date.']);
+                    }
+                }
+    
+                if ($divorceDate) {
+                    if ($deathDate && $divorceDate > $deathDate) {
+                        return redirect()->back()->withErrors(['marriages.*.divorce_date' => 'The divorce date cannot be after the date of death.']);
+                    }
+                }
+            }
+        }   
     
         //retrieves the family member with the given ID from DB, otherwise gives 404 error if fails
         $person = Person::findOrFail($id);

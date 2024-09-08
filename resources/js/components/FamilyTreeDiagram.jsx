@@ -8,7 +8,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Corben',
   },
   title: {
-    fontSize: 20,
+    fontSize: 16,
     fontFamily: 'Great Vibes',
     marginBottom: 10,
     textAlign: 'center',
@@ -18,10 +18,21 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
   },
-  personInitials: {
-    fontSize: 10,
-    margin: '5 0',
+  personContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  personText: {
+    fontSize: 8,
     textAlign: 'center',
+    marginBottom: 2,
+  },
+  coupleContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   childrenContainer: {
     display: 'flex',
@@ -30,13 +41,12 @@ const styles = StyleSheet.create({
   },
   verticalLine: {
     width: 1,
-    backgroundColor: '#000',
-    alignSelf: 'center',
+    backgroundColor: 'black',
+    height: 10,
   },
-  spouseLine: {
-    width: 10,
+  horizontalLine: {
     height: 1,
-    backgroundColor: '#000',
+    backgroundColor: 'black',
     alignSelf: 'center',
   },
 });
@@ -49,39 +59,56 @@ const getInitials = (name) => {
     .toUpperCase();
 };
 
-const PersonInitials = ({ person }) => (
-  <Text style={styles.personInitials}>{getInitials(person.data.name)}</Text>
+const PersonNode = ({ person }) => (
+  <View style={styles.personContainer}>
+    <Text style={styles.personText}>{getInitials(person.data.name)}</Text>
+  </View>
 );
 
-const FamilyNode = ({ person, graph, depth = 0 }) => {
-  const spouse = graph.edges
-    .find(edge => edge.source === person.id && edge.label === 'Spouse');
-  const spousePerson = spouse ? graph.nodes.find(node => node.id === spouse.target) : null;
+const FamilyNode = ({ person, graph, selectedPeople, processedPeople }) => {
+  if (processedPeople.has(person.id)) return null;
+  processedPeople.add(person.id);
+
+  const spouse = graph.edges.find(edge => 
+    (edge.source === person.id || edge.target === person.id) && edge.label === 'Spouse'
+  );
+  const spousePerson = spouse 
+    ? graph.nodes.find(node => node.id === (spouse.source === person.id ? spouse.target : spouse.source))
+    : null;
 
   const children = graph.edges
     .filter(edge => edge.source === person.id && edge.label === 'Child')
-    .map(edge => graph.nodes.find(node => node.id === edge.target));
+    .map(edge => graph.nodes.find(node => node.id === edge.target))
+    .filter(child => selectedPeople.includes(child.id));
+
+  const childSpacing = 40;
 
   return (
-    <View style={{ alignItems: 'center' }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <PersonInitials person={person} />
-        {spousePerson && (
+    <View style={styles.personContainer}>
+      <View style={styles.coupleContainer}>
+        <PersonNode person={person} />
+        {spousePerson && selectedPeople.includes(spousePerson.id) && (
           <>
-            <View style={styles.spouseLine} />
-            <PersonInitials person={spousePerson} />
+            <View style={[styles.horizontalLine, { width: 10 }]} />
+            <PersonNode person={spousePerson} />
           </>
         )}
       </View>
       {children.length > 0 && (
         <>
-          <View style={[styles.verticalLine, { height: 10 }]} />
+          <View style={styles.verticalLine} />
+          <View style={[styles.horizontalLine, { width: (children.length - 1) * childSpacing }]} />
           <View style={styles.childrenContainer}>
             {children.map((child, index) => (
-              <React.Fragment key={child.id}>
-                {index > 0 && <View style={{ width: 20 }} />}
-                <FamilyNode person={child} graph={graph} depth={depth + 1} />
-              </React.Fragment>
+              <View key={child.id} style={{ alignItems: 'center', width: childSpacing }}>
+                <View style={[styles.verticalLine, { height: 10 }]} />
+                <FamilyNode 
+                  person={child} 
+                  graph={graph} 
+                  selectedPeople={selectedPeople}
+                  processedPeople={processedPeople}
+                />
+              </View>
             ))}
           </View>
         </>
@@ -90,23 +117,50 @@ const FamilyNode = ({ person, graph, depth = 0 }) => {
   );
 };
 
-const FamilyTreePage = ({ rootPerson, graph }) => (
-  <Page size="A5" orientation="landscape" style={styles.page}>
-    <Text style={styles.title}>Family Tree</Text>
-    <View style={styles.treeContainer}>
-      <FamilyNode person={rootPerson} graph={graph} />
-    </View>
-  </Page>
-);
-
-const FamilyTreeDiagram = ({ graph }) => {
-  const rootMembers = graph.nodes.filter(node => 
-    !graph.edges.some(edge => edge.target === node.id && edge.label === 'Child')
+const FamilyTreePage = ({ rootPerson, graph, selectedPeople }) => {
+  const processedPeople = new Set();
+  return (
+    <Page size="A5" orientation="landscape" style={styles.page}>
+      <Text style={styles.title}>Family Tree</Text>
+      <View style={styles.treeContainer}>
+        <FamilyNode 
+          person={rootPerson} 
+          graph={graph} 
+          selectedPeople={selectedPeople}
+          processedPeople={processedPeople}
+        />
+      </View>
+    </Page>
   );
+};
 
-  return rootMembers.map((rootPerson, index) => (
-    <FamilyTreePage key={rootPerson.id} rootPerson={rootPerson} graph={graph}/>
-  ));
+const FamilyTreeDiagram = ({ selectedPeople, graph }) => {
+  const findRootMembers = () => {
+    const roots = new Set(selectedPeople);
+    selectedPeople.forEach(id => {
+      const parentEdges = graph.edges.filter(edge => edge.target === id && edge.label === 'Child');
+      parentEdges.forEach(edge => {
+        if (selectedPeople.includes(edge.source)) {
+          roots.delete(id);
+        }
+      });
+    });
+    return Array.from(roots);
+  };
+
+  const rootMembers = findRootMembers();
+
+  return rootMembers.map((rootId, index) => {
+    const rootPerson = graph.nodes.find(node => node.id === rootId);
+    return (
+      <FamilyTreePage 
+        key={rootPerson.id} 
+        rootPerson={rootPerson} 
+        graph={graph} 
+        selectedPeople={selectedPeople}
+      />
+    );
+  });
 };
 
 export default FamilyTreeDiagram;

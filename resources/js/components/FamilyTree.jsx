@@ -478,7 +478,7 @@ const toolTip = (node) => { //customises tooltip, containing names and marriage 
         pathFunc="step"        
         pathClassFunc={pathClassFunc}
         translate={{ x: 300, y: 50 }}
-        separation={{ siblings: 7, nonSiblings: 7 }}
+        separation={{ siblings: 5.5, nonSiblings: 5 }}
         nodeSize={{ x: 190, y: 300 }}
         renderCustomNodeElement={customNode}
       />

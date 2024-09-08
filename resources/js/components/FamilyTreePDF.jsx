@@ -117,14 +117,22 @@ const styles = StyleSheet.create({ //CSS
     marginBottom: 30,
     textAlign: 'center',
   },
-  timelineContainer: {
-    flexDirection: 'column',
-    position: 'relative',
-    paddingLeft: 20,
+  bulletPoint: {
+    width: 5,
+    height: 5,
+    borderRadius: 5,
+    backgroundColor: 'black',
+    position: 'absolute',
+    left: 0,
+    zIndex: 1,
+  },
+  timelineEventContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   timelineLine: {
     position: 'absolute',
-    left: 10,
+    left: 2.5,
     top: 0,
     bottom: 0,
     width: 1,
@@ -309,10 +317,13 @@ const TimelinePage = ({ person, events }) => {
             {events
               .slice(pageIndex * EVENTS_PER_PAGE, (pageIndex + 1) * EVENTS_PER_PAGE)
               .map((event, index) => (
-                <View key={index} style={styles.timelineEvent}>
+              <View key={index} style={styles.timelineEventContainer}>
+                <View style={styles.bulletPoint} />
+                <View style={styles.timelineEvent}>
                   <Text style={styles.timelineDate}>{event.date || 'Unknown date'}</Text>
                   <Text style={styles.timelineDescription}>{event.description}</Text>
                 </View>
+              </View>
               ))}
           </View>
           {pageIndex < pageCount - 1 && (

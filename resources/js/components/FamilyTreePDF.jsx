@@ -3,6 +3,7 @@ import { Document, Page, Text, View, StyleSheet, Font, PDFViewer, Link, Image } 
 import axios from 'axios';
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css'; 
+import FamilyTreeDiagram from './FamilyTreeDiagram';
 
 Font.register({
   family: 'Great Vibes',
@@ -184,6 +185,18 @@ const TitlePage = ({ title }) => ( //title page
 
 const ITEMS_PER_PAGE = 20;
 
+const getInitials = (name) => {
+  return name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase();
+};
+
+const PersonInitials = ({ person }) => (
+  <Text style={styles.personInitials}>{getInitials(person.data.name)}</Text>
+);
+
 const ContentsPage = ({ graph, selectedPeople }) => { //contents page - allows 20 items per page before breaking to new page
   const contentItems = renderContents(graph, selectedPeople).filter(item => item !== null);
   const pageCount = Math.ceil(contentItems.length / ITEMS_PER_PAGE);
@@ -268,7 +281,7 @@ const renderContents = (graph, selectedPeople) => { //render each person in cont
         <Link src={`#${person.id}`} style={styles.link}>
           {person.data.name}
         </Link>
-        {person.yearInfo}
+        {person.yearInfo} (<PersonInitials person={person} />)
       </Text>
     ))
   ]);
@@ -652,17 +665,20 @@ const FamilyTreePDF = ({ onClose }) => { //fetch family data from backend
   };
 
   const renderPages = (graph) => {
-    return selectedPeople.map(id => {
-      const person = graph.nodes.find(node => node.id === id);
-      return person ? (
-        <PersonPage 
-          key={`${person.id}-${biographyLevel}`} 
-          person={person} 
-          graph={graph} 
-          biographyLevel={biographyLevel} 
-        />
-      ) : null;
-    }).filter(Boolean);
+    return [
+      <FamilyTreeDiagram key="family-tree" selectedPeople={selectedPeople} graph={graph} />,
+      ...selectedPeople.map(id => {
+        const person = graph.nodes.find(node => node.id === id);
+        return person ? (
+          <PersonPage 
+            key={`${person.id}-${biographyLevel}`} 
+            person={person} 
+            graph={graph} 
+            biographyLevel={biographyLevel} 
+          />
+        ) : null;
+      }).filter(Boolean)
+    ];
   };
 
   const overlay = { // position when viewing PDF

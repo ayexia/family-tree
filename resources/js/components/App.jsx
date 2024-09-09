@@ -21,7 +21,7 @@ const App = () => {
     const [view, setView] = useState('graph');
     const [showPDF, setShowPDF] = useState(false);
     const [generations, setGenerations] = useState(3);
-    const [query, setQuery] = useState('');
+    const [desiredName, setDesiredName] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [highlightedNode, setHighlightedNode] = useState(null);
     const [showStatistics, setShowStatistics] = useState(false);
@@ -233,8 +233,8 @@ const App = () => {
                         <input
                             type="text"
                             placeholder="Search person"
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
+                            value={desiredName}
+                            onChange={(e) => setDesiredName(e.target.value)}
                             style={{...inputStyle, width: '95%', marginTop: '1px'}}
                         />
                         </Tippy>
@@ -381,7 +381,7 @@ const App = () => {
                     {view === 'graph' ? 
                         <FamilyGraph 
                             generations={generations} 
-                            query={query} 
+                            desiredName={desiredName} 
                             showStatistics={showStatistics}
                             setShowStatistics={setShowStatistics}
                             highlightedNode={highlightedNode}
@@ -394,7 +394,7 @@ const App = () => {
                         /> : 
                         <FamilyTree 
                             generations={generations} 
-                            query={query}
+                            desiredName={desiredName}
                             lineStyles={lineStyles}
                         />
                         }

@@ -9,7 +9,7 @@ import "../../css/treeCustomisation.css";
 import Sidebar from './Sidebar';
 import Legend from './Legend';
 
-const FamilyTree = ({ generations, query, lineStyles }) => {
+const FamilyTree = ({ generations, lineStyles, desiredName }) => {
   const [treeData, setTreeData] = useState(null); //initialises variable treeData to store fetched family tree data
   const [isSidebarOpened, setIsSidebarOpened] = useState(false); //initialises, checks and sets visibility of sidebar (boolean)
   const [selectedNode, setSelectedNode] = useState(null); //initialises node selection state
@@ -29,25 +29,21 @@ const FamilyTree = ({ generations, query, lineStyles }) => {
 
   useEffect(() => {
     if (hasSearched) {
-      fetchFamilyTreeData(surnameQuery); //after component is mounted calls this function which retrieves the family tree data from the api through http requests
+      fetchFamilyTreeData(surnameQuery, desiredName); //after component is mounted calls this function which retrieves the family tree data from the api through http requests
     }
-  }, [surnameQuery, generations, hasSearched]);
+  }, [surnameQuery, desiredName, generations, hasSearched]);
 
   useEffect(() => {
-    if (query) {
-      setHighlightQuery(query.toLowerCase());
-    } else {
-      setHighlightQuery ('');
-    }
-  }, [query]);
+    setHighlightQuery(desiredName ? desiredName.toLowerCase() : '');
+  }, [desiredName]);
 
-  const fetchFamilyTreeData = async (surname = '') => { 
+  const fetchFamilyTreeData = async (surname = '', name = '') => { 
     try {
       const response = await axios.get('/api/family-tree-json', {
-        params: { desiredSurname: surname, generations }
-      }); //uses axios library to make http request to fetch api data, which is then parsed as JSON. this retrieves data for a queried surname in particular
+        params: { desiredSurname: surname, desiredName: name, generations }
+      }); //uses axios library to make http request to fetch api data, which is then parsed as JSON. this retrieves data for a queried surname and name
       if (response.data.length === 0) {
-        setErrorMessage('No results found for the given surname.'); //if no results found prints error message
+        setErrorMessage('No results found for the given search.'); //if no results found prints error message
         setTreeData(null);
       } else {
         setTreeData(response.data); //the fetched data is stored in treeData variable
@@ -61,7 +57,7 @@ const FamilyTree = ({ generations, query, lineStyles }) => {
   const searchSurname = () => { //search function
     setErrorMessage('');
     setHasSearched(true); //sets hasSearched to true, thus allowing the tree data to be shown (or an error message if nothing is found)
-    fetchFamilyTreeData(surnameQuery); //calls function to retrieve the family tree data for queried surname
+    fetchFamilyTreeData(surnameQuery, desiredName); //calls function to retrieve the family tree data for queried surname and name
   };
 
   const openSidebar = (node) => { //if user clicks a node, sets that as selectedNode and sets sideBar opened to true, opening it and displaying information for that node
@@ -85,7 +81,10 @@ const FamilyTree = ({ generations, query, lineStyles }) => {
     const selectedImage = images[nodeDatum.id] || nodeDatum.attributes.image || '/images/user.png'; //node's image is either the image selected by user or default image
     const isMale = nodeDatum.attributes.gender === 'M'; //checks if node's gender is male or female (for spouses, only main person's gender is counted)
     const isFemale = nodeDatum.attributes.gender === 'F';
-    const isHighlighted = highlightQuery && nodeDatum.name.toLowerCase().includes(highlightQuery);
+    const isHighlighted = highlightQuery && (
+      nodeDatum.name.toLowerCase().includes(highlightQuery) ||
+      (nodeDatum.attributes.surname && nodeDatum.attributes.surname.toLowerCase().includes(highlightQuery))
+    );
     const isTodayBirthday = isBirthday(nodeDatum.attributes.DOB);
     const countryCode = nodeDatum.attributes.birth_place ? cityToCountryCode[nodeDatum.attributes.birth_place] : null;
     const isAdopted = nodeDatum.attributes.isAdopted;
@@ -471,7 +470,7 @@ const toolTip = (node) => { //customises tooltip, containing names and marriage 
       <img src="/images/search.png" alt="Search" style={imgStyle}></img></button>
   </div>
   <div style={{ flex: '1', height: '100%', width: '100%' }}>
-    {hasSearched && treeData && !errorMessage && (
+    {(hasSearched || desiredName) && treeData && !errorMessage && (
       <Tree
         data={treeData}
         orientation="vertical"

@@ -27,7 +27,7 @@ const cityToCountryCode = {
 
 const FamilyGraph = ({ 
   generations, 
-  query, 
+  desiredName,
   showStatistics,
   setShowStatistics,
   highlightedNode,
@@ -156,7 +156,7 @@ const FamilyGraph = ({
 
   const fetchFamilyTreeData = useCallback(async () => {
     try {
-      const response = await axios.get('/api/family-graph-json', { params: { generations } });
+      const response = await axios.get('/api/family-graph-json', { params: { generations, desiredName } });
       if (response.data.nodes.length === 0) {
         setErrorMessage('No results found.');
         setNodes([]);
@@ -177,7 +177,7 @@ const FamilyGraph = ({
       console.error('Error fetching data:', error);
       setErrorMessage('An error occurred while fetching data.');
     }
-  }, [images, generations, lineStyles]);
+  }, [images, generations, lineStyles, desiredName]);
 
   useEffect(() => {
     fetchFamilyTreeData();
@@ -201,10 +201,10 @@ const FamilyGraph = ({
 
   const handleSearch = useCallback(() => {
     const results = nodes.filter(node => 
-      node.data.label.toLowerCase().includes(query.toLowerCase())
+      node.data.label.toLowerCase().includes(desiredName.toLowerCase())
     );
     setSearchResults(results);
-  }, [query, nodes, setSearchResults]);
+  }, [desiredName, nodes, setSearchResults]);
 
   useEffect(() => {
     handleSearch();

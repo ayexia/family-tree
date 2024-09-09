@@ -4,29 +4,34 @@
 <link href="https://fonts.googleapis.com/css2?family=Inika:wght@400;700&family=Tourney:ital,wght@0,100..900;1,100..900&family=Waiting+for+the+Sunrise&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
 <style>
+    body {
+        padding-top: 60px;
+    }
+
     .profile {
         position: fixed;
         right: 2%;
-        top: 5%;
+        top: 65px;
     }
     
     .home-button {
         position: fixed;
         left: 15%;
-        top: 11%;
+        top: 71px;
     }
 
     .custom-background {
-        background-color: #9BB08C;
+        background-color: #00796b;
         padding: 2rem;
         border-radius: 2.5rem;
         box-shadow: none;
         height: 28rem;
         width: 35rem;
-        margin:auto;
-        bottom: 12%;
+        margin: auto;
+        bottom: 8%;
         position: fixed;
-        right:27.5%;
+        right: 27.5%;
+        overflow-y: auto;
     }
 
     .custom-background label {
@@ -35,7 +40,7 @@
     }
 
     .custom-button {
-        background-color: #587353;
+        background-color: #004d40;
         color: #EDECD7;
         font-family: "Inika", serif;
         border-radius: 2.5rem;
@@ -43,13 +48,12 @@
         border: none;
         cursor: pointer;
         text-transform: none;
-        right: 30%;
-        top: 75%;
-        position: fixed;
+        right: 5%;
+        position: absolute;
     }
 
     .custom-button:hover {
-        background-color: #4a6848;
+        background-color: #00695c;
     }
 
     .custom-error, .custom-success {
@@ -57,6 +61,7 @@
         padding: 0.75rem 1.25rem;
         font-family: "Inika", serif;
         font-size: 0.875rem;
+        margin-bottom: 1rem;
     }
 
     .custom-error {
@@ -72,17 +77,17 @@
     }
 
     .file-type-info {
-        margin-top: 0.5rem;
+        margin-top: 1em;
         color: #EDECD7;
         font-size: 0.875rem;
         font-family: "Inika", serif;
     }
 
     .back-to-tree-button {
-        position: absolute;
+        position: fixed;
         left: 7.5%;
         bottom: 100px;
-        background-color: #587353;
+        background-color: #00796b;
         color: #EDECD7;
         font-family: "Inika", serif;
         border-radius: 2.5rem;
@@ -105,7 +110,7 @@
     }
 
     .back-to-tree-button:hover {
-        background-color: #4a6848;
+        background-color: #004d40;
     }
 
     .footer {
@@ -116,17 +121,25 @@
         right: 0%;
         padding: 0.53rem;
         color: #EDECD7;
+        background-color: #004d40;
     }
 
     .instructions {
-        margin-top: 1rem;
+        margin-top: 2rem;
         color: #EDECD7;
         font-size: 0.875rem;
         font-family: "Inika", serif;
     }
 
     .instructions ul {
-        padding-left: 1.5rem;
+        padding-left: 0rem;
+    }
+
+    .subheading {
+        color: #004d40;
+        position: fixed;
+        left: 500px;
+        top: 75px;
     }
 </style>
 <div class="container">
@@ -147,13 +160,13 @@
 <div class="max-w-3xl mx-auto mt-8 custom-background">
     <div class="bg-white dark:bg-gray-800 overflow-hidden" style="box-shadow: none;">
         @if (session('success'))
-            <div class="custom-success mb-4 rounded">
+            <div class="custom-success rounded">
                 {{ session('success') }}
             </div>
         @endif
 
         @if ($errors->any())
-            <div class="custom-error mb-4 rounded">
+            <div class="custom-error rounded">
                 @foreach ($errors->all() as $error)
                     <p>{{ $error }}</p>
                 @endforeach
@@ -162,27 +175,24 @@
 
         <p class="instructions">To upload your GEDCOM file, follow these steps:</p>
         <ol class="instructions">
-            <li>Click on the "Choose GEDCOM file" button to select your file from your computer.</li>
-            <li>Ensure that your file has the ".ged" extension. Files with other extensions will not be accepted.</li>
-            <li>Click the "Upload GEDCOM" button to start the upload process.</li>
-            <li>Wait for the upload to complete. You'll see a confirmation message once the process is finished.</li>
-            <li>If you encounter any issues, please make sure your file is properly formatted and the correct type.</li>
+            <li>Click on the "Choose GEDCOM file" button to select your file.</li>
+            <li>Ensure your file has the ".ged" extension. Files with other extensions will not be accepted.</li>
+            <li>Click "Upload GEDCOM" to start the upload process.</li>
         </ol>
 
-    <form action="{{ route('upload') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
-    @csrf
-    <div>
-        <label for="gedcom_file">Choose GEDCOM file</label>
-        <input type="file" name="gedcom_file" id="gedcom_file" accept=".ged" style="margin-top: 0.25rem; display: block; width: 100%; font-size: 0.875rem; color: #1a202c; border: 1px solid #cbd5e0; border-radius: 0.375rem; cursor: pointer; background-color: #f7fafc;">
-        <p class="file-type-info">Files must be of .ged extension</p>
-    </div>
-    <div>
-        <button type="submit" class="custom-button">
-            Upload GEDCOM
-        </button>
-    </div>
-</form>
-
+        <form action="{{ route('upload') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+            @csrf
+            <div>
+                <label for="gedcom_file">Choose GEDCOM file</label>
+                <input type="file" name="gedcom_file" id="gedcom_file" accept=".ged" style="margin-top: 0.25rem; display: block; width: 100%; font-size: 0.875rem; color: #EDECD7; border: 1px solid #004d40; border-radius: 0.375rem; cursor: pointer; background-color: #004d40;">
+                <p class="file-type-info">Files must be of .ged extension</p>
+            </div>
+            <div>
+                <button type="submit" class="custom-button">
+                    Upload GEDCOM
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 <a href="{{ route('display') }}" class="back-to-tree-button">

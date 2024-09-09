@@ -34,8 +34,11 @@ const GraphSidebar = ({ node, onClose, setImages, images }) => {
   const isBirthday = (birthDate) => {
     if (!birthDate) return false;
     const today = new Date();
-    const birth = new Date(birthDate);
-    return today.getMonth() === birth.getMonth() && today.getDate() === birth.getDate();
+    const [year, month, day] = birthDate.split('-').map(Number);
+  
+    const birthdayThisYear = new Date(today.getFullYear(), month - 1, day);
+  
+    return today.getMonth() === birthdayThisYear.getMonth() && today.getDate() === birthdayThisYear.getDate();
   };
 
   const isTodayBirthday = isBirthday(node.data.birth_date);
@@ -47,15 +50,15 @@ const GraphSidebar = ({ node, onClose, setImages, images }) => {
       right: 0,
       top: 0,
       height: '100%',
-      backgroundColor: '#92B08E',
+      backgroundColor: '#008080',
       boxShadow: '-2px 0 5px rgba(0,0,0,0.5)',
       overflowY: 'auto',
       transition: 'transform .3s',
       transform: 'translate(0px)',
     }}>
       <button onClick={onClose} style={{
-        backgroundColor: '#37672F',
-        color: 'white',
+        backgroundColor: '#004d40',
+        color: '#edecd7',
         border: 'none',
         padding: '10px',
         cursor: 'pointer',
@@ -82,13 +85,13 @@ const GraphSidebar = ({ node, onClose, setImages, images }) => {
             <span>It's {node.data.name}'s birthday today!</span>
           </div>
         )}
-        <h3>{node.data.name || 'Unknown'}</h3>
+        <h3 style={{ color: '#edecd7' }}>{node.data.name || 'Unknown'}</h3>
         <p><img src={images[node.id] || node.data.image || '/images/user.png'} height={250} width={250} /></p>  
       <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
         <div>
           <label htmlFor="upload-button" style={{
-            backgroundColor: '#37672F',
-            color: 'white',
+            backgroundColor: '#004d40',
+            color: '#edecd7',
             padding: '10px',
             borderRadius: '5px',
             cursor: 'pointer',
@@ -100,8 +103,8 @@ const GraphSidebar = ({ node, onClose, setImages, images }) => {
         </div>
 
           <button onClick={edit} style={{
-            backgroundColor: '#37672F',
-            color: 'white',
+            backgroundColor: '#004d40',
+            color: '#edecd7',
             padding: '10px',
             borderRadius: '5px',
             cursor: 'pointer',
@@ -114,31 +117,31 @@ const GraphSidebar = ({ node, onClose, setImages, images }) => {
           </button>
         </div>
 
-        <p>Date of birth: {node.data.birth_date || 'Unknown date'}</p>
-        <p>Birthplace: {node.data.birth_place || 'Unknown'}</p>
-        <p>Date of death: {node.data.death_date || 'Unknown date'}</p>
-        <p>Resting place: {node.data.death_place || 'Unknown'}</p>
+        <p style={{ color: '#edecd7' }}>Date of birth: {node.data.birth_date || 'Unknown date'}</p>
+        <p style={{ color: '#edecd7' }}>Birthplace: {node.data.birth_place || 'Unknown'}</p>
+        <p style={{ color: '#edecd7' }}>Date of death: {node.data.death_date || 'Unknown date'}</p>
+        <p style={{ color: '#edecd7' }}>Resting place: {node.data.death_place || 'Unknown'}</p>
         {node.data.marriage_dates && node.data.marriage_dates.length > 0 ? (
           node.data.marriage_dates.map((marriage, index) => (
             <div key={index}>
-              <p>Marriage {index + 1}: {marriage || 'Unknown date'}</p>
+              <p style={{ color: '#edecd7' }}>Marriage {index + 1}: {marriage || 'Unknown date'}</p>
               {node.data.divorce_dates && node.data.divorce_dates[index] && (
-                <p>Divorce {index + 1}: {node.data.divorce_dates[index]}</p>
+                <p style={{ color: '#edecd7' }}>Divorce {index + 1}: {node.data.divorce_dates[index]}</p>
               )}
             </div>
           ))
         ) : (
-          <p>No marriages</p>
+          <p style={{ color: '#edecd7' }}>No marriages</p>
         )}
         
         <div>
-          <p>Parents:</p>
+          <p style={{ color: '#edecd7' }}>Parents:</p>
           {node.data.parents && Object.keys(node.data.parents).length > 0 ? (
             <ul>
               {Object.values(node.data.parents).map(parent => {
                 let parentType = parent.gender === 'F' ? 'Mother' : parent.gender === 'M' ? 'Father' : 'Parent';
                 return (
-                  <li key={parent.id}>
+                  <li key={parent.id} style={{ color: '#edecd7' }}>
                     {parentType}: {parent.name || 'Unknown person'}
                   </li>
                 );
@@ -146,41 +149,41 @@ const GraphSidebar = ({ node, onClose, setImages, images }) => {
             </ul>
           ) : (
             <ul>
-            <li>Mother: Unknown person</li>
-            <li>Father: Unknown person</li>
+              <li style={{ color: '#edecd7' }}>Mother: Unknown person</li>
+              <li style={{ color: '#edecd7' }}>Father: Unknown person</li>
             </ul>
           )}
         </div>
           <div>
-            <p>Pets:</p>            
+            <p style={{ color: '#edecd7' }}>Pets:</p>            
             {node.data.pets && node.data.pets.length > 0 ? (
               <ul>
                 {node.data.pets.map((pet, index) => (
-                  <li key={index}>{pet}</li>
+                  <li key={index} style={{ color: '#edecd7' }}>{pet}</li>
                 ))}
               </ul>
             ) : (
-              <p>No pets</p>
+              <p style={{ color: '#edecd7' }}>No pets</p>
             )}        
           </div>
           <div>
-            <p>Hobbies:</p>            
+            <p style={{ color: '#edecd7' }}>Hobbies:</p>            
             {node.data.hobbies && node.data.hobbies.length > 0 ? (
               <ul>
                 {node.data.hobbies.map((hobby, index) => (
-                  <li key={index}>{hobby}</li>
+                  <li key={index} style={{ color: '#edecd7' }}>{hobby}</li>
                 ))}
               </ul>
             ) : (
-              <p>No hobbies</p>
+              <p style={{ color: '#edecd7' }}>No hobbies</p>
             )}        
           </div>
           <div>
-            <p>Notes:</p>
+            <p style={{ color: '#edecd7' }}>Notes:</p>
             {node.data.notes ? (
-              <p>{node.data.notes}</p>
+              <p style={{ color: '#edecd7' }}>{node.data.notes}</p>
             ) : (
-              <p>No notes</p>
+              <p style={{ color: '#edecd7' }}>No notes</p>
             )}        
           </div>
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}

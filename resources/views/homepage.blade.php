@@ -9,12 +9,13 @@
 <style>
     .profile-button {
         text-decoration: none;
+        color: #EDECD7;
     }
 
     .circle .tooltip {
         visibility: hidden;
         width: 160px;
-        background-color: #9BB08C;
+        background-color: #00796b;
         color: #EDECD7;
         text-align: center;
         padding: 8px 12px;
@@ -37,7 +38,7 @@
         transform: translateX(-50%);
         border-width: 5px;
         border-style: solid;
-        border-color: #9BB08C transparent transparent transparent;
+        border-color: #00796b transparent transparent transparent;
     }
 
     .circle:hover .tooltip {
@@ -53,7 +54,7 @@
         position: relative;
     }
     .admin-button {
-        background-color: #587353;
+        background-color: #00796b;
         color: #EDECD7;
         border: none;
         padding: 10px 20px;
@@ -68,7 +69,7 @@
         position: absolute;
     }
     .admin-button:hover {
-        background-color: #4a6848;
+        background-color: #004d40;
     }
 </style>
 <body>

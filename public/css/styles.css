@@ -3,7 +3,7 @@
 body {
     font-family: "Inika", serif;
     background-color: #EDECD7;
-    color: #37672f;
+    color: #004d40;
     margin: 0;
     padding: 0;
     display: flex;
@@ -38,7 +38,7 @@ body {
     font-family: "Inika", serif;
     font-weight: bold;
     font-size: 32px;
-    color: #587353;
+    color: #00796b;
 }
 
 .profile {
@@ -50,26 +50,26 @@ body {
 .profile-button {
     display: flex;
     align-items: center;
-    background-color: #587353;
+    background-color: #00796b;
     color: #EDECD7;
     border: none;
     padding: 10px 30px;
     border-radius: 50px;
     cursor: pointer;
     font-weight: bold;
-    font-size: 0.7em;
+    font-size: 0.8em;
     font-family: "Inika", serif;
 }
 
 .profile-button img {
     width: 35px;
     height: 35px;
-    opacity: 0.3;
+    opacity: 0.8;
     margin-right: 15px;
 }
 
 .profile-button:hover {
-    background-color: #4a6848;
+    background-color: #004d40;
 }
 
 .home-button {
@@ -84,7 +84,7 @@ body {
 .gradient-text {
     font-size: 2.5em;
     font-weight: bold;
-    background: repeating-linear-gradient(90deg, #37672F, #79966e, #99AF89);
+    background: repeating-linear-gradient(90deg, #00796b, #004d40, #00796b);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -96,7 +96,7 @@ body {
     justify-content: flex-end;
     align-items: center;
     margin: 20px 0 40px 0;
-    background-color: #6C9661;
+    background-color: #004d40;
     padding: 10px;
     width: 100%;
     border-radius: 10px;
@@ -116,15 +116,15 @@ body {
     padding: 10px 20px 10px 40px;
     border-radius: 20px;
     border: none;
-    background-color: #8EBE84;
-    color: #BDD5AE;
+    background-color: #00796b;
+    color: #EDECD7;
     outline: none;
     text-align: center;
     font-weight: bold;
 }
 
 .search-input::placeholder {
-    color: #BDD5AE;
+    color: #EDECD7;
     text-align: center;
     font-weight: bold;
 }
@@ -143,7 +143,7 @@ body {
 .search-button img {
     width: 20px;
     height: 20px;
-    opacity: 0.3;
+    opacity: 0.8;
 }
 
 .main-content {
@@ -157,7 +157,7 @@ body {
 }
 
 .circle {
-    background-color: #92B08E;
+    background-color: #009688;
     width: 300px;
     height: 300px;
     border-radius: 50%;
@@ -168,12 +168,13 @@ body {
     font-weight: bold;
     color: #EDECD7;
     cursor: pointer;
-    transition: border-color 0.3s;
+    transition: background-color 0.3s, box-shadow 0.3s;
     position: absolute;
 }
 
 .circle:hover {
-    border: 5px solid #B8D26D;
+    background-color: #00796b;
+    box-shadow: 0 0 0 5px #004d40;
 }
 
 .family-tree {
@@ -187,7 +188,7 @@ body {
 }
 
 .textbox {
-    background-color: #9BB08C;
+    background-color: #00796b;
     width: 425px;
     height: 250px;
     border-radius: 20%;
@@ -202,7 +203,7 @@ body {
     box-sizing: border-box;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: #587353 #EDECD7;
+    scrollbar-color: #004d40 #00796b;
 }
 
 .textbox::-webkit-scrollbar {
@@ -210,29 +211,29 @@ body {
 }
 
 .textbox::-webkit-scrollbar-track {
-    background: #EDECD7;
+    background: #00796b;
     border-radius: 10px;
 }
 
 .textbox::-webkit-scrollbar-thumb {
-    background-color: #587353;
+    background-color: #004d40;
     border-radius: 10px;
-    border: 3px solid #EDECD7;
+    border: 3px solid #00796b;
 }
 
 .textbox::-webkit-scrollbar-thumb:hover {
-    background-color: #4a6848;
+    background-color: #004d40;
 }
 
 .one {
     top: 125px;
-    left: 50px;    
+    left: 50px;
     position: absolute;
 }
 
 .two {
     bottom: -500px;
-    right: 50px;    
+    right: 50px;
     position: absolute;
 }
 
@@ -246,24 +247,24 @@ body {
     opacity: 0.8;
     margin-right: 15px;
     border: 5px solid rgba(255, 255, 255, 0.8);
-    border-color: #67584B;
+    border-color: #004d40;
     background-color: #FFFFFF;
 }
 
 .tree {
     bottom: -90px;
-    right: 100px;    
+    right: 100px;
     position: absolute;
 }
 
 .dna {
     bottom: -360px;
-    left: 100px;    
+    left: 100px;
     position: absolute;
 }
 
 .footer {
-    background-color: #6C9661;
+    background-color: #004d40;
     padding: 10px;
     width: 100%;
     box-sizing: border-box;

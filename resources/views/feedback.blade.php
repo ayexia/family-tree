@@ -8,10 +8,16 @@
         position: absolute;
         left: -35%;
         top: 15%;
+        background-color: #00796b;
+        color: #EDECD7;
+    }
+
+    .home-button:hover {
+        background-color: #004d40;
     }
 
     .custom-background {
-        background-color: #9BB08C;
+        background-color: #00796b;
         padding: 0rem;
         border-radius: 2.5rem;
         box-shadow: none;
@@ -34,12 +40,12 @@
         border-radius: 0.375rem;
         font-size: 0.875rem;
         color: #EDECD7;
-        background-color: #678A5C;
+        background-color: #004d40;
         font-family: "Inika", serif;
     }
 
     .custom-button {
-        background-color: #587353;
+        background-color: #004d40;
         color: #EDECD7;
         font-family: "Inika", serif;
         border-radius: 2.5rem;
@@ -52,7 +58,7 @@
     }
 
     .custom-button:hover {
-        background-color: #4a6848;
+        background-color: #00695c;
     }
 
     .custom-error, .custom-success {
@@ -84,7 +90,11 @@
         left: 0;
         bottom: 0;
         width: 100%;
-        background-color: #6C9661;
+        background-color: #004d40;
+    }
+
+    .subheading {
+        color: #004d40;
     }
 </style>
 <div class="container">
@@ -127,7 +137,7 @@
     </div>
 </div>
 
-    <div class="footer">
-        <p>Copyright 2024 | <a href="{{ route('about') }}">About MyStory</a> | <a href="#">Submit Feedback</a></p>
-    </div>
+<div class="footer">
+    <p>Copyright 2024 | <a href="{{ route('about') }}">About MyStory</a> | <a href="#">Submit Feedback</a></p>
+</div>
 @endsection

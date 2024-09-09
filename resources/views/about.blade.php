@@ -5,16 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About MyStory</title>
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
-</head>
 <style>
 .profile-button {
     text-decoration: none;
 }
+
 .footer {
     position: absolute;
+    left: 0;
     bottom: -150px;
+    width: 100%;
+    background-color: #004d40;
+    color: #EDECD7;
+    padding: 10px 0;
+    text-align: center;
 }
+
+.subheading {
+    color: #004d40;
+}
+
+body {
+        padding-bottom: 60px;
+    }
+
+
 </style>
+</head>
 <body>
     <div class="container">
         <div class="header">
@@ -29,9 +46,10 @@
             @endauth
         </div>
         <a href="{{ route('home') }}" class="profile-button home-button">
-                <img src="{{ asset('images/home.png') }}" alt="Home">
-                Home
-            </a>                    
+            <img src="{{ asset('images/home.png') }}" alt="Home">
+            Home
+        </a>
+        
         <div class="main-content">
             <div class="textbox one">
             Welcome to MyStory, the ultimate tool for preserving and exploring your family history. Whether you're looking to visualise your ancestry or share cherished memories, MyStory is designed to make your journey into genealogy both comprehensive and accessible.

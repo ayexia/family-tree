@@ -9,14 +9,19 @@
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
 </head>
 <style>
+    body {
+        padding-bottom: 60px;
+    }
+
     .profile-button {
         text-decoration: none;
+        color: #EDECD7;
     }
 
     .home-button {
         display: flex;
         align-items: center;
-        background-color: #587353;
+        background-color: #00796b;
         color: #EDECD7;
         text-decoration: none;
         padding: 10px 20px;
@@ -38,19 +43,19 @@
     }
 
     .home-button:hover {
-        background-color: #4a6848;
+        background-color: #004d40;
     }
 
     .footer {
         text-align: center;
         font-family: "Inika", serif;
-        margin-top: 2rem;
         position: fixed;
-        right: 0%;
+        right: 0;
         bottom: 0;
+        left: 0;
         padding: 0.53rem;
         color: #EDECD7;
-        background-color: #6C9661;
+        background-color: #004d40;
         width: 100%;
     }
 
@@ -60,10 +65,10 @@
     }
 
     .admin-section {
-        border: 2px solid #9BB08C;
+        border: 2px solid #00796b;
         padding: 20px;
         border-radius: 20px;
-        background-color: #9BB08C;
+        background-color: #00796b;
         margin: 20px 0;
         color: #EDECD7;
     }
@@ -84,11 +89,11 @@
     }
 
     th {
-        background-color: #587353;
+        background-color: #004d40;
     }
 
     .action-button {
-        background-color: #587353;
+        background-color: #004d40;
         color: #EDECD7;
         border: none;
         padding: 5px 10px;
@@ -100,15 +105,38 @@
     }
 
     .action-button:hover {
-        background-color: #4a6848;
+        background-color: #00695c;
+    }
+
+    .verified, .not-verified {
+    font-weight: bold;
+    padding: 2px 5px;
+    border-radius: 3px;
     }
 
     .verified {
-        color: #ffdee9;
+        color: #004d40;
+        background-color: #EDECD7;
     }
 
     .not-verified {
-        color: #F44336;
+        color: #EDECD7;
+        background-color: #d32f2f;
+    }
+
+    .verified::before {
+        content: "✓ ";
+    }
+
+    .not-verified::before {
+        content: "✗ ";
+    }
+
+    .gradient-text {
+        background: repeating-linear-gradient(90deg, #00796b, #004d40, #00796b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 </style>
 <body>

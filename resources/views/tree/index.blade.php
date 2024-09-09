@@ -11,12 +11,13 @@
 <style>
     .profile-button {
         text-decoration: none;
+        color: #EDECD7;
     }
 
     .home-button {
         display: flex;
         align-items: center;
-        background-color: #587353;
+        background-color: #00796b;
         color: #EDECD7;
         text-decoration: none;
         padding: 10px 20px;
@@ -38,7 +39,7 @@
     }
 
     .home-button:hover {
-        background-color: #4a6848;
+        background-color: #004d40;
     }
 
     .footer {
@@ -49,12 +50,13 @@
         right: 0%;
         padding: 0.53rem;
         color: #EDECD7;
+        background-color: #004d40;
     }
 
     .search-results .family-tree li {
-        background-color: #9BB08C;
+        background-color: #00796b;
         padding: 15px;
-        border: 1px solid #ddd;
+        border: 1px solid #004d40;
         border-radius: 20px;
         margin: 10px auto;
         width: 80%;
@@ -64,7 +66,7 @@
     }
 
     .search-results ul li:first-child {
-        background: #9BB08C;
+        background: #00796b;
         padding: 15px;
         border-radius: 20px;
         border: none;
@@ -72,10 +74,10 @@
     }
 
     .tree-display-box {
-        border: 2px solid #9BB08C;
+        border: 2px solid #00796b;
         padding: 20px;
         border-radius: 20px;
-        background-color: #9BB08C;
+        background-color: #00796b;
         margin: 20px auto;
         max-width: 60%;
     }
@@ -105,10 +107,26 @@
 
     .search-container p {
         font-family: "Inika", serif;
-        font-size: 0.8em;
+        font-size: 0.9em;
         color: #EDECD7;
-        left: -100px;
+        left: -50px;
         position: relative;
+    }
+
+    .gradient-text {
+        background: repeating-linear-gradient(90deg, #00796b, #004d40, #00796b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .search-input {
+        background-color: #00796b;
+        color: #EDECD7;
+    }
+
+    .search-input::placeholder {
+        color: #EDECD7;
     }
 </style>
 <body>

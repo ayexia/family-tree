@@ -14,17 +14,19 @@
         position: absolute;
         font-family: "Inika", serif;
         font-size: 40px;
+        color: #004d40;
     }
 
     .profile-button {
         text-decoration: none;
         font-family: "Inika", serif;
+        color: #EDECD7;
     }
 
     .home-button {
         display: flex;
         align-items: center;
-        background-color: #587353;
+        background-color: #00796b;
         color: #EDECD7;
         text-decoration: none;
         padding: 10px 20px;
@@ -39,14 +41,8 @@
         top: 25px;
     }
 
-    .home-button img {
-        width: 30px;
-        height: 30px;
-        margin-right: 20px;
-    }
-
     .home-button:hover {
-        background-color: #4a6848;
+        background-color: #004d40;
     }
 
     .footer {
@@ -57,13 +53,14 @@
         right: 0%;
         padding: 0.53rem;
         color: #EDECD7;
+        background-color: #004d40;
         z-index: 1000;
     }
 
     .search-results .family-tree li {
-        background-color: #9BB08C;
+        background-color: #00796b;
         padding: 15px;
-        border: 1px solid #ddd;
+        border: 1px solid #004d40;
         border-radius: 20px;
         margin: 10px auto;
         width: 80%;
@@ -74,7 +71,7 @@
     }
 
     .search-results ul li:first-child {
-        background: #9BB08C;
+        background: #00796b;
         padding: 15px;
         border-radius: 20px;
         border: none;
@@ -83,29 +80,12 @@
     }
 
     .tree-display-box {
-        border: 2px solid #9BB08C;
+        border: 2px solid #00796b;
         padding: 20px;
         border-radius: 20px;
-        background-color: #9BB08C;
+        background-color: #00796b;
         margin: 20px auto;
         max-width: 60%;
-    }
-
-    .family-tree {
-        list-style-type: none;
-        padding-left: 0;
-        margin: 0;
-        font-family: "Inika", serif;
-    }
-
-    .family-tree ul {
-        list-style-type: none;
-        padding-left: 0;
-        margin: 0;
-    }
-
-    .family-tree ul li {
-        margin: 5px 0;
     }
 
     .family-tree li {
@@ -131,7 +111,7 @@
         width: 30px;
         height: 30px;
         border-radius: 50%;
-        background-color: #587353;
+        background-color: #00796b;
         color: #EDECD7;
         display: flex;
         justify-content: center;
@@ -151,10 +131,11 @@
     .circle.info-tooltip:hover {
         transform: translate(-50%, -50%);
     }
+
     .circle .tooltip {
         visibility: hidden;
         width: 300px;
-        background-color: #9BB08C;
+        background-color: #00796b;
         color: #EDECD7;
         text-align: left;
         padding: 10px;
@@ -175,7 +156,7 @@
         left: 50%;
         border-width: 5px;
         border-style: solid;
-        border-color: #9BB08C transparent transparent transparent;
+        border-color: #00796b transparent transparent transparent;
     }
 
     .circle:hover .tooltip {

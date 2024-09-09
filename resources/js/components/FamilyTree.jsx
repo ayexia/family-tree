@@ -5,7 +5,6 @@ import Tippy from '@tippyjs/react'; //uses tippyjs package to customise tooltip
 import { Cake } from 'lucide-react';
 import ReactCountryFlag from 'react-country-flag';
 import 'tippy.js/dist/tippy.css';
-import "../../css/treeCustomisation.css";
 import Sidebar from './Sidebar';
 import Legend from './Legend';
 
@@ -70,12 +69,15 @@ const FamilyTree = ({ generations, lineStyles, desiredName }) => {
       setSelectedNode(null); 
     };
 
-  const isBirthday = (dob) => {
-      if (!dob) return false;
-      const today = new Date();
-      const birthDate = new Date(dob);
-      return today.getMonth() === birthDate.getMonth() && today.getDate() === birthDate.getDate();
-    };
+  const isBirthday = (birthDate) => {
+    if (!birthDate) return false;
+    const today = new Date();
+    const [year, month, day] = birthDate.split('-').map(Number);
+  
+    const birthdayThisYear = new Date(today.getFullYear(), month - 1, day);
+  
+    return today.getMonth() === birthdayThisYear.getMonth() && today.getDate() === birthdayThisYear.getDate();
+  };
 
   const customNode = ({ nodeDatum }) => { //customises nodes in family tree based on particular properties
     const selectedImage = images[nodeDatum.id] || nodeDatum.attributes.image || '/images/user.png'; //node's image is either the image selected by user or default image
@@ -158,21 +160,21 @@ const toolTip = (node) => { //customises tooltip, containing names and marriage 
   return (
     <div style={{ 
       padding: '10px', 
-      background: 'linear-gradient(135deg, #92B08E, #6C9661, #37672F)',
-      color: '#fff', 
+      background: 'linear-gradient(135deg, #00796b, #6C9661, #37672F)',
+      color: '#edecd7', 
       borderRadius: '10px',
       width: '300px'
      }}>
-      <strong style={{ fontSize: '20px', fontFamily: 'Times New Roman' }}>{node.name}</strong><br />
+      <strong style={{ fontSize: '20px', fontFamily: 'Inika' }}>{node.name}</strong><br />
       {timelineEvents.length > 0 && (
-        <div style={{ marginTop: '10px', borderLeft: '2px solid #fff', paddingLeft: '10px' }}>
+        <div style={{ marginTop: '10px', borderLeft: '2px solid #edecd7', paddingLeft: '10px' }}>
           {timelineEvents.map((event, index) => (
             <div key={index} style={{ marginBottom: '5px', position: 'relative' }}>
               <div style={{ 
                 width: '10px', 
                 height: '10px', 
                 borderRadius: '50%', 
-                background: '#fff', 
+                background: '#edecd7', 
                 position: 'absolute', 
                 left: '-16px', 
                 top: '5px' 
@@ -263,13 +265,13 @@ const toolTip = (node) => { //customises tooltip, containing names and marriage 
                     <circle cx="0" cy="0" r={nodeRadius} />
                   </clipPath>
                 </defs>
-                <text fill="#37672F" stroke="none" x="60" y="-5" style={{ fontSize: '28px', fontFamily: 'Times New Roman' }}>
+                <text fill="#00796b" stroke="none" x="60" y="-5" style={{ fontSize: '28px', fontFamily: 'Times New Roman' }}>
                   {nodeDatum.name}
                 </text>
-                <text fill="#37672F" stroke="none" x="60" y="15" style={{ fontSize: '24px' }}>
+                <text fill="#00796b" stroke="none" x="60" y="15" style={{ fontSize: '24px' }}>
                   DOB: {nodeDatum.attributes.DOB}
                 </text>
-                <text fill="#37672F" stroke="none" x="60" y="35" style={{ fontSize: '24px' }}>
+                <text fill="#00796b" stroke="none" x="60" y="35" style={{ fontSize: '24px' }}>
                   DOD: {nodeDatum.attributes.DOD}
                 </text>
               </g>
@@ -365,13 +367,13 @@ const toolTip = (node) => { //customises tooltip, containing names and marriage 
                             <circle cx="0" cy="0" r={nodeRadius} />
                           </clipPath>
                         </defs>
-                        <text fill="#37672F" stroke="none" x="60" y="-5" style={{ fontSize: '28px', fontFamily: 'Times New Roman' }}>
+                        <text fill="#00796b" stroke="none" x="60" y="-5" style={{ fontSize: '28px', fontFamily: 'Times New Roman' }}>
                           {spouse.name}
                         </text>
-                        <text fill="#37672F" stroke="none" x="60" y="15" style={{ fontSize: '24px' }}>
+                        <text fill="#00796b" stroke="none" x="60" y="15" style={{ fontSize: '24px' }}>
                           DOB: {spouse.attributes.DOB}
                         </text>
-                        <text fill="#37672F" stroke="none" x="60" y="35" style={{ fontSize: '24px' }}>
+                        <text fill="#00796b" stroke="none" x="60" y="35" style={{ fontSize: '24px' }}>
                           DOD: {spouse.attributes.DOD}
                         </text>
                       </g>
@@ -416,7 +418,7 @@ const toolTip = (node) => { //customises tooltip, containing names and marriage 
   
     const buttonStyle = {
       padding: '2.5px 20px',
-      backgroundColor: '#CCE7BD',
+      backgroundColor: '#00796b',
       color: '#587353',
       border: 'none',
       borderRadius: '0 5px 5px 0',
@@ -430,7 +432,7 @@ const toolTip = (node) => { //customises tooltip, containing names and marriage 
     const imgStyle = {
       width: '15px',
       height: '15px',
-      opacity: 0.3,
+      opacity: 0.8,
   };
 
     if (!treeData) { //alternate display if no tree data is available - error message and search bar

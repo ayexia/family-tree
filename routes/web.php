@@ -46,6 +46,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/feedback', [FeedbackController::class, 'create'])->name('feedback.create');
     Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
     Route::get('/display', [FamilyTreeController::class, 'familyTreeSurname'])->name('display');
+    Route::get('/member/profile/{id}', [FamilyTreeController::class, 'viewProfile'])->name('member.profile');
 });
 
 Route::post('/upload', [GedcomController::class, 'upload'])->name('upload')->middleware(['auth', 'verified']);

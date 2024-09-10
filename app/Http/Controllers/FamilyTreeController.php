@@ -484,4 +484,93 @@ class FamilyTreeController extends Controller
         $firstPerson = Person::first();
         return view('tree.display', ['surname' => $firstPerson->surname]);
     }
+
+    public function viewProfile($id)
+    {
+        $person = Person::findOrFail($id);
+        
+        if ($person->familyTree->user_id !== Auth::id()) {
+            abort(403, 'Unauthorised action.');
+        }
+    
+        $familyTreeId = $person->family_tree_id;
+        $familyTree = $this->buildFamilyTreeArray($familyTreeId);
+        $node = $familyTree[$id];
+    
+        $visited = [];
+        $tree = $this->buildFamilyTree($node, $visited);
+    
+        return view('profile', compact('person', 'tree', 'familyTreeId'));
+    }
+    
+    private function buildFamilyTreeArray($familyTreeId)
+    {
+        $allPersons = Person::where('family_tree_id', $familyTreeId)->get();
+        $allPersonsIds = $allPersons->pluck('id');
+    
+        $marriages = Spouse::where('family_tree_id', $familyTreeId)->get();
+        $motherAndChildRelationships = MotherAndChild::where('family_tree_id', $familyTreeId)->get();
+        $fatherAndChildRelationships = FatherAndChild::where('family_tree_id', $familyTreeId)->get();
+    
+        $relativeIds = $allPersonsIds
+            ->merge($motherAndChildRelationships->pluck('mother_id'))
+            ->merge($motherAndChildRelationships->pluck('child_id'))
+            ->merge($fatherAndChildRelationships->pluck('father_id'))
+            ->merge($fatherAndChildRelationships->pluck('child_id'))
+            ->merge($marriages->pluck('first_spouse_id'))
+            ->merge($marriages->pluck('second_spouse_id'))
+            ->unique();
+    
+        $relatives = Person::whereIn('id', $relativeIds)
+            ->where('family_tree_id', $familyTreeId)
+            ->get();
+    
+        $familyTree = [];
+    
+        foreach ($relatives as $relative) {
+            $familyTree[$relative->id] = new Node(
+                $relative->id, 
+                $relative->name, 
+                $relative->surname, 
+                $relative->birth_date, 
+                $relative->death_date, 
+                $relative->birth_place, 
+                $relative->death_place, 
+                $relative->pets, 
+                $relative->hobbies, 
+                $relative->gender, 
+                $relative->father_id, 
+                $relative->mother_id, 
+                $relative->image, 
+                $relative->is_adopted, 
+                $relative->notes
+            );
+        }
+    
+        foreach ($marriages as $marriage) {
+            if (isset($familyTree[$marriage->first_spouse_id]) && isset($familyTree[$marriage->second_spouse_id])) {
+                $familyTree[$marriage->first_spouse_id]->addSpouse($familyTree[$marriage->second_spouse_id]);
+                $familyTree[$marriage->first_spouse_id]->setMarriageDates($marriage->marriage_date, $marriage->divorce_date);
+    
+                $familyTree[$marriage->second_spouse_id]->addSpouse($familyTree[$marriage->first_spouse_id]);
+                $familyTree[$marriage->second_spouse_id]->setMarriageDates($marriage->marriage_date, $marriage->divorce_date);
+            }
+        }
+    
+        foreach ($motherAndChildRelationships as $motherAndChild) {
+            if (isset($familyTree[$motherAndChild->mother_id]) && isset($familyTree[$motherAndChild->child_id])) {
+                $familyTree[$motherAndChild->mother_id]->addChild($familyTree[$motherAndChild->child_id], $motherAndChild->is_adopted);
+                $familyTree[$motherAndChild->child_id]->addParent($familyTree[$motherAndChild->mother_id]);
+            }
+        }
+    
+        foreach ($fatherAndChildRelationships as $fatherAndChild) {
+            if (isset($familyTree[$fatherAndChild->father_id]) && isset($familyTree[$fatherAndChild->child_id])) {
+                $familyTree[$fatherAndChild->father_id]->addChild($familyTree[$fatherAndChild->child_id], $fatherAndChild->is_adopted);
+                $familyTree[$fatherAndChild->child_id]->addParent($familyTree[$fatherAndChild->father_id]);
+            }
+        }
+    
+        return $familyTree;
+    }
 }

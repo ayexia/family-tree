@@ -73,15 +73,6 @@
         color: #EDECD7;
     }
 
-    .tree-display-box {
-        border: 2px solid #00796b;
-        padding: 20px;
-        border-radius: 20px;
-        background-color: #00796b;
-        margin: 20px auto;
-        max-width: 60%;
-    }
-
     .family-tree {
         list-style-type: none;
         padding-left: 0;
@@ -128,6 +119,21 @@
     .search-input::placeholder {
         color: #EDECD7;
     }
+
+    .view-profile-link {
+        display: inline-block;
+        margin-left: 10px;
+        padding: 5px 10px;
+        background-color: #004d40;
+        color: #EDECD7;
+        text-decoration: none;
+        border-radius: 15px;
+        font-size: 0.8em;
+    }
+
+    .view-profile-link:hover {
+        background-color: #00796b;
+    }
 </style>
 <body>
     <div class="container">
@@ -172,6 +178,7 @@
                             @endphp
                             <li class="person">
                                 <strong>{{ $node->name }}</strong> ({{ $node->birth_date }} - {{ $node->death_date }})
+                                <a href="{{ route('member.profile', ['id' => $person->id]) }}" class="view-profile-link">View Profile</a>
 
                                 @if (!empty($node->getParents()))
                                     <ul>
@@ -214,17 +221,6 @@
                 </ul>
             </div>
         @endif
-
-        <h2>Tree Display:</h2>
-        <div class="tree-display-box">
-            <ul class="family-tree">
-                @foreach($trees as $tree)
-                    @foreach($tree as $entry)
-                        <li>{{ $entry }}</li>
-                    @endforeach
-                @endforeach
-            </ul>
-        </div>
     </div>
     <footer class="footer">
     <p>Copyright 2024 | <a href="{{ route('about') }}">About MyStory</a> | <a href="{{ route('feedback.create') }}">Submit Feedback</a></p>

@@ -31,6 +31,10 @@ const [errorMessage, setErrorMessage] = useState('');
     window.location.href = `/person/${node.id}/edit`;
   };
 
+  const viewProfile = () => {
+    window.location.href = `/member/profile/${node.id}`;
+  };
+
   const isBirthday = (birthDate) => {
     if (!birthDate) return false;
     const today = new Date();
@@ -42,6 +46,22 @@ const [errorMessage, setErrorMessage] = useState('');
   };
 
   const isTodayBirthday = isBirthday(node.attributes.DOB);
+  
+  const buttonStyle = {
+    backgroundColor: '#004d40',
+    color: '#edecd7',
+    padding: '8px 4px',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    border: 'none',
+    display: 'inline-block',
+    fontFamily: 'Inika, serif',
+    fontSize: '0.8em',
+    margin: '0 5px 5px 0',
+    whiteSpace: 'nowrap',
+    flex: '1 1 auto',
+    textAlign: 'center',
+  };
   
   return (
     <div style={{
@@ -87,34 +107,19 @@ const [errorMessage, setErrorMessage] = useState('');
           </div>
         )}
         <h3 style={{ color: '#edecd7' }}>{node.name || 'Unknown'}</h3>
-        <p><img src={images[node.id] || node.attributes.image ||'/images/user.png'} height={250} width={250}></img></p>
-        <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-          <div>
-          <label htmlFor="upload-button" style={{
-            backgroundColor: '#004d40',
-            color: '#edecd7',
-            padding: '10px',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            display: 'inline-block'
-          }}>
+        <p><img src={images[node.id] || node.attributes.image ||'/images/user.png'} height={250} width={250} /></p>
+        <div style={{ display: 'flex', flexWrap: 'nowrap', marginTop: '10px', justifyContent: 'space-between' }}>
+          <label htmlFor="upload-button" style={buttonStyle}>
             Upload Image
           </label>
           <input id="upload-button" type="file" onChange={uploadImage} style={{ display: 'none' }} />
-          </div>
 
-          <button onClick={edit} style={{
-            backgroundColor: '#004d40',
-            color: '#edecd7',
-            padding: '10px',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            border: 'none',
-            display: 'inline-block',
-            fontFamily: 'Inika, serif',
-            fontSize: '1em',
-          }}>
+          <button onClick={edit} style={buttonStyle}>
             Edit Details
+          </button>
+
+          <button onClick={viewProfile} style={buttonStyle}>
+            View Profile
           </button>
         </div>
 

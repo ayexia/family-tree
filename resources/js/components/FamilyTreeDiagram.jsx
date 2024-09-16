@@ -1,5 +1,5 @@
 import React from 'react';
-import { Page, View, Text, StyleSheet } from '@react-pdf/renderer';
+import { Page, View, Text, StyleSheet, Link } from '@react-pdf/renderer';
 
 const styles = StyleSheet.create({
   page: {
@@ -8,7 +8,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Corben',
   },
   title: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: 'Great Vibes',
     marginBottom: 10,
     textAlign: 'center',
@@ -18,15 +18,29 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
   },
+  familyContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
   personContainer: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+    margin: 2,
   },
   personText: {
     fontSize: 8,
     textAlign: 'center',
-    marginBottom: 2,
+  },
+  rootText: {
+    fontSize: 8,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    backgroundColor: '#E6E6FA',
+    padding: 2,
+    borderRadius: 3,
   },
   coupleContainer: {
     display: 'flex',
@@ -59,37 +73,44 @@ const getInitials = (name) => {
     .toUpperCase();
 };
 
-const PersonNode = ({ person }) => (
+const PersonNode = ({ person, isRoot }) => (
+  <Link src={`#${person.id}`}>
   <View style={styles.personContainer}>
-    <Text style={styles.personText}>{getInitials(person.data.name)}</Text>
+    <Text style={isRoot ? styles.rootText : styles.personText}>
+      {getInitials(person.data.name)}
+    </Text>
   </View>
+</Link>
 );
 
-const FamilyNode = ({ person, graph, selectedPeople, processedPeople }) => {
-  if (processedPeople.has(person.id)) return null;
-  processedPeople.add(person.id);
-
-  const spouse = graph.edges.find(edge => 
+const FamilyNode = ({ person, graph, selectedPeople, isRoot }) => {
+  const spouse = graph.edges.find(edge =>
     (edge.source === person.id || edge.target === person.id) && edge.label === 'Spouse'
   );
-  const spousePerson = spouse 
+    const spousePerson = spouse
     ? graph.nodes.find(node => node.id === (spouse.source === person.id ? spouse.target : spouse.source))
     : null;
 
   const children = graph.edges
-    .filter(edge => edge.source === person.id && edge.label === 'Child')
+    .filter(edge => 
+    (edge.source === person.id || (spousePerson && edge.source === spousePerson.id)) && 
+    edge.label === 'Child'
+    )
     .map(edge => graph.nodes.find(node => node.id === edge.target))
-    .filter(child => selectedPeople.includes(child.id));
+    .filter(child => selectedPeople.includes(child.id))
+    .filter((child, index, self) =>
+    index === self.findIndex((t) => t.id === child.id)
+  );
 
-  const childSpacing = 40;
+  const childWidth = 30;
 
   return (
-    <View style={styles.personContainer}>
+    <View style={styles.familyContainer}>
       <View style={styles.coupleContainer}>
-        <PersonNode person={person} />
+        <PersonNode person={person} isRoot={isRoot} />
         {spousePerson && selectedPeople.includes(spousePerson.id) && (
           <>
-            <View style={[styles.horizontalLine, { width: 10 }]} />
+            <View style={[styles.horizontalLine, { width: 5 }]} />
             <PersonNode person={spousePerson} />
           </>
         )}
@@ -97,17 +118,12 @@ const FamilyNode = ({ person, graph, selectedPeople, processedPeople }) => {
       {children.length > 0 && (
         <>
           <View style={styles.verticalLine} />
-          <View style={[styles.horizontalLine, { width: (children.length - 1) * childSpacing }]} />
+          <View style={[styles.horizontalLine, { width: Math.max((children.length - 1) * childWidth, 0) }]} />
           <View style={styles.childrenContainer}>
-            {children.map((child, index) => (
-              <View key={child.id} style={{ alignItems: 'center', width: childSpacing }}>
-                <View style={[styles.verticalLine, { height: 10 }]} />
-                <FamilyNode 
-                  person={child} 
-                  graph={graph} 
-                  selectedPeople={selectedPeople}
-                  processedPeople={processedPeople}
-                />
+            {children.map((child) => (
+            <View key={child.id} style={{ alignItems: 'center', width: childWidth }}>
+            <View style={styles.verticalLine} />
+              <PersonNode person={child} />
               </View>
             ))}
           </View>
@@ -117,50 +133,71 @@ const FamilyNode = ({ person, graph, selectedPeople, processedPeople }) => {
   );
 };
 
-const FamilyTreePage = ({ rootPerson, graph, selectedPeople }) => {
-  const processedPeople = new Set();
-  return (
+const FamilyTreePage = ({ families, graph, selectedPeople, generation }) => (
     <Page size="A5" orientation="landscape" style={styles.page}>
-      <Text style={styles.title}>Family Tree</Text>
+    <Text style={styles.title}>Family Tree - Generation {generation}</Text>
       <View style={styles.treeContainer}>
-        <FamilyNode 
-          person={rootPerson} 
-          graph={graph} 
+      {families.map((rootPerson) => (
+        <FamilyNode
+          key={rootPerson.id}
+          person={rootPerson}
+          graph={graph}
           selectedPeople={selectedPeople}
-          processedPeople={processedPeople}
+          isRoot={true}
         />
+      ))}
       </View>
     </Page>
   );
+
+  const FamilyTreeDiagram = ({ selectedPeople, graph }) => {
+  const getGeneration = (person) => {
+  let generation = 0;
+  let currentPerson = person;
+  while (currentPerson) {
+    const parent = graph.edges.find(edge => 
+      edge.target === currentPerson.id && edge.label === 'Child'
+    );
+    if (parent) {
+      generation++;
+      currentPerson = graph.nodes.find(node => node.id === parent.source);
+    } else {
+      break;
+    }
+  }
+  return generation;
 };
 
-const FamilyTreeDiagram = ({ selectedPeople, graph }) => {
-  const findRootMembers = () => {
-    const roots = new Set(selectedPeople);
+  const familiesByGeneration = {};
+
     selectedPeople.forEach(id => {
-      const parentEdges = graph.edges.filter(edge => edge.target === id && edge.label === 'Child');
-      parentEdges.forEach(edge => {
-        if (selectedPeople.includes(edge.source)) {
-          roots.delete(id);
+    const person = graph.nodes.find(node => node.id === id);
+    if (person) {
+      const generation = getGeneration(person);
+      if (!familiesByGeneration[generation]) {
+        familiesByGeneration[generation] = [];
         }
-      });
+      familiesByGeneration[generation].push(person);
+      }
     });
-    return Array.from(roots);
-  };
 
-  const rootMembers = findRootMembers();
-
-  return rootMembers.map((rootId, index) => {
-    const rootPerson = graph.nodes.find(node => node.id === rootId);
-    return (
-      <FamilyTreePage 
-        key={rootPerson.id} 
-        rootPerson={rootPerson} 
-        graph={graph} 
+  const pages = [];
+  Object.entries(familiesByGeneration).forEach(([generation, families]) => {
+  for (let i = 0; i < families.length; i += 4) {
+    const familiesToShow = families.slice(i, i + 4);
+    pages.push(
+      <FamilyTreePage
+        key={`page-${pages.length}`}
+        families={familiesToShow}
+        graph={graph}
         selectedPeople={selectedPeople}
+        generation={parseInt(generation) + 1}
       />
     );
+  }
   });
+
+  return pages;
 };
 
 export default FamilyTreeDiagram;

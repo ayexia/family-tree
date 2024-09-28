@@ -481,7 +481,12 @@ class FamilyTreeController extends Controller
     
         public function familyTreeSurname()
     {
-        $firstPerson = Person::first();
-        return view('tree.display', ['surname' => $firstPerson->surname]);
+        $firstPerson = Person::first(); 
+        if ($firstPerson) {
+            return view('tree.display', ['surname' => $firstPerson->surname]);
+        } else {
+            $user = auth()->user(); 
+            return view('tree.display', ['surname' => $user->name]);
+        }
     }
 }

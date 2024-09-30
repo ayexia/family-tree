@@ -58,8 +58,4 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('admin.delete-user');
 });
 
-Route::get('/{any}', function () {
-    return view('display');
-})->where('any', '.*');
-
 require __DIR__.'/auth.php';

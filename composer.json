@@ -9,7 +9,7 @@
         "laravel/framework": "^11.9",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
-        "liberu-genealogy/php-gedcom": "^9.0.3"
+        "liberu-genealogy/php-gedcom": "^1.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

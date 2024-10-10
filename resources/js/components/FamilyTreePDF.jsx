@@ -3,6 +3,7 @@ import { Document, Page, Text, View, StyleSheet, Font, PDFViewer, Link, Image } 
 import axios from 'axios';
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css'; 
+import FamilyTreeDiagram from './FamilyTreeDiagram';
 
 Font.register({
   family: 'Great Vibes',
@@ -192,6 +193,18 @@ const TitlePage = ({ title }) => ( //title page
 
 const ITEMS_PER_PAGE = 20;
 
+const getInitials = (name) => {
+  return name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase();
+};
+
+const PersonInitials = ({ person }) => (
+  <Text style={styles.personInitials}>{getInitials(person.data.name)}</Text>
+);
+
 const ContentsPage = ({ graph, selectedPeople }) => { //contents page - allows 20 items per page before breaking to new page
   const contentItems = renderContents(graph, selectedPeople).filter(item => item !== null);
   const pageCount = Math.ceil(contentItems.length / ITEMS_PER_PAGE);
@@ -276,7 +289,7 @@ const renderContents = (graph, selectedPeople) => { //render each person in cont
         <Link src={`#${person.id}`} style={styles.link}>
           {person.data.name}
         </Link>
-        {person.yearInfo}
+        {person.yearInfo} (<PersonInitials person={person} />)
       </Text>
     ))
   ]);
@@ -302,8 +315,11 @@ const formatDate = (dateString) => {
 
 const EVENTS_PER_PAGE = 20;
 
-const TimelinePage = ({ person, events }) => {
-  const pageCount = Math.ceil(events.length / EVENTS_PER_PAGE);
+const TimelinePage = ({ person, events, selectedPeople }) => {
+  const filteredEvents = events.filter(event => 
+    event.relatedPersonId ? selectedPeople.includes(event.relatedPersonId) : true
+  );
+  const pageCount = Math.ceil(filteredEvents.length / EVENTS_PER_PAGE);
 
   return Array.from({ length: pageCount }, (_, pageIndex) => (
     <Page key={`timeline-${pageIndex}`} size="A5" style={styles.timelinePage}>
@@ -314,7 +330,7 @@ const TimelinePage = ({ person, events }) => {
           </Text>
           <View style={styles.timelineContainer}>
             <View style={styles.timelineLine} />
-            {events
+            {filteredEvents
               .slice(pageIndex * EVENTS_PER_PAGE, (pageIndex + 1) * EVENTS_PER_PAGE)
               .map((event, index) => (
               <View key={index} style={styles.timelineEventContainer}>
@@ -340,7 +356,7 @@ const TimelinePage = ({ person, events }) => {
 
 const MAX_CHARS_PER_PAGE = 750;
 
-const PersonPage = ({ person, graph, biographyLevel }) => {
+const PersonPage = ({ person, graph, biographyLevel, selectedPeople }) => {
   if (!person || !person.data) {
     return (
       <Page size="A5" style={styles.page}>
@@ -395,14 +411,16 @@ const PersonPage = ({ person, graph, biographyLevel }) => {
       bio += `${data.name} was born in ${data.birth_place}. `;
     }
 
-    if (parents.length > 0) {
-      bio += `${data.gender === 'M' ? 'His' : data.gender === 'F' ? 'Her' : 'Their'} parents were ${parents.map(p => p.name).join(' and ')}. `;
+    const selectedParents = parents.filter(parent => selectedPeople.includes(parent.id));
+    if (selectedParents.length > 0) {
+      bio += `${data.gender === 'M' ? 'His' : data.gender === 'F' ? 'Her' : 'Their'} parents were ${selectedParents.map(p => p.name).join(' and ')}. `;
     }
 
-    if (spouses.length > 0) {
+    const selectedSpouses = spouses.filter(spouse => selectedPeople.includes(spouse.id));
+    if (selectedSpouses.length > 0) {
       bio += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} `;
-      if (spouses.length === 1) {
-        const spouse = spouses[0];
+      if (selectedSpouses.length === 1) {
+        const spouse = selectedSpouses[0];
         bio += `married ${spouse.data.name}`;
         if (spouse.marriageDate) {
           bio += ` ${spouse.marriageDate.includes(' ') ? 'on' : 'in'} ${spouse.marriageDate}`;
@@ -413,8 +431,8 @@ const PersonPage = ({ person, graph, biographyLevel }) => {
         bio += '. ';
       } else {
         bio += 'married ';
-        spouses.forEach((spouse, index) => {
-          if (index > 0) bio += index === spouses.length - 1 ? ' and ' : ', ';
+        selectedSpouses.forEach((spouse, index) => {
+          if (index > 0) bio += index === selectedSpouses.length - 1 ? ' and ' : ', ';
           bio += spouse.data.name;
           if (spouse.marriageDate) {
             bio += ` ${spouse.marriageDate.includes(' ') ? 'on' : 'in'} ${spouse.marriageDate}`;
@@ -430,54 +448,56 @@ const PersonPage = ({ person, graph, biographyLevel }) => {
       }
     }
   
-    if (children.length > 0) {
-      bio += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} had ${children.length} ${children.length === 1 ? 'child' : 'children'}: `;
-      const adoptedChildren = children.map(child => {
+    const selectedChildren = children.filter(child => selectedPeople.includes(child.id));
+    if (selectedChildren.length > 0) {
+      bio += `${data.gender === 'M' ? 'He' : data.gender === 'F' ? 'She' : 'They'} had ${selectedChildren.length} ${selectedChildren.length === 1 ? 'child' : 'children'}: `;
+      const adoptedChildren = selectedChildren.map(child => {
           const adoptionInfo = child.data.isAdopted ? ' (adopted)' : '';
           return child.data.name + adoptionInfo;
       });
-      if (children.length === 1) {
+      if (selectedChildren.length === 1) {
           bio += adoptedChildren[0] + '. ';
-      } else if (children.length === 2) {
+      } else if (selectedChildren.length === 2) {
           bio += `${adoptedChildren[0]} and ${adoptedChildren[1]}. `;
       } else {
           bio += adoptedChildren.slice(0, -1).join(', ') + ', and ' + adoptedChildren[adoptedChildren.length - 1] + '. ';
       }
-  }
+    }
 
     if (biographyLevel === 'comprehensive' || biographyLevel === 'detailed') {
-      const grandparents = parents.flatMap(parent => 
+      const selectedGrandparents = parents.flatMap(parent => 
         (parent.parents && typeof parent.parents === 'object') 
-          ? Object.values(parent.parents).filter(Boolean) 
+          ? Object.values(parent.parents).filter(gp => selectedPeople.includes(gp.id))
           : []
       );
-      if (grandparents.length > 0) {
+      if (selectedGrandparents.length > 0) {
         bio += `${data.gender === 'M' ? 'His' : data.gender === 'F' ? 'Her' : 'Their'} grandparents were `;
-        if (grandparents.length === 1) {
-          bio += `${grandparents[0].name}. `;
-        } else if (grandparents.length === 2) {
-          bio += `${grandparents[0].name} and ${grandparents[1].name}. `;
+        if (selectedGrandparents.length === 1) {
+          bio += `${selectedGrandparents[0].name}. `;
+        } else if (selectedGrandparents.length === 2) {
+          bio += `${selectedGrandparents[0].name} and ${selectedGrandparents[1].name}. `;
         } else {
-          bio += grandparents.slice(0, -1).map(gp => gp.name).join(', ') + ', and ' + grandparents[grandparents.length - 1].name + '. ';
+          bio += selectedGrandparents.slice(0, -1).map(gp => gp.name).join(', ') + ', and ' + selectedGrandparents[selectedGrandparents.length - 1].name + '. ';
         }
       }
 
-      const grandchildren = children.flatMap(child => 
+      const selectedGrandchildren = selectedChildren.flatMap(child => 
         graph.edges
           .filter(edge => edge.source === child.id && edge.label === 'Child')
           .map(edge => graph.nodes.find(node => node.id === edge.target))
-      ).filter(Boolean);
-    if (grandchildren.length > 0) {
-      bio += `${data.gender === 'M' ? 'His' : data.gender === 'F' ? 'Her' : 'Their'} grandchildren are `;
-      if (grandchildren.length === 1) {
-        bio += `${grandchildren[0].data.name}. `;
-      } else if (grandchildren.length === 2) {
-        bio += `${grandchildren[0].data.name} and ${grandchildren[1].data.name}. `;
-      } else {
-        bio += grandchildren.slice(0, -1).map(gc => gc.data.name).join(', ') + ', and ' + grandchildren[grandchildren.length - 1].data.name + '. ';
+          .filter(gc => selectedPeople.includes(gc.id))
+      );
+      if (selectedGrandchildren.length > 0) {
+        bio += `${data.gender === 'M' ? 'His' : data.gender === 'F' ? 'Her' : 'Their'} grandchildren are `;
+        if (selectedGrandchildren.length === 1) {
+          bio += `${selectedGrandchildren[0].data.name}. `;
+        } else if (selectedGrandchildren.length === 2) {
+          bio += `${selectedGrandchildren[0].data.name} and ${selectedGrandchildren[1].data.name}. `;
+        } else {
+          bio += selectedGrandchildren.slice(0, -1).map(gc => gc.data.name).join(', ') + ', and ' + selectedGrandchildren[selectedGrandchildren.length - 1].data.name + '. ';
+        }
       }
     }
-  }
 
     if (biographyLevel === 'detailed') {
       if (data.pets && data.pets.length > 0) {
@@ -495,6 +515,7 @@ const PersonPage = ({ person, graph, biographyLevel }) => {
           bio += `${data.gender === 'M' ? 'His' : data.gender === 'F' ? 'Her' : 'Their'} hobbies included ${data.hobbies.slice(0, -1).join(', ')}, and ${data.hobbies[data.hobbies.length - 1]}. `;
         }
       }
+    }
 
     bio += deathInfo;
     
@@ -506,7 +527,6 @@ const PersonPage = ({ person, graph, biographyLevel }) => {
         bio += `Additional notes: ${notes.join(' ')} `;
       }
     }
-  }
 
     return bio;
   };
@@ -538,25 +558,30 @@ const PersonPage = ({ person, graph, biographyLevel }) => {
     }
 
     spouses.forEach((spouse, index) => {
-      if (spouse.marriageDate) {
-        events.push({ 
-          date: spouse.marriageDate, 
-          description: `Married ${spouse.data.name}` 
-        });
-      }
-      if (spouse.divorceDate && !spouse.isCurrent) {
-        events.push({ 
-          date: spouse.divorceDate, 
-          description: `Divorced from ${spouse.data.name}` 
-        });
+      if (selectedPeople.includes(spouse.id)) {
+        if (spouse.marriageDate) {
+          events.push({ 
+            date: spouse.marriageDate, 
+            description: `Married ${spouse.data.name}`,
+            relatedPersonId: spouse.id
+          });
+        }
+        if (spouse.divorceDate && !spouse.isCurrent) {
+          events.push({ 
+            date: spouse.divorceDate, 
+            description: `Divorced from ${spouse.data.name}`,
+            relatedPersonId: spouse.id
+          });
+        }
       }
     });
 
     children.forEach(child => {
-      if (child.data.birth_date) {
+      if (selectedPeople.includes(child.id) && child.data.birth_date) {
         events.push({ 
           date: formatDate(child.data.birth_date), 
-          description: `${child.data.name} born` 
+          description: `${child.data.name} born`,
+          relatedPersonId: child.id
         });
       }
     });
@@ -610,7 +635,7 @@ const PersonPage = ({ person, graph, biographyLevel }) => {
         </View>
       </Page>
       ))}
-      <TimelinePage person={person} events={timelineEvents} />
+      <TimelinePage person={person} events={timelineEvents} selectedPeople={selectedPeople} />
     </>
   );
 };
@@ -663,17 +688,21 @@ const FamilyTreePDF = ({ onClose }) => { //fetch family data from backend
   };
 
   const renderPages = (graph) => {
-    return selectedPeople.map(id => {
-      const person = graph.nodes.find(node => node.id === id);
-      return person ? (
-        <PersonPage 
-          key={`${person.id}-${biographyLevel}`} 
-          person={person} 
-          graph={graph} 
-          biographyLevel={biographyLevel} 
-        />
-      ) : null;
-    }).filter(Boolean);
+    return [
+      <FamilyTreeDiagram key="family-tree" selectedPeople={selectedPeople} graph={graph} />,
+      ...selectedPeople.map(id => {
+        const person = graph.nodes.find(node => node.id === id);
+        return person ? (
+          <PersonPage 
+            key={`${person.id}-${biographyLevel}`} 
+            person={person} 
+            graph={graph} 
+            biographyLevel={biographyLevel} 
+            selectedPeople={selectedPeople}
+          />
+        ) : null;
+      }).filter(Boolean)
+    ];
   };
 
   const overlay = { // position when viewing PDF

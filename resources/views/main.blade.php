@@ -176,6 +176,53 @@
 
         .footer a:hover {
             text-decoration: underline;
+        } 
+        
+        .tooltip-trigger {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip-trigger .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: #004d40;
+            color: #EDECD7;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip-trigger:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .footer .tooltip-trigger .tooltip-text {
+            bottom: 100%;
+            top: auto;
+            margin-bottom: 5px;
+            font-size: 0.8em;
+        }
+
+        .tooltip-trigger .tooltip-text::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+        }
+
+        .footer .tooltip-trigger .tooltip-text::after {
+            bottom: -10px;
+            border-color: #004d40 transparent transparent transparent;
         }
     </style>
 </head>
@@ -233,9 +280,15 @@
                     <a href="{{ route('about') }}" class="profile-button user-about-button">About MyStory</a>
                 </div>
                 @endif
-            <div class="footer">
-                <p>Copyright 2024 | <a href="{{ route('feedback.create') }}">Submit Feedback</a></p>
-            </div>
+                <footer class="footer">
+        <p>
+            Copyright 2024 | 
+            <span class="tooltip-trigger">
+                <a href="{{ route('feedback.create') }}">Submit Feedback</a>
+                <span class="tooltip-text">Share your thoughts and suggestions to help us improve</span>
+            </span>
+        </p>
+    </footer>
         </div>
     </div>
 </body>

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios'; 
 import { Cake } from 'lucide-react';
+import Tippy from '@tippyjs/react';
+import 'tippy.js/dist/tippy.css'; 
 
 const Sidebar = ({ node, onClose, setImages, images }) => {
 const [errorMessage, setErrorMessage] = useState('');
@@ -109,18 +111,24 @@ const [errorMessage, setErrorMessage] = useState('');
         <h3 style={{ color: '#edecd7' }}>{node.name || 'Unknown'}</h3>
         <p><img src={images[node.id] || node.attributes.image ||'/images/user.png'} height={250} width={250} /></p>
         <div style={{ display: 'flex', flexWrap: 'nowrap', marginTop: '10px', justifyContent: 'space-between' }}>
-          <label htmlFor="upload-button" style={buttonStyle}>
-            Upload Image
-          </label>
+          <Tippy content="Upload a new image">
+            <label htmlFor="upload-button" style={buttonStyle}>
+              Upload Image
+            </label>
+          </Tippy>
           <input id="upload-button" type="file" onChange={uploadImage} style={{ display: 'none' }} />
 
-          <button onClick={edit} style={buttonStyle}>
-            Edit Details
-          </button>
+          <Tippy content="Edit details for this person">
+            <button onClick={edit} style={buttonStyle}>
+              Edit Details
+            </button>
+          </Tippy>
 
-          <button onClick={viewProfile} style={buttonStyle}>
-            View Profile
-          </button>
+          <Tippy content="View the full profile of this person">
+            <button onClick={viewProfile} style={buttonStyle}>
+              View Profile
+            </button>
+          </Tippy>
         </div>
 
         <p style={{ color: '#edecd7' }}>Date of birth: {node.attributes.DOB || "Unknown date"}</p>

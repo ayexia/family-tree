@@ -170,11 +170,7 @@ class GedcomParser
                     unset($isDivorced); //removes value for isDivorced
             }
         }
-        
-        if ($counter % 1000 == 0) {
-            gc_collect_cycles();
-        }
-    
+            
             if (isset($id)) { //passes all data extracted of final family record to storeSpouse, storeMotherAndChild and storeFatherAndChild methods
                 $this->storeSpouses(  
                 $this->familyTreeId,
@@ -210,21 +206,19 @@ class GedcomParser
     */
     private function storePerson($familyTreeId, $gedcomId, $name, $surname, $gender, $birth, $birthDateQualifier, $death, $deathDateQualifier, $birthPlace, $deathPlace)
     {
-        $person = Person::updateOrCreate( //updates/creates Person record with corresponding information for each column in People table
-            ['gedcom_id' => $gedcomId],
-            [
-                'family_tree_id' => $familyTreeId,
-                'name' => $name,
-                'gender' => $gender,
-                'surname' => $surname,
-                'birth_date' => $this->convertToDate($birth),
-                'birth_date_qualifier' => $birthDateQualifier,
-                'death_date' => $this->convertToDate($death),
-                'death_date_qualifier' => $deathDateQualifier,
-                'birth_place' => $birthPlace,
-                'death_place' => $deathPlace
-            ]
-        );
+        $person = Person::create([ //updates/creates Person record with corresponding information for each column in People table
+            'gedcom_id' => $gedcomId,
+            'family_tree_id' => $familyTreeId,
+            'name' => $name,
+            'gender' => $gender,
+            'surname' => $surname,
+            'birth_date' => $this->convertToDate($birth),
+            'birth_date_qualifier' => $birthDateQualifier,
+            'death_date' => $this->convertToDate($death),
+            'death_date_qualifier' => $deathDateQualifier,
+            'birth_place' => $birthPlace,
+            'death_place' => $deathPlace
+        ]);
         /** STILL NEEDS WORKING/TESTING
          * try-catch flashes a message through Laravel's Session class 
          *(\Facades\Session - Facades are equivalent of wrapper classes for Laravel, where it instantiates the class and resolves any dependencies behind the scenes) 

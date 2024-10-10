@@ -686,7 +686,7 @@ const FamilyTreePDF = ({ onClose }) => { //fetch family data from backend
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 1000,
+    zIndex: 1005,
   };
 
   const closeButton = { //button to close PDF view

@@ -134,16 +134,82 @@
     .view-profile-link:hover {
         background-color: #00796b;
     }
+    .no-tree-message, .no-results-message {
+        font-family: "Inika", serif;
+        font-size: 1.1em;
+        color: #00796b;
+        text-align: center;
+    }
+    .tooltip-trigger {
+    position: relative;
+    cursor: help;
+}
+
+.tooltip-trigger .tooltip-text {
+    visibility: hidden;
+    width: 200px;
+    background-color: #004d40;
+    color: #EDECD7;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip-trigger:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+.profile .tooltip-trigger .tooltip-text {
+    top: 100%;
+    bottom: auto;
+    margin-top: 5px;
+    font-size: 0.5em;
+}
+
+.footer .tooltip-trigger .tooltip-text {
+    bottom: 100%;
+    top: auto;
+    margin-bottom: 5px;
+    font-size: 0.8em;
+}
+
+.tooltip-trigger .tooltip-text::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+}
+
+.profile .tooltip-trigger .tooltip-text::after {
+    top: -10px;
+    border-color: transparent transparent #004d40 transparent;
+}
+
+.footer .tooltip-trigger .tooltip-text::after {
+    bottom: -10px;
+    border-color: #004d40 transparent transparent transparent;
+}
+
 </style>
 <body>
     <div class="container">
         <header class="header">
             <h1 class="gradient-text">Search</h1>
             <div class="profile">
-            <a href="{{route('profile.edit') }}" class="profile-button">
-                <img src="{{ asset('images/user-profile.png') }}" alt="User">
-                Profile
-            </a>
+                <a href="{{ route('profile.edit') }}" class="profile-button tooltip-trigger">
+                    <img src="{{ asset('images/user-profile.png') }}" alt="User">
+                    Profile
+                    <span class="tooltip-text">Edit your profile, logout or delete your account</span>
+                </a>
             </div>
             <a href="{{ route('home') }}" class="profile-button home-button">
                 <img src="{{ asset('images/home.png') }}" alt="Home">
@@ -152,33 +218,33 @@
         </header>
 
         <div class="search-container">
-        <p>Search for a family member whose information you'd like to see in greater detail.</p>
-            <div class="search-input-container">
-            @if($familyTreeId)
-    <form method="GET" action="{{ route('family.tree', ['familyTreeId' => $familyTreeId]) }}">
+    <p>Search for a family member whose information you'd like to see in greater detail.</p>
+        <div class="search-input-container">
+            <form method="GET" action="{{ route('family.tree', ['familyTreeId' => $familyTreeId ?? '']) }}">
         <input type="text" id="desiredName" name="desiredName" value="{{ request('desiredName') }}" class="search-input" placeholder="Search">
         <button type="submit" class="search-button">
             <img src="{{ asset('images/search.png') }}" alt="Search">
         </button>
     </form>
-        @else
-            <p>You don't have a family tree yet. Please import a GEDCOM file first.</p>
-        @endif
 </div>
 </div>
-        @if ($allPersons->isEmpty())
-            <div>No results found for the given query.</div>
-        @else
-            <div class="search-results">
-                <ul class="family-tree">
-                    @foreach($allPersons as $person)
-                        @if(isset($familyTree[$person->id]))
-                            @php
-                                $node = $familyTree[$person->id];
-                            @endphp
-                            <li class="person">
-                                <strong>{{ $node->name }}</strong> ({{ $node->birth_date }} - {{ $node->death_date }})
-                                <a href="{{ route('member.profile', ['id' => $person->id]) }}" class="view-profile-link">View Profile</a>
+
+    <div class="results-container">
+        @if(!$familyTreeId)
+            <p class="no-tree-message">You don't have a family tree yet. Please import a GEDCOM file first.</p>
+        @elseif($allPersons->isEmpty())
+            <p class="no-results-message">No results found for the given query.</p>
+            @else
+        <div class="search-results">
+            <ul class="family-tree">
+                @foreach($allPersons as $person)
+                    @if(isset($familyTree[$person->id]))
+                        @php
+                            $node = $familyTree[$person->id];
+                        @endphp
+                        <li class="person">
+                            <strong>{{ $node->name }}</strong> ({{ $node->birth_date }} - {{ $node->death_date }})
+                            <a href="{{ route('member.profile', ['id' => $person->id]) }}" class="view-profile-link">View Profile</a>
 
                                 @if (!empty($node->getParents()))
                                     <ul>
@@ -223,7 +289,17 @@
         @endif
     </div>
     <footer class="footer">
-    <p>Copyright 2024 | <a href="{{ route('about') }}">About MyStory</a> | <a href="{{ route('feedback.create') }}">Submit Feedback</a></p>
+        <p>
+            Copyright 2024 | 
+            <span class="tooltip-trigger">
+                <a href="{{ route('about') }}">About MyStory</a>
+                <span class="tooltip-text">Learn more about our application and its features</span>
+            </span> | 
+            <span class="tooltip-trigger">
+                <a href="{{ route('feedback.create') }}">Submit Feedback</a>
+                <span class="tooltip-text">Share your thoughts and suggestions to help us improve</span>
+            </span>
+        </p>
     </footer>
 </body>
 </html>

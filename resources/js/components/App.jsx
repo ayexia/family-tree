@@ -8,10 +8,10 @@ import FamilyGraph from './FamilyGraph';
 import FamilyTreePDF from './FamilyTreePDF';
 
 const DEFAULT_LINE_STYLES = {
-    parentChild: { color: '#000000', width: 2, dashArray: 'none' },
-    current: { color: '#FF0000', width: 2, dashArray: 'none' },
-    divorced: { color: '#808080', width: 2, dashArray: '5,5' },
-    adopted: { color: '#FFA500', width: 2, dashArray: '10,5' },
+    parentChild: { color: '#000000', width: 5, dashArray: 'none' },
+    current: { color: '#FF0000', width: 5, dashArray: 'none' },
+    divorced: { color: '#808080', width: 5, dashArray: '5,5' },
+    adopted: { color: '#FFA500', width: 5, dashArray: '10,5' },
     nodeMale: { color: '#97EBE6' },
     nodeFemale: { color: '#EB97CF' },
     nodeOther: { color: '#EBC097' }

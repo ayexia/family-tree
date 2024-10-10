@@ -438,7 +438,7 @@ const toolTip = (node) => { //customises tooltip, containing names and marriage 
     if (!treeData) { //alternate display if no tree data is available - error message and search bar
   return (
     <div>
-      {errorMessage}
+      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
       <div style={searchContainerStyle}>
         <input 
           type="text" 

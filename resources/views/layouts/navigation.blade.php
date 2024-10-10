@@ -58,14 +58,55 @@
     .ms-6 {
         margin-left: 2rem;
     }
+
+    .logo-tooltip {
+    position: relative;
+    display: inline-block;
+    }
+
+    .logo-tooltip .tooltip-text {
+        visibility: hidden;
+        width: 120px;
+        background-color: #004d40;
+        color: #EDECD7;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1000;
+        bottom: -30px;
+        left: 50%;
+        margin-left: -60px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-family: "Inika", serif;
+        font-size: 0.8rem;
+    }
+
+    .logo-tooltip:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .logo-tooltip .tooltip-text::after {
+        content: "";
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+        border-color: transparent transparent #004d40 transparent;
+    }
 </style>
 
 <nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-20 items-center">
             <div class="flex-shrink-0">
-                <a href="{{ route('home') }}">
+                <a href="{{ route('home') }}" class="logo-tooltip">
                     <x-application-logo class="block h-12 w-auto fill-current text-gray-800 dark:text-gray-200" />
+                    <span class="tooltip-text">Return to Home</span>
                 </a>
             </div>
 

@@ -55,65 +55,60 @@ class Node {
     }
 
     public function isCurrentSpouse(Node $spouse) {
-        $knownMarriageDates = array_filter($this->marriage_dates, function($date) {
-            return $date !== 'Unknown date' && $date !== null;
-        });
-        $spouseKnownMarriageDates = array_filter($spouse->marriage_dates, function($date) {
-            return $date !== 'Unknown date' && $date !== null;
+        $knownMarriageDates = array_filter($this->marriage_dates, function ($date) {
+            return $date !== null && $date !== 'Unknown date';
         });
 
-        $knownDivorceDates = array_filter($this->divorce_dates, function($date) {
-            return $date !== 'Unknown date' && $date !== null;
-        });
-        $spouseKnownDivorceDates = array_filter($spouse->divorce_dates, function($date) {
-            return $date !== 'Unknown date' && $date !== null;
-        });
+    $spouseKnownMarriageDates = array_filter($spouse->marriage_dates, function ($date) {
+        return $date !== null && $date !== 'Unknown date';
+    });
 
-        $sharedDivorceDates = array_intersect($knownDivorceDates, $spouseKnownDivorceDates);
-        if (!empty($sharedDivorceDates)) {
-            return false;
-        }
+    $knownDivorceDates = array_filter($this->divorce_dates, function ($date) {
+        return $date !== null && $date !== 'Unknown date';
+    });
 
-        if (empty($knownMarriageDates) || empty($spouseKnownMarriageDates)) {
-            return true;
-        }
+    $spouseKnownDivorceDates = array_filter($spouse->divorce_dates, function ($date) {
+        return $date !== null && $date !== 'Unknown date';
+    });
 
-        $latestMarriageDate = max($knownMarriageDates);
-        $spouseLatestMarriageDate = max($spouseKnownMarriageDates);
+    if (empty($this->marriage_dates) || empty($spouse->marriage_dates) || empty($this->divorce_dates) || empty($spouse->divorce_dates)) {
+        return true;
+    }
 
-        $overallLatestMarriageDate = max($latestMarriageDate, $spouseLatestMarriageDate);
-
-        if ($latestMarriageDate < $spouseLatestMarriageDate) {
-            if (!empty($knownMarriageDates) && empty($knownDivorceDates)) {
-                $this->updateSpouseDivorceDate($spouse->id, $spouseLatestMarriageDate);
-            }
-        } elseif ($spouseLatestMarriageDate < $latestMarriageDate) {
-            if (!empty($spouseKnownMarriageDates) && empty($spouseKnownDivorceDates)) {
-                $this->updateSpouseDivorceDate($this->id, $latestMarriageDate);
-            }
-        }
-
-        if ($spouseLatestMarriageDate === $overallLatestMarriageDate) {
-            return true;
-        }
-
+    if (!empty(array_intersect($knownDivorceDates, $spouseKnownDivorceDates))) {
         return false;
     }
 
-    private function updateSpouseDivorceDate($personId, $divorceDate) {
-            $spouseRecord = Spouse::where(function ($query) use ($personId) {
-                $query->where(function ($q) use ($personId) {
-                    $q->where('first_spouse_id', $this->id)
-                      ->where('second_spouse_id', $personId);
-                })->orWhere(function ($q) use ($personId) {
-                    $q->where('first_spouse_id', $personId)
-                      ->where('second_spouse_id', $this->id);
-                });
-            })->first();
+    if (empty($knownMarriageDates) || empty($spouseKnownMarriageDates)) {
+        return true;
+    }
 
-            if ($spouseRecord) {
-                $spouseRecord->update(['divorce_date' => $divorceDate]);
-            } 
+    $latestMarriageDate = max($knownMarriageDates);
+    $spouseLatestMarriageDate = max($spouseKnownMarriageDates);
+
+    if ($latestMarriageDate < $spouseLatestMarriageDate && empty($knownDivorceDates)) {
+        $this->updateSpouseDivorceDate($spouse->id, $spouseLatestMarriageDate);
+    } elseif ($spouseLatestMarriageDate < $latestMarriageDate && empty($spouseKnownDivorceDates)) {
+        $this->updateSpouseDivorceDate($this->id, $latestMarriageDate);
+    }
+
+    return $spouseLatestMarriageDate === $latestMarriageDate;
+}
+
+    private function updateSpouseDivorceDate($personId, $divorceDate) {
+        $spouseRecord = Spouse::where(function ($query) use ($personId) {
+            $query->where(function ($q) use ($personId) {
+                $q->where('first_spouse_id', $this->id)
+                ->where('second_spouse_id', $personId);
+            })->orWhere(function ($q) use ($personId) {
+                $q->where('first_spouse_id', $personId)
+                ->where('second_spouse_id', $this->id);
+            });
+        })->first();
+
+    if ($spouseRecord && $spouseRecord->divorce_date === null) {
+        $spouseRecord->update(['divorce_date' => $divorceDate]);
+    }
     }
     
     public function addChild(Node $child, $isAdopted = false) {

@@ -127,16 +127,125 @@
     .search-input::placeholder {
         color: #EDECD7;
     }
+    .tooltip-trigger {
+        position: relative;
+        cursor: help;
+    }
+
+    .tooltip-trigger .tooltip-text {
+        visibility: hidden;
+        width: 200px;
+        background-color: #004d40;
+        color: #EDECD7;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        left: 50%;
+        margin-left: -100px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .tooltip-trigger:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .profile .tooltip-trigger .tooltip-text {
+        top: 100%;
+        bottom: auto;
+        margin-top: 5px;        
+        font-size: 0.5em;
+    }
+
+    .footer .tooltip-trigger .tooltip-text {
+        bottom: 100%;
+        top: auto;
+        margin-bottom: 5px;
+        font-size: 0.8em;
+    }
+
+    .tooltip-trigger .tooltip-text::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+    }
+
+    .profile .tooltip-trigger .tooltip-text::after {
+        top: -10px;
+        border-color: transparent transparent #004d40 transparent;
+    }
+
+    .footer .tooltip-trigger .tooltip-text::after {
+        bottom: -10px;
+        border-color: #004d40 transparent transparent transparent;
+    }
+
+    .back-to-tree-button .tooltip-text {
+        visibility: hidden;
+        width: 120px;
+        background-color: #004d40;
+        color: #EDECD7;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -60px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-size: 0.8rem;
+    }
+
+    .back-to-tree-button:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .back-to-tree-button .tooltip-text::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+        border-color: #004d40 transparent transparent transparent;
+    }
+    .edit-profile-link {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        padding: 5px 10px;
+        background-color: #004d40;
+        color: #EDECD7;
+        text-decoration: none;
+        border-radius: 15px;
+        font-size: 0.8em;
+        transition: background-color 0.3s;
+    }
+
+    .edit-profile-link:hover {
+        background-color: #00796b;
+    }
 </style>
 <div class="container">
     <div class="header">
         <h1 class="subheading">{{ $person->name }}'s Profile</h1>
         <div class="profile">
-            <a href="{{ route('profile.edit') }}" class="profile-button">
-                <img src="{{ asset('images/user-profile.png') }}" alt="User">
-                Profile
-            </a>
-        </div>
+                <a href="{{ route('profile.edit') }}" class="profile-button tooltip-trigger">
+                    <img src="{{ asset('images/user-profile.png') }}" alt="User">
+                    Profile
+                    <span class="tooltip-text">Edit your profile, logout or delete your account</span>
+                </a>
+            </div>
     </div>
     <a href="{{ route('home') }}" class="profile-button home-button">
         <img src="{{ asset('images/home.png') }}" alt="Home">
@@ -152,8 +261,6 @@
             <img src="{{ asset('images/search.png') }}" alt="Search">
         </button>
     </form>
-    @else
-            <p>You don't have a family tree yet. Please import a GEDCOM file first.</p>
         @endif
 </div>
 </div>
@@ -165,6 +272,7 @@
             @else
                 <img src="{{ asset('images/user-profile.png') }}" alt="{{ $person->name }}" class="profile-image">
             @endif
+            <a href="{{ route('person.edit', ['id' => $person->id]) }}" class="edit-profile-link">Edit Profile</a>
 
             <h2>Personal Information</h2>
             <p><strong>Name:</strong> {{ $person->name }}</p>
@@ -194,9 +302,20 @@ No family tree data available.
 <a href="{{ route('display') }}" class="back-to-tree-button">
     <img src="{{ asset('images/tree-icon.png') }}" alt="Tree Icon">
     Family Tree
+    <span class="tooltip-text">View your family tree</span>
 </a>
 
-<div class="footer">
-    <p>Copyright 2024 | <a href="{{ route('about') }}">About MyStory</a> | <a href="{{ route('feedback.create') }}">Submit Feedback</a></p>
-</div>
+<footer class="footer">
+        <p>
+            Copyright 2024 | 
+            <span class="tooltip-trigger">
+                <a href="{{ route('about') }}">About MyStory</a>
+                <span class="tooltip-text">Learn more about our application and its features</span>
+            </span> | 
+            <span class="tooltip-trigger">
+                <a href="{{ route('feedback.create') }}">Submit Feedback</a>
+                <span class="tooltip-text">Share your thoughts and suggestions to help us improve</span>
+            </span>
+        </p>
+    </footer>
 @endsection

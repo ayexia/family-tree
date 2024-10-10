@@ -20,9 +20,9 @@ class GedcomController extends Controller
      */
     public function upload(Request $request) 
     {
-        //checks and ensures the uploaded file type matches what's required (ged alone does not work and must be accompanied by "txt/text")
+        //checks and ensures the uploaded file type matches what's required (.ged files)
         $request->validate([
-            'gedcom_file' => 'required|file|mimes:txt,text,ged', 
+            'gedcom_file' => ['required', 'extensions:ged'], 
         ]);
 
         //obtains current user's ID

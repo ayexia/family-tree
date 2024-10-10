@@ -715,7 +715,7 @@ const FamilyTreePDF = ({ onClose }) => { //fetch family data from backend
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 1000,
+    zIndex: 1005,
   };
 
   const closeButton = { //button to close PDF view
@@ -723,8 +723,8 @@ const FamilyTreePDF = ({ onClose }) => { //fetch family data from backend
     top: '10px',
     left: '270px',
     padding: '5px 10px',
-    backgroundColor: '#CCE7BD',
-    color: '#A7B492',
+    backgroundColor: '#00796b',
+    color: '#EDECD7',
     border: 'none',
     borderRadius: '5px',
     cursor: 'pointer',
@@ -752,8 +752,8 @@ const FamilyTreePDF = ({ onClose }) => { //fetch family data from backend
   const buttonStyle = {
     margin: '10px 0',
     padding: '5px 10px',
-    backgroundColor: '#CCE7BD',
-    color: '#A7B492',
+    backgroundColor: '#00796b',
+    color: '#EDECD7',
     border: 'none',
     borderRadius: '5px',
     cursor: 'pointer',

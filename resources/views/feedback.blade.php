@@ -4,14 +4,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Inika:wght@400;700&family=Tourney:ital,wght@0,100..900;1,100..900&family=Waiting+for+the+Sunrise&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
 <style>
+    .profile {
+        position: absolute;
+        right: -35%;
+        top: -15%;
+    }
+
     .home-button {
         position: absolute;
-        left: -35%;
+        left: -17%;
         top: 15%;
     }
 
     .custom-background {
-        background-color: #9BB08C;
+        background-color: #00796b;
         padding: 0rem;
         border-radius: 2.5rem;
         box-shadow: none;
@@ -34,12 +40,12 @@
         border-radius: 0.375rem;
         font-size: 0.875rem;
         color: #EDECD7;
-        background-color: #678A5C;
+        background-color: #004d40;
         font-family: "Inika", serif;
     }
 
     .custom-button {
-        background-color: #587353;
+        background-color: #004d40;
         color: #EDECD7;
         font-family: "Inika", serif;
         border-radius: 2.5rem;
@@ -52,7 +58,7 @@
     }
 
     .custom-button:hover {
-        background-color: #4a6848;
+        background-color: #00695c;
     }
 
     .custom-error, .custom-success {
@@ -84,16 +90,103 @@
         left: 0;
         bottom: 0;
         width: 100%;
-        background-color: #6C9661;
+        background-color: #004d40;
+    }
+
+    .subheading {
+        color: #004d40;
+    }
+
+    .info {
+        color: #004d40;
+        font-family: "Inika", serif;
+        font-size: 0.8rem;
+    }
+
+    .profile-button, .home-button {
+        background-color: #00796b;
+        color: #EDECD7;
+    }
+
+    .profile-button:hover, .home-button:hover {
+        background-color: #004d40;
+    }
+
+    .tooltip-trigger {
+        position: relative;
+        cursor: help;
+    }
+
+    .tooltip-trigger .tooltip-text {
+        visibility: hidden;
+        width: 200px;
+        background-color: #004d40;
+        color: #EDECD7;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        left: 50%;
+        margin-left: -100px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .tooltip-trigger:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .profile .tooltip-trigger .tooltip-text {
+        top: 100%;
+        bottom: auto;
+        margin-top: 5px;        
+        font-size: 0.5em;
+    }
+
+    .footer .tooltip-trigger .tooltip-text {
+        bottom: 100%;
+        top: auto;
+        margin-bottom: 5px;
+        font-size: 0.8em;
+    }
+
+    .tooltip-trigger .tooltip-text::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+    }
+
+    .profile .tooltip-trigger .tooltip-text::after {
+        top: -10px;
+        border-color: transparent transparent #004d40 transparent;
+    }
+
+    .footer .tooltip-trigger .tooltip-text::after {
+        bottom: -10px;
+        border-color: #004d40 transparent transparent transparent;
     }
 </style>
 <div class="container">
     <div class="header">
         <h1 class="subheading">Submit Feedback</h1>
+        <p class="info">Your feedback helps us improve MyStory. We appreciate your thoughts and suggestions!</p>
+        <div class="profile">
+            <a href="{{ route('profile.edit') }}" class="profile-button tooltip-trigger">
+                <img src="{{ asset('images/user-profile.png') }}" alt="User">
+                Profile
+                <span class="tooltip-text">Edit your profile, logout or delete your account</span>
+            </a>
+        </div>
     </div>
     <a href="{{ route('home') }}" class="profile-button home-button">
         <img src="{{ asset('images/home.png') }}" alt="Home">
-        Home</a>
+        Home
+    </a>
 </div>
 <div class="max-w-3xl mx-auto mt-8 custom-background">
     <div class="bg-white dark:bg-gray-800 overflow-hidden" style="box-shadow: none; padding: 2rem;">
@@ -127,7 +220,17 @@
     </div>
 </div>
 
-    <div class="footer">
-        <p>Copyright 2024 | <a href="{{ route('about') }}">About MyStory</a> | <a href="#">Submit Feedback</a></p>
-    </div>
+<footer class="footer">
+    <p>
+        Copyright 2024 | 
+        <span class="tooltip-trigger">
+            <a href="{{ route('about') }}">About MyStory</a>
+            <span class="tooltip-text">Learn more about our application and its features</span>
+        </span> | 
+        <span class="tooltip-trigger">
+            <a href="#">Submit Feedback</a>
+            <span class="tooltip-text">Share your thoughts and suggestions to help us improve</span>
+        </span>
+    </p>
+</footer>
 @endsection

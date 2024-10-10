@@ -8,7 +8,7 @@ const Legend = ({ lineStyles }) => {
     alignItems: 'flex-start',
     padding: '10px',
     borderRadius: '10px',
-    color: '#9BB08C',
+    color: '#004d40',
     fontFamily: 'Inika, serif',
     fontSize: '15px',
     fontWeight: 'bold',

@@ -46,11 +46,14 @@ const FamilyGraph = ({
   const [images, setImages] = useState({});
   const { setCenter, zoomIn: reactFlowZoomIn, zoomOut: reactFlowZoomOut, fitView } = useReactFlow();
 
-  const isBirthday = (dob) => {
-    if (!dob) return false;
+  const isBirthday = (birthDate) => {
+    if (!birthDate) return false;
     const today = new Date();
-    const birthDate = new Date(dob);
-    return today.getMonth() === birthDate.getMonth() && today.getDate() === birthDate.getDate();
+    const [year, month, day] = birthDate.split('-').map(Number);
+  
+    const birthdayThisYear = new Date(today.getFullYear(), month - 1, day);
+  
+    return today.getMonth() === birthdayThisYear.getMonth() && today.getDate() === birthdayThisYear.getDate();
   };
 
   const customNode = useCallback(({ data }) => {

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios'; 
 import { Cake } from 'lucide-react';
+import Tippy from '@tippyjs/react';
+import 'tippy.js/dist/tippy.css'; 
 
 const Sidebar = ({ node, onClose, setImages, images }) => {
 const [errorMessage, setErrorMessage] = useState('');
@@ -31,14 +33,37 @@ const [errorMessage, setErrorMessage] = useState('');
     window.location.href = `/person/${node.id}/edit`;
   };
 
+  const viewProfile = () => {
+    window.location.href = `/member/profile/${node.id}`;
+  };
+
   const isBirthday = (birthDate) => {
     if (!birthDate) return false;
     const today = new Date();
-    const birth = new Date(birthDate);
-    return today.getMonth() === birth.getMonth() && today.getDate() === birth.getDate();
+    const [year, month, day] = birthDate.split('-').map(Number);
+  
+    const birthdayThisYear = new Date(today.getFullYear(), month - 1, day);
+  
+    return today.getMonth() === birthdayThisYear.getMonth() && today.getDate() === birthdayThisYear.getDate();
   };
 
   const isTodayBirthday = isBirthday(node.attributes.DOB);
+  
+  const buttonStyle = {
+    backgroundColor: '#004d40',
+    color: '#edecd7',
+    padding: '8px 4px',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    border: 'none',
+    display: 'inline-block',
+    fontFamily: 'Inika, serif',
+    fontSize: '0.8em',
+    margin: '0 5px 5px 0',
+    whiteSpace: 'nowrap',
+    flex: '1 1 auto',
+    textAlign: 'center',
+  };
   
   return (
     <div style={{
@@ -47,7 +72,7 @@ const [errorMessage, setErrorMessage] = useState('');
       right: 0,
       top: 0,
       height: '100%',
-      backgroundColor: '#92B08E',
+      backgroundColor: '#008080',
       boxShadow: '-2px 0 5px rgba(0,0,0,0.5)',
       overflowY: 'auto',
       transition: 'transform .3s',
@@ -55,8 +80,8 @@ const [errorMessage, setErrorMessage] = useState('');
       zIndex: '500',
     }}>
       <button onClick={onClose} style={{
-        backgroundColor: '#37672F',
-        color: 'white',
+        backgroundColor: '#004d40',
+        color: '#edecd7',
         border: 'none',
         padding: '10px',
         cursor: 'pointer',
@@ -83,62 +108,53 @@ const [errorMessage, setErrorMessage] = useState('');
             <span>It's {node.name}'s birthday today!</span>
           </div>
         )}
-        <h3>{node.name || 'Unknown'}</h3>
-        <p><img src={images[node.id] || node.attributes.image ||'/images/user.png'} height={250} width={250}></img></p>
-        <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-          <div>
-          <label htmlFor="upload-button" style={{
-            backgroundColor: '#37672F',
-            color: 'white',
-            padding: '10px',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            display: 'inline-block'
-          }}>
-            Upload Image
-          </label>
+        <h3 style={{ color: '#edecd7' }}>{node.name || 'Unknown'}</h3>
+        <p><img src={images[node.id] || node.attributes.image ||'/images/user.png'} height={250} width={250} /></p>
+        <div style={{ display: 'flex', flexWrap: 'nowrap', marginTop: '10px', justifyContent: 'space-between' }}>
+          <Tippy content="Upload a new image">
+            <label htmlFor="upload-button" style={buttonStyle}>
+              Upload Image
+            </label>
+          </Tippy>
           <input id="upload-button" type="file" onChange={uploadImage} style={{ display: 'none' }} />
-          </div>
 
-          <button onClick={edit} style={{
-            backgroundColor: '#37672F',
-            color: 'white',
-            padding: '10px',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            border: 'none',
-            display: 'inline-block',
-            fontFamily: 'Inika, serif',
-            fontSize: '1em',
-          }}>
-            Edit Details
-          </button>
+          <Tippy content="Edit details for this person">
+            <button onClick={edit} style={buttonStyle}>
+              Edit Details
+            </button>
+          </Tippy>
+
+          <Tippy content="View the full profile of this person">
+            <button onClick={viewProfile} style={buttonStyle}>
+              View Profile
+            </button>
+          </Tippy>
         </div>
 
-        <p>Date of birth: {node.attributes.DOB || "Unknown date"}</p>
-        <p>Birthplace: {node.attributes.birth_place || "Unknown"}</p>
-        <p>Date of death: {node.attributes.DOD || "Unknown date"}</p>
-        <p>Resting place: {node.attributes.death_place || "Unknown"}</p>
+        <p style={{ color: '#edecd7' }}>Date of birth: {node.attributes.DOB || "Unknown date"}</p>
+        <p style={{ color: '#edecd7' }}>Birthplace: {node.attributes.birth_place || "Unknown"}</p>
+        <p style={{ color: '#edecd7' }}>Date of death: {node.attributes.DOD || "Unknown date"}</p>
+        <p style={{ color: '#edecd7' }}>Resting place: {node.attributes.death_place || "Unknown"}</p>
         {node.attributes.marriage_dates && node.attributes.marriage_dates.length > 0 ? (
           node.attributes.marriage_dates.map((marriage, index) => (
             <div key={index}>
-              <p>Marriage {index + 1}: {marriage || 'Unknown date'}</p>
+              <p style={{ color: '#edecd7' }}>Marriage {index + 1}: {marriage || 'Unknown date'}</p>
               {node.attributes.divorce_dates && node.attributes.divorce_dates[index] && (
-                <p>Divorce {index + 1}: {node.attributes.divorce_dates[index]}</p>
+                <p style={{ color: '#edecd7' }}>Divorce {index + 1}: {node.attributes.divorce_dates[index]}</p>
               )}
             </div>
           ))
         ) : (
-          <p>No marriages</p>
+          <p style={{ color: '#edecd7' }}>No marriages</p>
         )}
          <div>
-          <p>Parents:</p>
+         <p style={{ color: '#edecd7' }}>Parents:</p>
           {node.attributes.parents && Object.keys(node.attributes.parents).length > 0 ? (
             <ul>
               {Object.values(node.attributes.parents).map(parent => {
                 let parentType = parent.gender === 'F' ? 'Mother' : parent.gender === 'M' ? 'Father' : 'Parent';
                 return (
-                  <li key={parent.id}>
+                  <li key={parent.id} style={{ color: '#edecd7' }}>
                     {parentType}: {parent.name || 'Unknown person'}
                   </li>
                 );
@@ -146,41 +162,41 @@ const [errorMessage, setErrorMessage] = useState('');
             </ul>
           ) : (
             <ul>
-            <li>Mother: Unknown person</li>
-            <li>Father: Unknown person</li>
+            <li style={{ color: '#edecd7' }}>Mother: Unknown person</li>
+            <li style={{ color: '#edecd7' }}>Father: Unknown person</li>
             </ul>
           )}
         </div>
           <div>
-            <p>Pets:</p>            
+          <p style={{ color: '#edecd7' }}>Pets:</p>            
         {node.attributes.pets && node.attributes.pets.length > 0 ? (
             <ul>
               {node.attributes.pets.map((pet, index) => (
-                <li key={index}>{pet}</li>
+                <li key={index} style={{ color: '#edecd7' }}>{pet}</li>
               ))}
             </ul>
         ) : (
-          <p>No pets</p>
+          <p style={{ color: '#edecd7' }}>No pets</p>
         )}        
         </div>
           <div>
-            <p>Hobbies:</p>            
+          <p style={{ color: '#edecd7' }}>Hobbies:</p>            
         {node.attributes.hobbies && node.attributes.hobbies.length > 0 ? (
             <ul>
               {node.attributes.hobbies.map((hobby, index) => (
-                <li key={index}>{hobby}</li>
+                <li key={index} style={{ color: '#edecd7' }}>{hobby}</li>
               ))}
             </ul>
         ) : (
-          <p>No hobbies</p>
+          <p style={{ color: '#edecd7' }}>No hobbies</p>
         )}        
         </div>
           <div>
-            <p>Notes:</p>
+          <p style={{ color: '#edecd7' }}>Notes:</p>
         {node.attributes.notes ? (
-            <p>{node.attributes.notes}</p>
+            <p style={{ color: '#edecd7' }}>{node.attributes.notes}</p>
         ) : (
-          <p>No notes</p>
+          <p style={{ color: '#edecd7' }}>No notes</p>
         )}        
         </div>
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}

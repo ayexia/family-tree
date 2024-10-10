@@ -6,13 +6,13 @@
 <style>
     .profile {
         position: absolute;
-        right: -60%;
+        right: -35%;
         top: -15%;
     }
 
     .home-button {
         position: absolute;
-        left: -35%;
+        left: -17%;
         top: 15%;
     }
 
@@ -20,7 +20,7 @@
         position: absolute;
         left: 5%;
         top: 20%;
-        background-color: #587353;
+        background-color: #00796b;
         color: #EDECD7;
         font-family: "Inika", serif;
         border-radius: 2.5rem;
@@ -43,11 +43,11 @@
     }
 
     .back-to-tree-button:hover {
-        background-color: #4a6848;
+        background-color: #004d40;
     }
 
     .custom-background {
-        background-color: #9BB08C;
+        background-color: #00796b;
         padding: 0rem;
         border-radius: 2.5rem;
         box-shadow: none;
@@ -70,12 +70,12 @@
         border-radius: 0.375rem;
         font-size: 0.875rem;
         color: #EDECD7;
-        background-color: #678A5C;
+        background-color: #004d40;
         font-family: "Inika", serif;
     }
 
     .custom-button {
-        background-color: #587353;
+        background-color: #004d40;
         color: #EDECD7;
         font-family: "Inika", serif;
         border-radius: 2.5rem;
@@ -88,7 +88,7 @@
     }
 
     .custom-button:hover {
-        background-color: #4a6848;
+        background-color: #00695c;
     }
 
     .custom-error, .custom-success {
@@ -118,16 +118,149 @@
         color: #EDECD7;
         position: fixed;
         left: 0px;
+        background-color: #004d40;
+        width: 100%;
+    }
+
+    .subheading {
+        color: #004d40;
+    }
+
+    .info {
+        color: #004d40;
+        font-family: "Inika", serif;
+        font-size: 0.8rem;
+    }
+
+    .profile-button, .home-button {
+        background-color: #00796b;
+        color: #EDECD7;
+    }
+
+    .profile-button:hover, .home-button:hover {
+        background-color: #004d40;
+    }
+    .tooltip-trigger {
+        position: relative;
+        cursor: help;
+    }
+
+    .tooltip-trigger .tooltip-text {
+        visibility: hidden;
+        width: 200px;
+        background-color: #004d40;
+        color: #EDECD7;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        left: 50%;
+        margin-left: -100px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .tooltip-trigger:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .profile .tooltip-trigger .tooltip-text {
+        top: 100%;
+        bottom: auto;
+        margin-top: 5px;        
+        font-size: 0.5em;
+    }
+
+    .footer .tooltip-trigger .tooltip-text {
+        bottom: 100%;
+        top: auto;
+        margin-bottom: 5px;
+        font-size: 0.8em;
+    }
+
+    .tooltip-trigger .tooltip-text::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+    }
+
+    .profile .tooltip-trigger .tooltip-text::after {
+        top: -10px;
+        border-color: transparent transparent #004d40 transparent;
+    }
+
+    .footer .tooltip-trigger .tooltip-text::after {
+        bottom: -10px;
+        border-color: #004d40 transparent transparent transparent;
+    }
+
+    .back-to-tree-button .tooltip-text {
+        visibility: hidden;
+        width: 120px;
+        background-color: #004d40;
+        color: #EDECD7;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -60px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-size: 0.8rem;
+    }
+
+    .back-to-tree-button:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .back-to-tree-button .tooltip-text::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+        border-color: #004d40 transparent transparent transparent;
+    }
+    .view-profile-link {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        padding: 5px 10px;
+        background-color: #004d40;
+        color: #EDECD7;
+        text-decoration: none;
+        border-radius: 15px;
+        font-size: 0.8em;
+        transition: background-color 0.3s;
+        font-family: "Inika", serif;
+    }
+
+    .view-profile-link:hover {
+        background-color: #00796b;
     }
 </style>
 <div class="container">
     <div class="header">
         <h1 class="subheading">Edit Person</h1>
+        <p class="info">Edit details for this person in your family tree. Changes will be saved and reflected in your family tree view.</p>
         <div class="profile">
-            <a href="{{ route('profile.edit') }}" button class="profile-button">
-                <img src="{{ asset('images/user-profile.png') }}" alt="User">
-                Profile</a>
-        </div>
+                <a href="{{ route('profile.edit') }}" class="profile-button tooltip-trigger">
+                    <img src="{{ asset('images/user-profile.png') }}" alt="User">
+                    Profile
+                    <span class="tooltip-text">Edit your profile, logout or delete your account</span>
+                </a>
+            </div>
     </div>
     <a href="{{ route('home') }}" class="profile-button home-button">
         <img src="{{ asset('images/home.png') }}" alt="Home">
@@ -135,6 +268,7 @@
 </div>
 <div class="max-w-3xl mx-auto mt-8 custom-background">
     <div class="bg-white dark:bg-gray-800 overflow-hidden" style="box-shadow: none; padding: 2rem;">
+    <a href="{{ route('member.profile', ['id' => $person->id]) }}" class="view-profile-link">View Profile</a>
 
         @if (session('success'))
             <div class="custom-success mb-4 rounded">
@@ -228,9 +362,20 @@
 <a href="{{ route('display') }}" class="back-to-tree-button">
     <img src="{{ asset('images/tree-icon.png') }}" alt="Tree Icon">
     Family Tree
+    <span class="tooltip-text">View your family tree</span>
 </a>
 
-<div class="footer">
-    <p>Copyright 2024 | <a href="{{ route('about') }}">About MyStory</a> | <a href="{{ route('feedback.create') }}">Submit Feedback</a></p>
-</div>
+<footer class="footer">
+        <p>
+            Copyright 2024 | 
+            <span class="tooltip-trigger">
+                <a href="{{ route('about') }}">About MyStory</a>
+                <span class="tooltip-text">Learn more about our application and its features</span>
+            </span> | 
+            <span class="tooltip-trigger">
+                <a href="{{ route('feedback.create') }}">Submit Feedback</a>
+                <span class="tooltip-text">Share your thoughts and suggestions to help us improve</span>
+            </span>
+        </p>
+    </footer>
 @endsection

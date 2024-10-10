@@ -14,17 +14,19 @@
         position: absolute;
         font-family: "Inika", serif;
         font-size: 40px;
+        color: #004d40;
     }
 
     .profile-button {
         text-decoration: none;
         font-family: "Inika", serif;
+        color: #EDECD7;
     }
 
     .home-button {
         display: flex;
         align-items: center;
-        background-color: #587353;
+        background-color: #00796b;
         color: #EDECD7;
         text-decoration: none;
         padding: 10px 20px;
@@ -39,14 +41,8 @@
         top: 25px;
     }
 
-    .home-button img {
-        width: 30px;
-        height: 30px;
-        margin-right: 20px;
-    }
-
     .home-button:hover {
-        background-color: #4a6848;
+        background-color: #004d40;
     }
 
     .footer {
@@ -57,13 +53,14 @@
         right: 0%;
         padding: 0.53rem;
         color: #EDECD7;
+        background-color: #004d40;
         z-index: 1000;
     }
 
     .search-results .family-tree li {
-        background-color: #9BB08C;
+        background-color: #00796b;
         padding: 15px;
-        border: 1px solid #ddd;
+        border: 1px solid #004d40;
         border-radius: 20px;
         margin: 10px auto;
         width: 80%;
@@ -74,7 +71,7 @@
     }
 
     .search-results ul li:first-child {
-        background: #9BB08C;
+        background: #00796b;
         padding: 15px;
         border-radius: 20px;
         border: none;
@@ -83,29 +80,12 @@
     }
 
     .tree-display-box {
-        border: 2px solid #9BB08C;
+        border: 2px solid #00796b;
         padding: 20px;
         border-radius: 20px;
-        background-color: #9BB08C;
+        background-color: #00796b;
         margin: 20px auto;
         max-width: 60%;
-    }
-
-    .family-tree {
-        list-style-type: none;
-        padding-left: 0;
-        margin: 0;
-        font-family: "Inika", serif;
-    }
-
-    .family-tree ul {
-        list-style-type: none;
-        padding-left: 0;
-        margin: 0;
-    }
-
-    .family-tree ul li {
-        margin: 5px 0;
     }
 
     .family-tree li {
@@ -124,14 +104,14 @@
         width: 100%;
         margin: 0px auto 80px;
         position: relative;
-        top: 45px;
+        top: -20px;
     }
     
     .circle.info-tooltip {
         width: 30px;
         height: 30px;
         border-radius: 50%;
-        background-color: #587353;
+        background-color: #00796b;
         color: #EDECD7;
         display: flex;
         justify-content: center;
@@ -141,69 +121,148 @@
         font-weight: bold;
         cursor: pointer;
         position: absolute;
-        left: 34%;
-        top: 25px;
-        transform: translate(-50%, -50%);
+        left: 410px;
+        top: 5px;
         transition: none;
-        z-index: 1000;
+        z-index: 1003;
     }
 
-    .circle.info-tooltip:hover {
-        transform: translate(-50%, -50%);
-    }
-    .circle .tooltip {
+    .circle.info-tooltip .tooltip {
         visibility: hidden;
         width: 300px;
-        background-color: #9BB08C;
+        background-color: #004d40;
         color: #EDECD7;
         text-align: left;
         padding: 10px;
         border-radius: 6px;
         position: absolute;
-        z-index: 1;
-        top: 125%;
+        z-index: 1001;
+        top: 120%;
         left: 50%;
+        transform: translateX(-50%);
         font-size: 0.8em;
         opacity: 0;
         transition: opacity 0.3s;
     }
 
-    .circle .tooltip::after {
-        content: "";
-        position: absolute;
-        top: 125%;
-        left: 50%;
-        border-width: 5px;
-        border-style: solid;
-        border-color: #9BB08C transparent transparent transparent;
-    }
-
-    .circle:hover .tooltip {
+    .circle.info-tooltip:hover .tooltip {
         visibility: visible;
         opacity: 1;
     }
 
+    .circle.info-tooltip .tooltip::after {
+        content: "";
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+        border-color: transparent transparent #00796b transparent;
+    }
+    
     .home-button.import-gedcom {
         left: 22.75%;
     }
+    .tooltip-trigger {
+        position: relative;
+        cursor: help;
+    }
+
+    .tooltip-trigger .tooltip-text {
+        visibility: hidden;
+        width: 200px;
+        background-color: #004d40;
+        color: #EDECD7;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        left: 50%;
+        margin-left: -100px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-size: 0.5em;
+    }
+
+    .tooltip-trigger:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .profile .tooltip-trigger .tooltip-text {
+        top: 100%;
+        bottom: auto;
+        margin-top: 5px;
+        font-size: 0.5em;
+    }
+
+    .footer .tooltip-trigger .tooltip-text {
+        bottom: 100%;
+        top: auto;
+        margin-bottom: 5px;
+        font-size: 0.8em;        
+    }
+
+    .tooltip-trigger .tooltip-text::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+    }
+
+    .profile .tooltip-trigger .tooltip-text::after {
+        top: -10px;
+        border-color: transparent transparent #004d40 transparent;
+    }
+    
+    .gedcom .tooltip-trigger .tooltip-text::after {
+        top: -10px;
+        border-color: transparent transparent #004d40 transparent;
+    }
+    .gedcom .tooltip-trigger .tooltip-text {
+        top: 100%;
+        bottom: auto;
+        margin-top: 5px;
+        z-index: 1002;
+    }
+
+    .footer .tooltip-trigger .tooltip-text::after {
+        bottom: -10px;
+        border-color: #004d40 transparent transparent transparent;
+    }
+    .home-button.import-gedcom {
+    display: inline-block;
+    top: 5px;
+    left: 265px;
+    position: relative;
+    z-index: 1001;
+}
 </style>
 </head>
 <body>
     <header class="header">
         <h1 class="title">{{ $surname }}'s Family Tree</h1>
         <div class="profile">
-            <a href="{{route('profile.edit') }}" class="profile-button">
-                <img src="{{ asset('images/user-profile.png') }}" alt="User">
-                Profile
-            </a>
-        </div>
+                <a href="{{ route('profile.edit') }}" class="profile-button tooltip-trigger">
+                    <img src="{{ asset('images/user-profile.png') }}" alt="User">
+                    Profile
+                    <span class="tooltip-text">Edit your profile, logout or delete your account</span>
+                </a>
+            </div>
         <a href="{{ route('home') }}" class="profile-button home-button">
             <img src="{{ asset('images/home.png') }}" alt="Home">
             Home
         </a>
-        <a href="{{ route('import.form') }}" class="profile-button home-button import-gedcom">
+        <div class="gedcom">
+        <a href="{{ route('import.form') }}" class="profile-button home-button import-gedcom tooltip-trigger">
             Import GEDCOM
+            <span class="tooltip-text">Import a GEDCOM file to create your family tree</span>
         </a>
+</div>
         <div class="circle info-tooltip">
             ?
             <span class="tooltip">
@@ -212,9 +271,11 @@
                 <p>- Search for specific family lines</p>
                 <p>- Adjust the number of visible generations</p>
                 <p>- Switch between tree and graph views</p>
-                <p>- Edit family members and upload images/memories</p>
+                <p>- View various family statistics (graph view)</p>
+                <p>- Edit information, view profiles and upload images by clicking on any member</p>
+                <p>- Customise the colour and look of family member icons and relationship lines</p>
                 <p>- Search for specific individuals</p>
-                <p>- Export as PDF book</p>
+                <p>- Export as PDF book, with options to customise its contents</p>
             </span>
         </div>
     </header>
@@ -222,7 +283,17 @@
     <div id="root"></div>
 
     <footer class="footer">
-    <p>Copyright 2024 | <a href="{{ route('about') }}">About MyStory</a> | <a href="{{ route('feedback.create') }}">Submit Feedback</a></p>
+        <p>
+            Copyright 2024 | 
+            <span class="tooltip-trigger">
+                <a href="{{ route('about') }}">About MyStory</a>
+                <span class="tooltip-text">Learn more about our application and its features</span>
+            </span> | 
+            <span class="tooltip-trigger">
+                <a href="{{ route('feedback.create') }}">Submit Feedback</a>
+                <span class="tooltip-text">Share your thoughts and suggestions to help us improve</span>
+            </span>
+        </p>
     </footer>
 </body>
 </html>

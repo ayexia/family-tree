@@ -8,10 +8,10 @@ import FamilyGraph from './FamilyGraph';
 import FamilyTreePDF from './FamilyTreePDF';
 
 const DEFAULT_LINE_STYLES = {
-    parentChild: { color: '#000000', width: 2, dashArray: 'none' },
-    current: { color: '#FF0000', width: 2, dashArray: 'none' },
-    divorced: { color: '#808080', width: 2, dashArray: '5,5' },
-    adopted: { color: '#FFA500', width: 2, dashArray: '10,5' },
+    parentChild: { color: '#000000', width: 5, dashArray: 'none' },
+    current: { color: '#FF0000', width: 5, dashArray: 'none' },
+    divorced: { color: '#808080', width: 5, dashArray: '5,5' },
+    adopted: { color: '#FFA500', width: 5, dashArray: '10,5' },
     nodeMale: { color: '#97EBE6' },
     nodeFemale: { color: '#EB97CF' },
     nodeOther: { color: '#EBC097' }
@@ -72,8 +72,8 @@ const App = () => {
     };   
     
     const buttonStyle = {
-        backgroundColor: '#CCE7BD',
-        color: '#A7B492',
+        backgroundColor: '#00796b',
+        color: '#EDECD7',
         padding: '2px 6px',
         border: 'none',
         borderRadius: '15px',
@@ -101,7 +101,7 @@ const App = () => {
     const imgStyle = {
         width: '18px',
         height: '18px',
-        opacity: 0.3,
+        opacity: 0.8,
     };
 
     const controlsContainer = {
@@ -130,7 +130,7 @@ const App = () => {
         padding: '2px',
         margin: '3px 0',
         borderRadius: '3px',
-        border: '1px solid #CCE7BD',
+        border: '1px solid #00796b',
         fontSize: '0.7em',
         fontFamily: '"Inika", serif',
         width: '90%'
@@ -154,7 +154,7 @@ const App = () => {
         fontSize: '0.9em',
         textAlign: 'center',
         position: 'absolute',
-        color: '#587353',
+        color: '#00796b',
         top: '-25px',
         right: '550px',
         marginBottom: '0px'

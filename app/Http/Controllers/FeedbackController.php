@@ -16,15 +16,23 @@ class FeedbackController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'You must be logged in to submit feedback.');
+        }
+
+        $validatedData = $request->validate([
             'content' => 'required|string|max:1000',
         ]);
 
-        Feedback::create([
-            'user_id' => Auth::id(),
-            'content' => $request->content,
-        ]);
+        try {
+            Feedback::create([
+                'user_id' => Auth::id(),
+                'content' => $validatedData['content'],
+            ]);
 
-        return redirect()->route('home')->with('success', 'Thank you for your feedback!');
+            return redirect()->route('home')->with('success', 'Thank you for your feedback!');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Sorry, we couldn\'t save your feedback. Please try again later.');
+        }
     }
 }

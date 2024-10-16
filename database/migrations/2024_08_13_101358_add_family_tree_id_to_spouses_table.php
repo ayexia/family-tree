@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignId('family_tree_id')
                 ->nullable()
                 ->constrained('family_trees')
-                ->onDelete('set null');
+                ->onDelete('cascade');
         });
     }
 

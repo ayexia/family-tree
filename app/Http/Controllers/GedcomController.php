@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\GedcomParser;
+use App\Services\GedcomExporter;
 use App\Models\FamilyTree;
 use Gedcom\Parser;
 
@@ -66,5 +67,24 @@ class GedcomController extends Controller
     return view('homepage', [
         'familyTreeId' => $familyTree ? $familyTree->id : null,
         ]);
+    }
+
+    public function export()
+    {
+    $userId = auth()->user()->id;
+    $familyTree = FamilyTree::where('user_id', $userId)->first();
+
+    if (!$familyTree) {
+        return redirect()->back()->with('error', 'No family tree found for export.');
+    }
+
+    $exporter = new GedcomExporter();
+    $gedcomContent = $exporter->export($familyTree->id);
+
+    $filename = 'family_tree_' . $userId . '.ged';
+
+    return response($gedcomContent)
+        ->header('Content-Type', 'text/x-gedcom')
+        ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 }

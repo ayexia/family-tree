@@ -53,6 +53,8 @@ Route::post('/upload', [GedcomController::class, 'upload'])->name('upload')->mid
 
 Route::post('/upload-image', [UploadController::class, 'uploadImage'])->middleware(['auth', 'verified']);
 
+Route::get('/export-gedcom', [GedcomController::class, 'export'])->name('export.gedcom');
+
 Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::patch('/users/{user}/toggle-admin', [AdminController::class, 'toggleAdmin'])->name('admin.toggle-admin');

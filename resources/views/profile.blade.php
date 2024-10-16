@@ -253,16 +253,14 @@
     </a>
 </div>
 <div class="search-container">
-            <div class="search-input-container">
-            @if($familyTreeId)
+    <div class="search-input-container">
     <form method="GET" action="{{ route('family.tree', ['familyTreeId' => $familyTreeId]) }}">
         <input type="text" id="desiredName" name="desiredName" value="{{ request('desiredName') }}" class="search-input" placeholder="Search for family">
         <button type="submit" class="search-button">
             <img src="{{ asset('images/search.png') }}" alt="Search">
         </button>
     </form>
-        @endif
-</div>
+    </div>
 </div>
 <div class="max-w-3xl mx-auto mt-8 custom-background">
     <div class="bg-white dark:bg-gray-800 overflow-hidden" style="box-shadow: none; padding: 2rem;">

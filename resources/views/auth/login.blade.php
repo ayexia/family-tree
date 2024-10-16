@@ -5,7 +5,7 @@
             color: #EDECD7;
             position: absolute;
             left: 37.5%;
-            bottom: 23%;
+            bottom: 14%;
             font-family: "Inika", serif;
         }
 
@@ -17,7 +17,7 @@
             color: #EDECD7;
             position: absolute;
             left: 50%;
-            bottom: 40%;
+            bottom: 31%;
             font-family: "Inika", serif;
         }
 

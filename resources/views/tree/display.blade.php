@@ -104,7 +104,7 @@
         width: 100%;
         margin: 0px auto 80px;
         position: relative;
-        top: -20px;
+        top: -110px;
     }
     
     .circle.info-tooltip {
@@ -121,7 +121,7 @@
         font-weight: bold;
         cursor: pointer;
         position: absolute;
-        left: 410px;
+        left: 420px;
         top: 5px;
         transition: none;
         z-index: 1003;
@@ -161,9 +161,6 @@
         border-color: transparent transparent #00796b transparent;
     }
     
-    .home-button.import-gedcom {
-        left: 22.75%;
-    }
     .tooltip-trigger {
         position: relative;
         cursor: help;
@@ -228,19 +225,40 @@
         bottom: auto;
         margin-top: 5px;
         z-index: 1002;
+        font-size: 0.8em;
     }
 
     .footer .tooltip-trigger .tooltip-text::after {
         bottom: -10px;
         border-color: #004d40 transparent transparent transparent;
     }
+    .home-button.import-gedcom, .home-button.export-gedcom {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100px;
+        height: 40px;
+        padding: 10px;
+        border-radius: 50px;
+        top: 0px;
+        position: relative;
+        z-index: 1001;
+        font-size: 0.5em;
+    }
+
     .home-button.import-gedcom {
-    display: inline-block;
-    top: 5px;
-    left: 265px;
-    position: relative;
-    z-index: 1001;
-}
+        left: 210px;
+    }
+
+    .home-button.export-gedcom {
+        left: 335px;
+        top: -80px;
+    }
+
+    .home-button.import-gedcom img, .home-button.export-gedcom img {
+        width: 30px;
+        height: 30px;
+    }
 </style>
 </head>
 <body>
@@ -259,10 +277,18 @@
         </a>
         <div class="gedcom">
         <a href="{{ route('import.form') }}" class="profile-button home-button import-gedcom tooltip-trigger">
-            Import GEDCOM
+            <img src="{{ asset('images/upload.png') }}" alt="Import GEDCOM">
+            Import
             <span class="tooltip-text">Import a GEDCOM file to create your family tree</span>
         </a>
-</div>
+        </div>
+        <div class="gedcom">
+        <a href="{{ route('export.gedcom') }}" class="profile-button home-button export-gedcom tooltip-trigger">
+            <img src="{{ asset('images/download.png') }}" alt="Export GEDCOM">
+            Export
+            <span class="tooltip-text">Export your family tree as a GEDCOM file</span>
+        </a>
+        </div>
         <div class="circle info-tooltip">
             ?
             <span class="tooltip">
@@ -275,6 +301,7 @@
                 <p>- Edit information, view profiles and upload images by clicking on any member</p>
                 <p>- Customise the colour and look of family member icons and relationship lines</p>
                 <p>- Search for specific individuals</p>
+                <p>- Import and export your GEDCOM file</p>
                 <p>- Export as PDF book, with options to customise its contents</p>
             </span>
         </div>
@@ -295,5 +322,21 @@
             </span>
         </p>
     </footer>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    function handleLinkClick(e) {
+        e.preventDefault();
+        window.location.href = e.currentTarget.href;
+    }
+
+    const profileLink = document.getElementById('profile-link');
+    const importLink = document.getElementById('import-link');
+    const exportLink = document.getElementById('export-link');
+
+    if (profileLink) profileLink.addEventListener('click', handleLinkClick);
+    if (importLink) importLink.addEventListener('click', handleLinkClick);
+    if (exportLink) exportLink.addEventListener('click', handleLinkClick);
+});
+</script>
 </body>
 </html>

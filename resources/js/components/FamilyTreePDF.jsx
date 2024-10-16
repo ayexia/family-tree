@@ -264,35 +264,33 @@ const renderContents = (graph, selectedPeople) => { //render each person in cont
       return { ...person, generation, yearInfo };
     });
 
-  const groupedByGeneration = processedNodes.reduce((generationGroup, person) => {
-    if (!generationGroup[person.generation]) {
-      generationGroup[person.generation] = [];
+  const groupedByGeneration = processedNodes.reduce((acc, person) => {
+    if (!acc[person.generation]) {
+      acc[person.generation] = [];
     }
-    generationGroup[person.generation].push(person);
-    return generationGroup;
+    acc[person.generation].push(person);
+    return acc;
   }, {});
 
   Object.values(groupedByGeneration).forEach(group => {
-    group.sort((a, b) => {
-      const dateA = a.data.birth_date ? new Date(a.data.birth_date) : new Date(9999, 11, 31);
-      const dateB = b.data.birth_date ? new Date(b.data.birth_date) : new Date(9999, 11, 31);
-      return dateA - dateB;
-    });
+    group.sort((a, b) => a.data.name.localeCompare(b.data.name));
   });
 
-  return Object.entries(groupedByGeneration).flatMap(([generation, people]) => [
-    <Text key={`gen-${generation}`} style={styles.generationHeading}>
-      Generation {parseInt(generation) + 1}
-    </Text>,
-    ...people.map(person => (
-      <Text key={person.id} style={styles.contentItem}>
-        <Link src={`#${person.id}`} style={styles.link}>
-          {person.data.name}
-        </Link>
-        {person.yearInfo} (<PersonInitials person={person} />)
-      </Text>
-    ))
-  ]);
+  return Object.entries(groupedByGeneration)
+    .sort(([genA], [genB]) => parseInt(genA) - parseInt(genB))
+    .flatMap(([generation, people]) => [
+      <Text key={`gen-${generation}`} style={styles.generationHeading}>
+        Generation {parseInt(generation) + 1}
+      </Text>,
+      ...people.map(person => (
+        <Text key={person.id} style={styles.contentItem}>
+          <Link src={`#${person.id}`} style={styles.link}>
+            {person.data.name}
+          </Link>
+          {person.yearInfo} ({getInitials(person.data.name)})
+        </Text>
+      ))
+    ]);
 };
 
 const formatDate = (dateString) => {
@@ -328,7 +326,7 @@ const TimelinePage = ({ person, events, selectedPeople }) => {
           <Text style={styles.timelineTitle}>
             {person.data.name}'s Timeline {pageIndex > 0 ? `(continued)` : ''}
           </Text>
-          <View style={styles.timelineContainer}>
+          <View>
             <View style={styles.timelineLine} />
             {filteredEvents
               .slice(pageIndex * EVENTS_PER_PAGE, (pageIndex + 1) * EVENTS_PER_PAGE)

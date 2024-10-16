@@ -4,7 +4,7 @@
     "name": "module.esm"
   },
   "resources/css/app.css": {
-    "file": "assets/app-DQf1IUOi.css",
+    "file": "assets/app-C9Claw54.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
@@ -18,7 +18,7 @@
     ]
   },
   "resources/js/app.jsx": {
-    "file": "assets/app-BNzoTcgq.js",
+    "file": "assets/app-Cp_AwH98.js",
     "name": "app",
     "src": "resources/js/app.jsx",
     "isEntry": true,
@@ -26,7 +26,7 @@
       "_module.esm-BupoDfAL.js"
     ],
     "css": [
-      "assets/app-CbOO0SRC.css"
+      "assets/app-f9ZO-dXs.css"
     ]
   }
 }

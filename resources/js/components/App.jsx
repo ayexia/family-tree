@@ -105,7 +105,7 @@ const App = () => {
     };
 
     const controlsContainer = {
-        width: '180px',
+        width: '170px',
         height: '85vh',
         padding: '35px 8px 8px 8px',
         display: 'flex',
@@ -119,9 +119,9 @@ const App = () => {
     };
 
     const mainContentStyle = {
-        marginLeft: '180px',
+        marginLeft: '150px',
         marginTop: '0px',
-        width: 'calc(100vw - 180px)',
+        width: 'calc(100vw - 150px)',
         height: '77vh',
         overflow: 'hidden',
     };

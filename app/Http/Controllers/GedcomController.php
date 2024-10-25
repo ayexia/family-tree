@@ -35,7 +35,6 @@ class GedcomController extends Controller
 
         //retrieves file path (location), creates new instance of the parser and parses the file, allocating a family tree ID to it which then refers to the user
         $filePath = $request->file('gedcom_file')->getPathname();
-        ini_set('memory_limit', '512M');
         $parser = new GedcomParser();
         $parser->parse($filePath, $familyTree->id); 
 

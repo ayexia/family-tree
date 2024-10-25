@@ -180,7 +180,7 @@
             <span class="tooltip-text">Learn more about our application and its features</span>
         </span> | 
         <span class="tooltip-trigger">
-            <a href="#">Submit Feedback</a>
+            <a href="{{ route('feedback.create') }}">Submit Feedback</a>
             <span class="tooltip-text">Share your thoughts and suggestions to help us improve</span>
         </span>
     </p>

@@ -17,7 +17,7 @@ const FamilyTree = ({ generations, lineStyles, desiredName }) => {
   const [errorMessage, setErrorMessage] = useState(''); //initialises errorMessage variable to store error messages
   const [hoveredNode, setHoveredNode] = useState(null);
   const [images, setImages] = useState({});
-  const [highlightQuery, setHighlightQuery] = useState('');
+  const [highlightedPerson, setHighlightedPerson] = useState(null);
 
   const cityToCountryCode = {
     'New York': 'US',
@@ -28,18 +28,22 @@ const FamilyTree = ({ generations, lineStyles, desiredName }) => {
 
   useEffect(() => {
     if (hasSearched) {
-      fetchFamilyTreeData(surnameQuery, desiredName); //after component is mounted calls this function which retrieves the family tree data from the api through http requests
+      fetchFamilyTreeData(surnameQuery); //after component is mounted calls this function which retrieves the family tree data from the api through http requests
     }
-  }, [surnameQuery, desiredName, generations, hasSearched]);
+  }, [surnameQuery, generations, hasSearched]);
 
   useEffect(() => {
-    setHighlightQuery(desiredName ? desiredName.toLowerCase() : '');
+    if (desiredName) {
+      setHighlightedPerson(desiredName.toLowerCase());
+    } else {
+      setHighlightedPerson(null);
+    }
   }, [desiredName]);
 
-  const fetchFamilyTreeData = async (surname = '', name = '') => { 
+  const fetchFamilyTreeData = async (surname = '') => { 
     try {
       const response = await axios.get('/api/family-tree-json', {
-        params: { desiredSurname: surname, desiredName: name, generations }
+        params: { desiredSurname: surname, generations }
       }); //uses axios library to make http request to fetch api data, which is then parsed as JSON. this retrieves data for a queried surname and name
       if (response.data.length === 0) {
         setErrorMessage('No results found for the given search.'); //if no results found prints error message
@@ -56,7 +60,7 @@ const FamilyTree = ({ generations, lineStyles, desiredName }) => {
   const searchSurname = () => { //search function
     setErrorMessage('');
     setHasSearched(true); //sets hasSearched to true, thus allowing the tree data to be shown (or an error message if nothing is found)
-    fetchFamilyTreeData(surnameQuery, desiredName); //calls function to retrieve the family tree data for queried surname and name
+    fetchFamilyTreeData(surnameQuery); //calls function to retrieve the family tree data for queried surname and name
   };
 
   const openSidebar = (node) => { //if user clicks a node, sets that as selectedNode and sets sideBar opened to true, opening it and displaying information for that node
@@ -83,9 +87,9 @@ const FamilyTree = ({ generations, lineStyles, desiredName }) => {
     const selectedImage = images[nodeDatum.id] || nodeDatum.attributes.image || '/images/user.png'; //node's image is either the image selected by user or default image
     const isMale = nodeDatum.attributes.gender === 'M'; //checks if node's gender is male or female (for spouses, only main person's gender is counted)
     const isFemale = nodeDatum.attributes.gender === 'F';
-    const isHighlighted = highlightQuery && (
-      nodeDatum.name.toLowerCase().includes(highlightQuery) ||
-      (nodeDatum.attributes.surname && nodeDatum.attributes.surname.toLowerCase().includes(highlightQuery))
+    const isHighlighted = highlightedPerson && (
+      nodeDatum.name.toLowerCase().includes(highlightedPerson) ||
+      (nodeDatum.attributes.surname && nodeDatum.attributes.surname.toLowerCase().includes(highlightedPerson))
     );
     const isTodayBirthday = isBirthday(nodeDatum.attributes.DOB);
     const countryCode = nodeDatum.attributes.birth_place ? cityToCountryCode[nodeDatum.attributes.birth_place] : null;
@@ -283,7 +287,7 @@ const toolTip = (node) => { //customises tooltip, containing names and marriage 
                   const row = isFirstRow ? 0 : Math.floor((index - 2) / 2) + 1;
                   const horizontalPosition = isFirstRow ? (isLeft ? -spouseSpacing : spouseSpacing) : (isLeft ? -spouseSpacing : spouseSpacing);
                   const verticalPosition = isFirstRow ? 0 : row * verticalSpacing;
-                  const isSpouseHighlighted = highlightQuery && spouse.name.toLowerCase().includes(highlightQuery);
+                  const isSpouseHighlighted = highlightedPerson && spouse.name.toLowerCase().includes(highlightedPerson);
                   const spouseLineStyle = spouse.is_current ? lineStyles.current : 
                   (spouse.attributes.divorce_dates && spouse.attributes.divorce_dates.length > 0) ? lineStyles.divorced : 
                   lineStyles.current;                  
@@ -312,133 +316,154 @@ const toolTip = (node) => { //customises tooltip, containing names and marriage 
                         y2={-verticalPosition}
                         stroke={spouseLineStyle.color}
                         strokeWidth={spouseLineStyle.width}
-                        strokeDasharray={spouseLineStyle.dashArray}
-                      />
-                         {spouseNodeShape === 'circle' ? (
-                          <circle r={nodeRadius} style={{
-                            stroke: isSpouseHighlighted || isSpouseBirthday ? (isSpouseBirthday ? '#FFD700' : 'yellow') : 
-                              spouse.attributes.gender === 'M' ? lineStyles.nodeMale.color : 
-                              spouse.attributes.gender === 'F' ? lineStyles.nodeFemale.color : 
-                              lineStyles.nodeOther.color,
-                            fill: 'none',
-                            strokeWidth: isSpouseHighlighted || isSpouseBirthday ? 15 : 10,
-                          }} />
-                        ) : (
-                          <polygon 
-                            points={`0,-${nodeRadius} ${nodeRadius},-${nodeRadius/2} ${nodeRadius},${nodeRadius/2} 0,${nodeRadius} -${nodeRadius},${nodeRadius/2} -${nodeRadius},-${nodeRadius/2}`} 
-                            style={{
+                        strokestrokeDasharray={spouseLineStyle.dashArray}
+                        />
+                           {spouseNodeShape === 'circle' ? (
+                            <circle r={nodeRadius} style={{
                               stroke: isSpouseHighlighted || isSpouseBirthday ? (isSpouseBirthday ? '#FFD700' : 'yellow') : 
                                 spouse.attributes.gender === 'M' ? lineStyles.nodeMale.color : 
                                 spouse.attributes.gender === 'F' ? lineStyles.nodeFemale.color : 
                                 lineStyles.nodeOther.color,
                               fill: 'none',
                               strokeWidth: isSpouseHighlighted || isSpouseBirthday ? 15 : 10,
-                            }} 
+                            }} />
+                          ) : (
+                            <polygon 
+                              points={`0,-${nodeRadius} ${nodeRadius},-${nodeRadius/2} ${nodeRadius},${nodeRadius/2} 0,${nodeRadius} -${nodeRadius},${nodeRadius/2} -${nodeRadius},-${nodeRadius/2}`} 
+                              style={{
+                                stroke: isSpouseHighlighted || isSpouseBirthday ? (isSpouseBirthday ? '#FFD700' : 'yellow') : 
+                                  spouse.attributes.gender === 'M' ? lineStyles.nodeMale.color : 
+                                  spouse.attributes.gender === 'F' ? lineStyles.nodeFemale.color : 
+                                  lineStyles.nodeOther.color,
+                                fill: 'none',
+                                strokeWidth: isSpouseHighlighted || isSpouseBirthday ? 15 : 10,
+                              }} 
+                            />
+                          )}
+                          <image
+                            href={images[spouse.id] || spouse.attributes.image || '/images/user.png'}
+                            x="-50"
+                            y="-50"
+                            width="100"
+                            height="100"
+                            clipPath="url(#clipCircle)"
+                          ></image>
+                          {isSpouseBirthday && (
+                          <Cake
+                            size={24}
+                            color="#FFD700"
+                            style={{
+                              transform: 'translate(30px, -60px)',
+                            }}
                           />
                         )}
-                        <image
-                          href={images[spouse.id] || spouse.attributes.image || '/images/user.png'}
-                          x="-50"
-                          y="-50"
-                          width="100"
-                          height="100"
-                          clipPath="url(#clipCircle)"
-                        ></image>
-                        {isSpouseBirthday && (
-                        <Cake
-                          size={24}
-                          color="#FFD700"
-                          style={{
-                            transform: 'translate(30px, -60px)',
-                          }}
-                        />
-                      )}
-                      {spouseCountryCode && (
-                        <foreignObject x="-60" y="-60" width="24" height="24">
-                          <ReactCountryFlag 
-                            countryCode={spouseCountryCode}
-                            svg 
-                            style={{ width: '1.5em', height: '1.5em' }}
-                          />
-                        </foreignObject>
-                      )}
-                        <defs>
-                          <clipPath id="clipCircle">
-                            <circle cx="0" cy="0" r={nodeRadius} />
-                          </clipPath>
-                        </defs>
-                        <text fill="#00796b" stroke="none" x="60" y="-5" style={{ fontSize: '28px', fontFamily: 'Times New Roman' }}>
-                          {spouse.name}
-                        </text>
-                        <text fill="#00796b" stroke="none" x="60" y="15" style={{ fontSize: '24px' }}>
-                          DOB: {spouse.attributes.DOB}
-                        </text>
-                        <text fill="#00796b" stroke="none" x="60" y="35" style={{ fontSize: '24px' }}>
-                          DOD: {spouse.attributes.DOD}
-                        </text>
-                      </g>
-                    );
-                  })}
-                </g>
-              )}
-            </g>
-          </Tippy>
-        </>
+                        {spouseCountryCode && (
+                          <foreignObject x="-60" y="-60" width="24" height="24">
+                            <ReactCountryFlag 
+                              countryCode={spouseCountryCode}
+                              svg 
+                              style={{ width: '1.5em', height: '1.5em' }}
+                            />
+                          </foreignObject>
+                        )}
+                          <defs>
+                            <clipPath id="clipCircle">
+                              <circle cx="0" cy="0" r={nodeRadius} />
+                            </clipPath>
+                          </defs>
+                          <text fill="#00796b" stroke="none" x="60" y="-5" style={{ fontSize: '28px', fontFamily: 'Times New Roman' }}>
+                            {spouse.name}
+                          </text>
+                          <text fill="#00796b" stroke="none" x="60" y="15" style={{ fontSize: '24px' }}>
+                            DOB: {spouse.attributes.DOB}
+                          </text>
+                          <text fill="#00796b" stroke="none" x="60" y="35" style={{ fontSize: '24px' }}>
+                            DOD: {spouse.attributes.DOD}
+                          </text>
+                        </g>
+                      );
+                    })}
+                  </g>
+                )}
+              </g>
+            </Tippy>
+          </>
+        );
+      };
+  
+      const pathClassFunc = () => {
+        return 'parent-child-link';
+      };
+    
+      const linkStyles = `
+        .parent-child-link {
+          stroke: ${lineStyles.parentChild.color} !important;
+          stroke-width: ${lineStyles.parentChild.width}px !important;
+          stroke-dasharray: ${lineStyles.parentChild.dashArray} !important;
+        }
+      `;
+  
+      const searchContainerStyle = {
+        display: 'flex',
+        alignItems: 'center',
+        margin: '12px',
+        width: '27.5%',
+      };
+    
+      const inputStyle = {
+        flex: 1,
+        padding: '2.5px',
+        fontSize: '0.85em',
+        fontFamily: '"Inika", serif',
+        border: '1px solid #CCE7BD',
+        borderRadius: '5px 0 0 5px',
+        outline: 'none',
+      };
+    
+      const buttonStyle = {
+        padding: '2.5px 20px',
+        backgroundColor: '#00796b',
+        color: '#587353',
+        border: 'none',
+        borderRadius: '0 5px 5px 0',
+        cursor: 'pointer',
+        fontSize: '0.85em',
+        fontFamily: '"Inika", serif',
+        fontWeight: 'bold',
+        transition: 'background-color 0.3s',
+      };
+  
+      const imgStyle = {
+        width: '15px',
+        height: '15px',
+        opacity: 0.8,
+    };
+  
+      if (!treeData) { //alternate display if no tree data is available - error message and search bar
+    return (
+      <div>
+        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+        <div style={searchContainerStyle}>
+          <input 
+            type="text" 
+            value={surnameQuery} 
+            onChange={(e) => setSurnameQuery(e.target.value)} 
+            placeholder="Search a bloodline (surname)"
+            style={inputStyle}
+          />
+          <button onClick={searchSurname} style={buttonStyle}>
+          <img src="/images/search.png" alt="Search" style={imgStyle}></img></button>
+        </div>
+      </div>
       );
-    };
-
-    const pathClassFunc = () => {
-      return 'parent-child-link';
-    };
-  
-    const linkStyles = `
-      .parent-child-link {
-        stroke: ${lineStyles.parentChild.color} !important;
-        stroke-width: ${lineStyles.parentChild.width}px !important;
-        stroke-dasharray: ${lineStyles.parentChild.dashArray} !important;
       }
-    `;
-
-    const searchContainerStyle = {
-      display: 'flex',
-      alignItems: 'center',
-      margin: '12px',
-      width: '27.5%',
-    };
   
-    const inputStyle = {
-      flex: 1,
-      padding: '2.5px',
-      fontSize: '0.85em',
-      fontFamily: '"Inika", serif',
-      border: '1px solid #CCE7BD',
-      borderRadius: '5px 0 0 5px',
-      outline: 'none',
-    };
-  
-    const buttonStyle = {
-      padding: '2.5px 20px',
-      backgroundColor: '#00796b',
-      color: '#587353',
-      border: 'none',
-      borderRadius: '0 5px 5px 0',
-      cursor: 'pointer',
-      fontSize: '0.85em',
-      fontFamily: '"Inika", serif',
-      fontWeight: 'bold',
-      transition: 'background-color 0.3s',
-    };
-
-    const imgStyle = {
-      width: '15px',
-      height: '15px',
-      opacity: 0.8,
-  };
-
-    if (!treeData) { //alternate display if no tree data is available - error message and search bar
-  return (
-    <div>
-      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+    return ( //utilises react-d3-tree library to set parameters for tree display
+      //sets width and height of display, places search bar, the data to be used, any node customisations the orientation of the tree and style of links/branches, positioning of tree and spacing between sibling and non-sibling nodes
+      //only appears if the user has searched a bloodline/surname where family tree data is available, and no errors were given
+      //also ensures sidebar is only opened if isSidebarOpened is true, and if so will display the data of a selected node and also close if user selects to do this
+  <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100vh' }}>
+      <style>{linkStyles}</style>
       <div style={searchContainerStyle}>
         <input 
           type="text" 
@@ -449,46 +474,25 @@ const toolTip = (node) => { //customises tooltip, containing names and marriage 
         />
         <button onClick={searchSurname} style={buttonStyle}>
         <img src="/images/search.png" alt="Search" style={imgStyle}></img></button>
-      </div>
     </div>
-    );
-    }
-
-  return ( //utilises react-d3-tree library to set parameters for tree display
-    //sets width and height of display, places search bar, the data to be used, any node customisations the orientation of the tree and style of links/branches, positioning of tree and spacing between sibling and non-sibling nodes
-    //only appears if the user has searched a bloodline/surname where family tree data is available, and no errors were given
-    //also ensures sidebar is only opened if isSidebarOpened is true, and if so will display the data of a selected node and also close if user selects to do this
-<div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100vh' }}>
-    <style>{linkStyles}</style>
-    <div style={searchContainerStyle}>
-      <input 
-        type="text" 
-        value={surnameQuery} 
-        onChange={(e) => setSurnameQuery(e.target.value)} 
-        placeholder="Search a bloodline (surname)"
-        style={inputStyle}
-      />
-      <button onClick={searchSurname} style={buttonStyle}>
-      <img src="/images/search.png" alt="Search" style={imgStyle}></img></button>
+    <div style={{ flex: '1', height: '100%', width: '100%' }}>
+      {(hasSearched || desiredName) && treeData && !errorMessage && (
+        <Tree
+          data={treeData}
+          orientation="vertical"
+          pathFunc="step"        
+          pathClassFunc={pathClassFunc}
+          translate={{ x: 300, y: 50 }}
+          separation={{ siblings: 5.5, nonSiblings: 5 }}
+          nodeSize={{ x: 190, y: 300 }}
+          renderCustomNodeElement={customNode}
+        />
+      )}
+    </div>
+    {isSidebarOpened && <Sidebar node={selectedNode} onClose={closeSidebar} setImages={setImages} images={images} />}
+    <Legend lineStyles={lineStyles} />
   </div>
-  <div style={{ flex: '1', height: '100%', width: '100%' }}>
-    {(hasSearched || desiredName) && treeData && !errorMessage && (
-      <Tree
-        data={treeData}
-        orientation="vertical"
-        pathFunc="step"        
-        pathClassFunc={pathClassFunc}
-        translate={{ x: 300, y: 50 }}
-        separation={{ siblings: 5.5, nonSiblings: 5 }}
-        nodeSize={{ x: 190, y: 300 }}
-        renderCustomNodeElement={customNode}
-      />
-    )}
-  </div>
-  {isSidebarOpened && <Sidebar node={selectedNode} onClose={closeSidebar} setImages={setImages} images={images} />}
-  <Legend lineStyles={lineStyles} />
-</div>
-);
-};
-
-export default FamilyTree; //exports component for use
+  );
+  };
+  
+  export default FamilyTree; //exports component for use

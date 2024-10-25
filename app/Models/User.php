@@ -41,6 +41,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected function casts(): array
     {
+        //casts various attributes to appropriate types
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
@@ -51,11 +52,14 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function familyTree()
     {
+        //Defines one to one relationship with a family tree
         return $this->hasOne(FamilyTree::class);
     }
 
     public function isAdmin()
     {
+        //checks if user is admin
         return $this->is_admin;
     }
+
 }

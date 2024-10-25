@@ -20,18 +20,21 @@ class Spouse extends Model
     ];
 
     protected $casts = [
+    //casts ‘marriage_date’ and ‘divorce_date’to date format
         'marriage_date' => 'date',
         'divorce_date' => 'date',
     ];
-
+    
     public function firstSpouse()
     {
+//defines relationship where this model belongs to a person as first spouse 
         return $this->belongsTo(Person::class);
     }
-
+    
     public function secondSpouse()
     {
+//defines relationship where this model belongs to a person as second spouse
         return $this->belongsTo(Person::class);
-    }
+    }        
 
 }

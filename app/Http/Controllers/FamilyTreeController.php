@@ -247,10 +247,10 @@ class FamilyTreeController extends Controller
         //if they are not within the specified number of generations they are skipped
         continue;
     }
-      //extracts the birth and death years from person's DOB and DOD (through extracting the first 4 characters)
+      //extracts the birth and death years from person's DOB and DOD (by extracting the first 4 characters)
       $birthYear = substr($person->birth_date, 0, 4);
       $deathYear = substr($person->death_date, 0, 4);
-      //creates label for the node (used to display their details) which includes a concatenation of their name followed by birth and death years after a new line (e.g. John Doe \n(1950 - 2000))
+      //creates label for the node (used to display their details) which includes a their name followed by birth and death years after a new line (e.g. John Doe \n(1950 - 2000))
       $label = $person->name . "\n(" . $birthYear . " - " . $deathYear . ")";
 
       //adds family member as a node in the graph
@@ -409,42 +409,41 @@ class FamilyTreeController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $birthDate = $data['birth_date'] ?? null;
-        $deathDate = $data['death_date'] ?? null;
+        $birthDate = $data['birth_date'] ?? null; //get the birth date from data or null if it’s not set
+        $deathDate = $data['death_date'] ?? null; //get the death date from data or null if it's not set
     
-        if ($birthDate) {
+        if ($birthDate) { //make sure death date is provided and if it's before the birth date
             if ($deathDate && $birthDate > $deathDate) {
                 return redirect()->back()->withErrors(['death_date' => 'The date of death cannot be before the date of birth.']);
             }
         }
     
-        if (!empty($data['marriages'])) {
-            foreach ($data['marriages'] as $marriage) {
-                $marriageDate = $marriage['marriage_date'] ?? null;
-                $divorceDate = $marriage['divorce_date'] ?? null;
+        if (!empty($data['marriages'])) { //make sure to check if there are any marriages
+            foreach ($data['marriages'] as $marriage) { //loop through each marriage
+                $marriageDate = $marriage['marriage_date'] ?? null; //get marriage date or null
+                $divorceDate = $marriage['divorce_date'] ?? null; //get divorce date or null
     
-                if ($birthDate) {
-                    if ($marriageDate && $birthDate > $marriageDate) {
+                if ($birthDate) { //checks if birthdate available
+                    if ($marriageDate && $birthDate > $marriageDate) { //check if birthdate is after marriage
                         return redirect()->back()->withErrors(['marriages.*.marriage_date' => 'The marriage date cannot be before the date of birth.']);
                     }
     
-                    if ($divorceDate && $birthDate > $divorceDate) {
+                    if ($divorceDate && $birthDate > $divorceDate) { //check if birthdate is after divorce
                         return redirect()->back()->withErrors(['marriages.*.divorce_date' => 'The divorce Date cannot be before the date of birth.']);
                     }
                 }
     
-                if ($marriageDate) {
-                    if ($deathDate && $marriageDate > $deathDate) {
+                if ($marriageDate) { //check if marriage date available
+                    if ($deathDate && $marriageDate > $deathDate) { //check if marriage date is after the death date
                         return redirect()->back()->withErrors(['marriages.*.marriage_date' => 'The marriage date cannot be after the date of death.']);
-                    }
-    
-                    if ($divorceDate && $marriageDate > $divorceDate) {
+                    }             
+                    if ($divorceDate && $marriageDate > $divorceDate) { //check if marriage date is after divorce date      
                         return redirect()->back()->withErrors(['marriages.*.divorce_date' => 'The divorce date cannot be before the marriage date.']);
                     }
                 }
     
-                if ($divorceDate) {
-                    if ($deathDate && $divorceDate > $deathDate) {
+                if ($divorceDate) { //check if divorce date exists
+                    if ($deathDate && $divorceDate > $deathDate) { //check if divorce date is after the death date
                         return redirect()->back()->withErrors(['marriages.*.divorce_date' => 'The divorce date cannot be after the date of death.']);
                     }
                 }
@@ -456,9 +455,14 @@ class FamilyTreeController extends Controller
         $person->name = $data['name']; //updates person's name with new name from update request data 
         $person->birth_date = !empty($data['birth_date']) ? $data['birth_date'] : null; //updates DOB with update request data, if empty sets to null
         $person->death_date = !empty($data['death_date']) ? $data['death_date'] : null; //updates DOD with update request data, if empty sets to null
+
+        //set person's place of birth
         $person->birth_place = $data['birth_place'];
+        //set person's place of death
         $person->death_place = $data['death_place'];
+        //assign person's pets splitting by comma or space if present or set to null
         $person->pets = !empty($data['pets']) ? explode(', ', $data['pets']) : null;
+        //assign person's hobbies splitting by comma or space if present or set to null
         $person->hobbies = !empty($data['hobbies']) ? explode(', ', $data['hobbies']) : null;
         $person->notes = $data['notes'];
         $person->save(); //saves details
@@ -480,43 +484,51 @@ class FamilyTreeController extends Controller
     }  
     
     public function familyTreeSurname()
-    {
+    { //get first person from database
         $firstPerson = Person::first(); 
-        if ($firstPerson) {
+        if ($firstPerson) { //display surname of existing person
             return view('tree.display', ['surname' => $firstPerson->surname]);
-        } else {
+        } else { //if no person exists use authenticated user's name
             $user = auth()->user(); 
             return view('tree.display', ['surname' => $user->name]);
         }
     }
 
     public function viewProfile($id)
-    {
+    { 
+        //find person by ID, fail if not found
         $person = Person::findOrFail($id);
+    //check if family tree belongs to authenticated user
         
-        if ($person->familyTree->user_id !== Auth::id()) {
+        if ($person->familyTree->user_id !== Auth::id()) { 
+        //abort if action is unauthorised 
             abort(403, 'Unauthorised action.');
-        }
-    
-        $familyTreeId = $person->family_tree_id;
-        $familyTree = $this->buildFamilyTreeArray($familyTreeId);
-        $node = $familyTree[$id];
-    
-        $visited = [];
-        $tree = $this->buildFamilyTree($node, $visited);
-    
+        } 
+        //for further processing get family tree ID 
+        $familyTreeId = $person->family_tree_id; 
+        //build family tree array
+        $familyTree = $this->buildFamilyTreeArray($familyTreeId); 
+        //for specific person get node
+        $node = $familyTree[$id]; 
+        //initialise array to track visited nodes
+        $visited = []; 
+        //from node build complete family tree
+        $tree = $this->buildFamilyTree($node, $visited); 
+        //return profile view with person data and family tree
         return view('profile', compact('person', 'tree', 'familyTreeId'));
     }
     
     private function buildFamilyTreeArray($familyTreeId)
-    {
+    { //retrieve all persons related to the family tree
         $allPersons = Person::where('family_tree_id', $familyTreeId)->get();
         $allPersonsIds = $allPersons->pluck('id');
-    
+    //retrieve marriages in family tree
         $marriages = Spouse::where('family_tree_id', $familyTreeId)->get();
-        $motherAndChildRelationships = MotherAndChild::where('family_tree_id', $familyTreeId)->get();
-        $fatherAndChildRelationships = FatherAndChild::where('family_tree_id', $familyTreeId)->get();
-    
+    //retrieve mother and child relationships      
+    $motherAndChildRelationships = MotherAndChild::where('family_tree_id', $familyTreeId)->get();
+    //retrieve father and child relationships       
+    $fatherAndChildRelationships = FatherAndChild::where('family_tree_id', $familyTreeId)->get();
+    //from various relationships collect all relatives id
         $relativeIds = $allPersonsIds
             ->merge($motherAndChildRelationships->pluck('mother_id'))
             ->merge($motherAndChildRelationships->pluck('child_id'))
@@ -525,13 +537,12 @@ class FamilyTreeController extends Controller
             ->merge($marriages->pluck('first_spouse_id'))
             ->merge($marriages->pluck('second_spouse_id'))
             ->unique();
-    
+    //retrieve all relatives based on the collected id
         $relatives = Person::whereIn('id', $relativeIds)
             ->where('family_tree_id', $familyTreeId)
             ->get();
     
-        $familyTree = [];
-    
+        $familyTree = []; //create node object for each relative
         foreach ($relatives as $relative) {
             $familyTree[$relative->id] = new Node(
                 $relative->id, 
@@ -550,27 +561,27 @@ class FamilyTreeController extends Controller
                 $relative->is_adopted, 
                 $relative->notes
             );
-        }
+        } //in family tree link spouses
     
         foreach ($marriages as $marriage) {
-            if (isset($familyTree[$marriage->first_spouse_id]) && isset($familyTree[$marriage->second_spouse_id])) {
+            if (isset($familyTree[$marriage->first_spouse_id]) && isset($familyTree[$marriage->second_spouse_id])) {//add each spouse to others record 
                 $familyTree[$marriage->first_spouse_id]->addSpouse($familyTree[$marriage->second_spouse_id]);
                 $familyTree[$marriage->first_spouse_id]->setMarriageDates($marriage->marriage_date, $marriage->divorce_date);
     
                 $familyTree[$marriage->second_spouse_id]->addSpouse($familyTree[$marriage->first_spouse_id]);
                 $familyTree[$marriage->second_spouse_id]->setMarriageDates($marriage->marriage_date, $marriage->divorce_date);
             }
-        }
+        }//link mother and child relationships
     
         foreach ($motherAndChildRelationships as $motherAndChild) {
-            if (isset($familyTree[$motherAndChild->mother_id]) && isset($familyTree[$motherAndChild->child_id])) {
+            if (isset($familyTree[$motherAndChild->mother_id]) && isset($familyTree[$motherAndChild->child_id])) {//add child to mothers record and vice versa
                 $familyTree[$motherAndChild->mother_id]->addChild($familyTree[$motherAndChild->child_id], $motherAndChild->is_adopted);
                 $familyTree[$motherAndChild->child_id]->addParent($familyTree[$motherAndChild->mother_id]);
             }
-        }
+        }//link father and child relationships
     
         foreach ($fatherAndChildRelationships as $fatherAndChild) {
-            if (isset($familyTree[$fatherAndChild->father_id]) && isset($familyTree[$fatherAndChild->child_id])) {
+            if (isset($familyTree[$fatherAndChild->father_id]) && isset($familyTree[$fatherAndChild->child_id])) {//add child to fathers record and vice versa
                 $familyTree[$fatherAndChild->father_id]->addChild($familyTree[$fatherAndChild->child_id], $fatherAndChild->is_adopted);
                 $familyTree[$fatherAndChild->child_id]->addParent($familyTree[$fatherAndChild->father_id]);
             }

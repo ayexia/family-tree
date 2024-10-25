@@ -17,12 +17,12 @@ class FatherAndChild extends Model
     'is_adopted'
     ];
 
-    public function father()
+    public function father() //a relationship indicating this model belongs to a person acting as the father
     {
         return $this->belongsTo(Person::class);
     }
 
-    public function child()
+    public function child() // a relationship indicating this model belongs to a person acting as the child
     {
         return $this->belongsTo(Person::class);
     }

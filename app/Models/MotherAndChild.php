@@ -17,12 +17,13 @@ class MotherAndChild extends Model
     'is_adopted'
     ];
 
-    public function mother()
+    public function mother() //a relationship where this model belongs to a person as a mother
     {
         return $this->belongsTo(Person::class);
     }
 
-    public function child()
+
+    public function child() //a relationship where this model belongs to a person as a child
     {
         return $this->belongsTo(Person::class);
     }

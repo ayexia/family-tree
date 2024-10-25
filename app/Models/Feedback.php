@@ -12,7 +12,9 @@ class Feedback extends Model
     protected $fillable = ['user_id', 'content'];
 
     public function user()
-    {
+    { 
+        //feedback belongs to users
         return $this->belongsTo(User::class);
-    }
+    } 
+
 }

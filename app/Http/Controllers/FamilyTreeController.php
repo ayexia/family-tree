@@ -484,14 +484,22 @@ class FamilyTreeController extends Controller
     }  
     
     public function familyTreeSurname()
-    { //get first person from database
-        $firstPerson = Person::first(); 
-        if ($firstPerson) { //display surname of existing person
+    {
+    // get current user's family tree ID
+    $userId = auth()->user()->id;
+    $familyTree = FamilyTree::where('user_id', $userId)->first();
+
+    if ($familyTree) {
+        // get first person from user's family tree
+        $firstPerson = Person::where('family_tree_id', $familyTree->id)->first();
+        
+        if ($firstPerson) {
+            // display surname of existing person from user's tree
             return view('tree.display', ['surname' => $firstPerson->surname]);
-        } else { //if no person exists use authenticated user's name
-            $user = auth()->user(); 
-            return view('tree.display', ['surname' => $user->name]);
         }
+    }    
+    // if no person exists or no family tree, use authenticated user's name
+    return view('tree.display', ['surname' => auth()->user()->name]);
     }
 
     public function viewProfile($id)

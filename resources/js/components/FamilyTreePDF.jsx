@@ -7,12 +7,12 @@ import FamilyTreeDiagram from './FamilyTreeDiagram';
 
 Font.register({
   family: 'Great Vibes',
-  src: "http://fonts.gstatic.com/s/greatvibes/v4/6q1c0ofG6NKsEhAc2eh-3Z0EAVxt0G0biEntp43Qt6E.ttf"
+  src: "https://fonts.gstatic.com/s/greatvibes/v4/6q1c0ofG6NKsEhAc2eh-3Z0EAVxt0G0biEntp43Qt6E.ttf"
 });
 
 Font.register({
   family: 'Corben',
-  src: "http://fonts.gstatic.com/s/corben/v9/aAJbkLknKhfXxsbVwcGZiA.ttf",
+  src: "https://fonts.gstatic.com/s/corben/v9/aAJbkLknKhfXxsbVwcGZiA.ttf",
 });
 
 const styles = StyleSheet.create({ //CSS

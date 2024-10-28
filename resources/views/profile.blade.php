@@ -1,6 +1,7 @@
 @extends('layouts.custom')
 
 @section('content')
+<title>View Profile</title>
 <link href="https://fonts.googleapis.com/css2?family=Inika:wght@400;700&family=Waiting+for+the+Sunrise&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
 <style>

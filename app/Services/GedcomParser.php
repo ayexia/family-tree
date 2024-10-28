@@ -18,11 +18,13 @@ use Illuminate\Support\Facades\Session;
 use Carbon\Carbon;
 
 /**
- * WIP
  * Contains the parsing logic required to extract individuals' details and relationship information and convert (if necessary) to store in database accordingly.
  */
 class GedcomParser
 {
+    /**
+    * Removes all existing data for given family tree ID.
+    */
     private function deleteFamilyTreeData($familyTreeId)
     {
         MotherAndChild::where('family_tree_id', $familyTreeId)->delete();
@@ -37,6 +39,9 @@ class GedcomParser
  * Parses the file - individuals' information is extracted via parser library php-gedcom,
  * and manual parsing is used to extract relationship information by splitting and reading each line, 
  * and identifying tags relevant for extraction.
+ * 
+ * @param string $filePath Path to the GEDCOM file
+ * @param int $familyTreeId ID of the family tree being processed
  */
     public function parse($filePath, $familyTreeId)
     {
@@ -218,7 +223,7 @@ class GedcomParser
             'birth_place' => $birthPlace,
             'death_place' => $deathPlace
         ]);
-        /** STILL NEEDS WORKING/TESTING
+        /** 
          * try-catch flashes a message through Laravel's Session class 
          *(\Facades\Session - Facades are equivalent of wrapper classes for Laravel, where it instantiates the class and resolves any dependencies behind the scenes) 
          * indicating whether the method was performed successfully or failed.

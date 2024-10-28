@@ -2,52 +2,69 @@
 
 namespace App\Services;
 
+//imports required model classes
 use App\Models\Person;
 use App\Models\MotherAndChild;
 use App\Models\FatherAndChild;
 use App\Models\Spouse;
 
+/**
+ * Handles the export of family tree data to GEDCOM format.
+ * Converts database records into standard GEDCOM 5.5.1 format.
+ */
 class GedcomExporter
 {
-//exports gedcom representation of the family tree identified by $familytreeid
+    /**
+     * Exports entire family tree to GEDCOM format.
+     * 
+     * @param int $familyTreeId ID of the family tree to export
+     * @return string Complete GEDCOM file content
+     */
     public function export($familyTreeId)
     {
-        // Initialise the gedcom file header
+        // Creates standard GEDCOM header with version and character encoding
         $gedcom = "0 HEAD\n1 GEDC\n2 VERS 5.5.1\n2 FORM LINEAGE-LINKED\n1 CHAR UTF-8\n";
-    //retrieve all people associated with specified family tree
+        
+        //retrieves and processes all people in the family tree
         $people = Person::where('family_tree_id', $familyTreeId)->get();
         foreach ($people as $person) {
-            $gedcom .= $this->exportPerson($person); //export each person
+            $gedcom .= $this->exportPerson($person); //adds each person's GEDCOM record
         }
 
-        //retrieve all families within family tree
+        //retrieves and processes all family units
         $families = $this->getAllFamilies($familyTreeId);
         foreach ($families as $family) {
             $gedcom .= $this->exportFamily($family);
         }
         
-        //close gedcom file
+        //adds required GEDCOM trailer
         $gedcom .= "0 TRLR\n";
 
-        return $gedcom; //return complete gedcom string
+        return $gedcom;
     }
 
-    //exports individuals info in gedcom format
+    /**
+     * Converts individual person's data to GEDCOM format.
+     * Includes personal details, events, and family relationships.
+     * 
+     * @param Person $person Person model instance to export
+     * @return string GEDCOM formatted person record
+     */
     private function exportPerson($person)
     {
-
-        //extracts first and last name by splitting name into parts
+        //separates first and last names for GEDCOM format
         $nameParts = explode(' ', $person->name);
         $lastName = array_pop($nameParts);
         $firstName = implode(' ', $nameParts);
 
-        //start individuals record
+        //creates individual record with unique ID
         $gedcom = "0 @I{$person->id}@ INDI\n";
+        //adds name in standard GEDCOM format with slashes around surname
         $gedcom .= "1 NAME {$firstName} /{$lastName}/\n";
         $gedcom .= "1 GIVN {$firstName}\n";
         $gedcom .= "2 SURN {$person->surname}\n";
         $gedcom .= "1 SEX {$person->gender}\n";
-    
+        
         //if birth and/or death date and place provided include in record
         if ($person->birth_date) {
             $gedcom .= "1 BIRT\n";
@@ -78,6 +95,13 @@ class GedcomExporter
         return $gedcom;
     }
 
+    /**
+    * Converts family unit data to GEDCOM format.
+    * Includes spouse relationships, marriage details, and children.
+    * 
+    * @param array $family Array containing family unit information
+    * @return string GEDCOM formatted family record
+    */
     private function exportFamily($family)
     {
     $gedcom = "0 @{$this->removeSuffix($family['id'])}@ FAM\n";
@@ -111,101 +135,147 @@ class GedcomExporter
     return $gedcom;
     }
 
-    private function getAllFamilies($familyTreeId)
-    {
-    $families = [];
-    //retrieve spouse records
-    $spouses = Spouse::where('family_tree_id', $familyTreeId)->get();
-    foreach ($spouses as $spouse) {
-        $familyId = $this->removeSuffix($spouse->gedcom_id);
-        $families[$familyId] = [
-            'id' => $familyId,
-            'husband_id' => $spouse->second_spouse_id,
-            'wife_id' => $spouse->first_spouse_id,
-            'marriage_date' => $spouse->marriage_date,
-            'marriage_date_qualifier' => $spouse->marriage_date_qualifier,
-            'marriage_place' => $spouse->marriage_place,
-            'children' => []
-        ];
-    }
+    /**
+    * Retrieves and organizes all family relationships for a family tree.
+    * Combines spouse, parent-child relationships into family units.
+    * 
+    * @param int $familyTreeId ID of the family tree
+    * @return array Array of organized family units
+    */
+   private function getAllFamilies($familyTreeId)
+   {
+       $families = [];
 
-    //retrieve mother and child relationships
-    $motherAndChildren = MotherAndChild::where('family_tree_id', $familyTreeId)->get();
-    foreach ($motherAndChildren as $relation) {
-        $familyId = $this->removeSuffix($relation->gedcom_id);
-        if (!isset($families[$familyId])) {
-            $families[$familyId] = [
-                'id' => $familyId,
-                'wife_id' => $relation->mother_id,
-                'children' => []
-            ];
-        }
-        $families[$familyId]['children'][$relation->child_id] = [
-            'id' => $relation->child_id,
-            'is_adopted' => $relation->is_adopted
-        ];
-    }
-    
-    //retrieve father and child relationships
-    $fatherAndChildren = FatherAndChild::where('family_tree_id', $familyTreeId)->get();
-    foreach ($fatherAndChildren as $relation) {
-        $familyId = $this->removeSuffix($relation->gedcom_id);
-        if (!isset($families[$familyId])) {
-            $families[$familyId] = [
-                'id' => $familyId,
-                'husband_id' => $relation->father_id,
-                'children' => []
-            ];
-        } elseif (!isset($families[$familyId]['husband_id'])) {
-            $families[$familyId]['husband_id'] = $relation->father_id;
-        }
-        $families[$familyId]['children'][$relation->child_id] = [
-            'id' => $relation->child_id,
-            'is_adopted' => $relation->is_adopted
-        ];
-    }
+       //processes spouse relationships first
+       $spouses = Spouse::where('family_tree_id', $familyTreeId)->get();
+       foreach ($spouses as $spouse) {
+           $familyId = $this->removeSuffix($spouse->gedcom_id);
+           //creates basic family structure with spouse information
+           $families[$familyId] = [
+               'id' => $familyId,
+               'husband_id' => $spouse->second_spouse_id,
+               'wife_id' => $spouse->first_spouse_id,
+               'marriage_date' => $spouse->marriage_date,
+               'marriage_date_qualifier' => $spouse->marriage_date_qualifier,
+               'marriage_place' => $spouse->marriage_place,
+               'children' => []
+           ];
+       }
 
-    return $families; //return the compiled families
-    }
+       //adds mother-child relationships to family units
+       $motherAndChildren = MotherAndChild::where('family_tree_id', $familyTreeId)->get();
+       foreach ($motherAndChildren as $relation) {
+           $familyId = $this->removeSuffix($relation->gedcom_id);
+           //creates new family unit if doesn't exist
+           if (!isset($families[$familyId])) {
+               $families[$familyId] = [
+                   'id' => $familyId,
+                   'wife_id' => $relation->mother_id,
+                   'children' => []
+               ];
+           }
+           //adds child to family unit
+           $families[$familyId]['children'][$relation->child_id] = [
+               'id' => $relation->child_id,
+               'is_adopted' => $relation->is_adopted
+           ];
+       }
+       
+       //adds father-child relationships to family units
+       $fatherAndChildren = FatherAndChild::where('family_tree_id', $familyTreeId)->get();
+       foreach ($fatherAndChildren as $relation) {
+           $familyId = $this->removeSuffix($relation->gedcom_id);
+           //creates new family unit if doesn't exist
+           if (!isset($families[$familyId])) {
+               $families[$familyId] = [
+                   'id' => $familyId,
+                   'husband_id' => $relation->father_id,
+                   'children' => []
+               ];
+           } elseif (!isset($families[$familyId]['husband_id'])) {
+               //adds father to existing family unit
+               $families[$familyId]['husband_id'] = $relation->father_id;
+           }
+           //adds child to family unit
+           $families[$familyId]['children'][$relation->child_id] = [
+               'id' => $relation->child_id,
+               'is_adopted' => $relation->is_adopted
+           ];
+       }
 
-    private function getFamiliesAsChild($personId)
-    {
-        $familyIds = []; //initialsises family IDs
-        //check mother/child relationship and if it exists find family ID
-        $motherRelation = MotherAndChild::where('child_id', $personId)->first();
-        if ($motherRelation) {
-            $familyIds[] = $motherRelation->gedcom_id;
-        }
-        //check father/child relationship and if it exists find family ID
-        $fatherRelation = FatherAndChild::where('child_id', $personId)->first();
-        if ($fatherRelation) {
-            $familyIds[] = $fatherRelation->gedcom_id;
-        }
+       return $families;
+   }
 
-        return array_unique($familyIds);//return unique family IDs
-    }
+   /**
+    * Finds all families where a person appears as a child.
+    * 
+    * @param int $personId ID of the person
+    * @return array Array of family IDs
+    */
+   private function getFamiliesAsChild($personId)
+   {
+       $familyIds = [];
+       
+       //checks for mother-child relationship
+       $motherRelation = MotherAndChild::where('child_id', $personId)->first();
+       if ($motherRelation) {
+           $familyIds[] = $motherRelation->gedcom_id;
+       }
 
-    private function getFamiliesAsSpouse($personId)
-    {
-        //where the person is spouse retrieve family IDs
-        return Spouse::where('first_spouse_id', $personId)
-            ->orWhere('second_spouse_id', $personId)
-            ->pluck('gedcom_id')
-            ->toArray();
-    }
+       //checks for father-child relationship
+       $fatherRelation = FatherAndChild::where('child_id', $personId)->first();
+       if ($fatherRelation) {
+           $familyIds[] = $fatherRelation->gedcom_id;
+       }
 
-    private function formatDate($date, $qualifier)
-    {
-        $formattedDate = date('d M Y', strtotime($date)); //adjusts date appropriately for GEDCOM specification
-        if ($qualifier !== 'EXACT') {
-            return $qualifier . ' ' . $formattedDate;   //append qualifier if not exact 
-        }
-        return $formattedDate;
-    }
+       return array_unique($familyIds); //returns deduplicated list
+   }
 
-    private function removeSuffix($gedcomId)
-    {
-        //remove suffix from gedcom Id
-        return preg_replace('/-CHILD.*$/', '', $gedcomId);
-    }
+    /**
+    * Finds all families where a person appears as a spouse.
+    * 
+    * @param int $personId ID of the person
+    * @return array Array of family IDs where person is either spouse
+    */
+   private function getFamiliesAsSpouse($personId)
+   {
+       //retrieves all family IDs where person is either first or second spouse
+       return Spouse::where('first_spouse_id', $personId)
+           ->orWhere('second_spouse_id', $personId)
+           ->pluck('gedcom_id')
+           ->toArray();
+   }
+
+   /**
+    * Formats dates according to GEDCOM standard with qualifiers.
+    * Converts database date format to GEDCOM format (DD MMM YYYY).
+    * 
+    * @param string $date Date to format
+    * @param string $qualifier Date qualifier (ABT/BEF/AFT/EXACT)
+    * @return string Formatted date string with qualifier if applicable
+    */
+   private function formatDate($date, $qualifier)
+   {
+       //converts date to GEDCOM format (e.g., "01 JAN 1900")
+       $formattedDate = date('d M Y', strtotime($date));
+       
+       //adds qualifier prefix if date is not exact
+       if ($qualifier !== 'EXACT') {
+           return $qualifier . ' ' . $formattedDate;
+       }
+       return $formattedDate;
+   }
+
+   /**
+    * Removes child number suffix from GEDCOM IDs.
+    * Converts IDs like "F1-CHILD 2" to just "F1".
+    * 
+    * @param string $gedcomId GEDCOM ID possibly containing child suffix
+    * @return string Clean GEDCOM ID
+    */
+   private function removeSuffix($gedcomId)
+   {
+       //removes "-CHILD X" suffix from family IDs
+       return preg_replace('/-CHILD.*$/', '', $gedcomId);
+   }
 }

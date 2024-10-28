@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'; // import react and necessary hooks
-import { Document, Page, Text, View, StyleSheet, Font, PDFViewer, Link, Image } from '@react-pdf/renderer'; // import components for pdf rendering
+import { Document, Page, Text, View, StyleSheet, Font, PDFViewer, Link, Image } from '@react-pdf/renderer'; // import components for pdf rendering - https://github.com/diegomura/react-pdf 
 import axios from 'axios'; // import axios making http requests 
-import Tippy from '@tippyjs/react'; // import tippy for tooltips
+import Tippy from '@tippyjs/react'; // import tippy for tooltips - https://github.com/atomiks/tippyjs
 import 'tippy.js/dist/tippy.css';  // import tippy css for styling
 import FamilyTreeDiagram from './FamilyTreeDiagram'; // import family tree diagram component 
 

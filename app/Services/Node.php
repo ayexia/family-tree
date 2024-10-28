@@ -4,6 +4,10 @@ namespace App\Services;
 use Carbon\Carbon;
 use App\Models\Spouse;
 
+/**
+ * Node class representing a person in the family tree.
+ * Stores personal information and manages relationships between family members.
+ */
 class Node {
     public $id;
     public $name;
@@ -45,27 +49,45 @@ class Node {
         $this->hobbies = $hobbies;
         $this->notes = $notes; 
     }
-    //sets marriage and divorce dates formatting them as necessary 
-    public function setMarriageDates($marriage_date, $divorce_date) {
-        $this->marriage_dates[] = $marriage_date ? Carbon::parse($marriage_date)->format('Y-m-d') : 'Unknown date'; 
-        $this->divorce_dates[] = $divorce_date ? Carbon::parse($divorce_date)->format('Y-m-d') : 'Unknown date'; 
-    }
-    
-    //adds spouse to current node
-    public function addSpouse(Node $spouse) {
-        $this->spouses[] = $spouse;
-    }
-    //checks if given node is current spouse
-    public function isCurrentSpouse(Node $spouse) {
-    //filter out known marriage and divorce dates
-        $knownMarriageDates = array_filter($this->marriage_dates, function ($date) {
-            return $date !== null && $date !== 'Unknown date';
-        });
+    /**
+    * Adds marriage and divorce dates for a relationship.
+    * Formats dates using Carbon to ensure consistent format.
+    * 
+    * @param string|null $marriage_date Date of marriage
+    * @param string|null $divorce_date Date of divorce if applicable
+    */
+   public function setMarriageDates($marriage_date, $divorce_date) {
+    $this->marriage_dates[] = $marriage_date ? Carbon::parse($marriage_date)->format('Y-m-d') : 'Unknown date'; 
+    $this->divorce_dates[] = $divorce_date ? Carbon::parse($divorce_date)->format('Y-m-d') : 'Unknown date'; 
+}
+
+/**
+ * Adds a spouse to this person's relationships.
+ * 
+ * @param Node $spouse Node object representing the spouse
+ */
+public function addSpouse(Node $spouse) {
+    $this->spouses[] = $spouse;
+}
+
+/**
+ * Determines if given spouse is currently married to this person.
+ * Checks marriage and divorce dates to determine current status.
+ * 
+ * @param Node $spouse Node object representing potential current spouse
+ * @return bool True if currently married, false if divorced
+ */
+public function isCurrentSpouse(Node $spouse) {
+    //filters out unknown or null marriage dates
+    $knownMarriageDates = array_filter($this->marriage_dates, function ($date) {
+        return $date !== null && $date !== 'Unknown date';
+    });
 
     $spouseKnownMarriageDates = array_filter($spouse->marriage_dates, function ($date) {
         return $date !== null && $date !== 'Unknown date';
     });
 
+    //filters out unknown or null divorce dates
     $knownDivorceDates = array_filter($this->divorce_dates, function ($date) {
         return $date !== null && $date !== 'Unknown date';
     });
@@ -73,35 +95,47 @@ class Node {
     $spouseKnownDivorceDates = array_filter($spouse->divorce_dates, function ($date) {
         return $date !== null && $date !== 'Unknown date';
     });
-    //if any marriage/divorce dates empty, assume they are currently married
 
-    if (empty($this->marriage_dates) || empty($spouse->marriage_dates) || empty($this->divorce_dates) || empty($spouse->divorce_dates)) {
+    //assumes current marriage if dates are missing
+    if (empty($this->marriage_dates) || empty($spouse->marriage_dates) || 
+        empty($this->divorce_dates) || empty($spouse->divorce_dates)) {
         return true;
     }
-    //check for intersections for known divorce dates 
 
+    //checks if there's a matching divorce date
     if (!empty(array_intersect($knownDivorceDates, $spouseKnownDivorceDates))) {
         return false;
     }
 
+    //assumes current marriage if marriage dates unknown
     if (empty($knownMarriageDates) || empty($spouseKnownMarriageDates)) {
         return true;
     }
 
+    //finds most recent marriage date for each person
     $latestMarriageDate = max($knownMarriageDates);
     $spouseLatestMarriageDate = max($spouseKnownMarriageDates);
 
-    //if necessary update divorce dates based on latest marriage dates
+    //updates divorce dates if newer marriage exists
     if ($latestMarriageDate < $spouseLatestMarriageDate && empty($knownDivorceDates)) {
         $this->updateSpouseDivorceDate($spouse->id, $spouseLatestMarriageDate);
     } elseif ($spouseLatestMarriageDate < $latestMarriageDate && empty($spouseKnownDivorceDates)) {
         $this->updateSpouseDivorceDate($this->id, $latestMarriageDate);
     }
 
+    //considers marriage current if latest dates match
     return $spouseLatestMarriageDate === $latestMarriageDate;
 }
-    //updates divorce date of spouse if applicable 
+
+   /**
+    * Updates divorce date in database for a specific spouse relationship.
+    * Called when a new marriage indicates previous marriage must have ended.
+    * 
+    * @param int $personId ID of the spouse
+    * @param string $divorceDate Date to set as divorce date
+    */
     private function updateSpouseDivorceDate($personId, $divorceDate) {
+        //finds spouse record checking both possible arrangements of spouse IDs
         $spouseRecord = Spouse::where(function ($query) use ($personId) {
             $query->where(function ($q) use ($personId) {
                 $q->where('first_spouse_id', $this->id)
@@ -111,10 +145,11 @@ class Node {
                 ->where('second_spouse_id', $this->id);
             });
         })->first();
-     //update divorce date if currently null
-    if ($spouseRecord && $spouseRecord->divorce_date === null) {
-        $spouseRecord->update(['divorce_date' => $divorceDate]);
-    }
+ 
+        //updates divorce date if record exists and no divorce date set
+        if ($spouseRecord && $spouseRecord->divorce_date === null) {
+            $spouseRecord->update(['divorce_date' => $divorceDate]);
+        }
     }
     
     //adds a child to current node, updating child id accordingly and adoption status if adopted

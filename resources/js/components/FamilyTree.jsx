@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'; //react modules handling states and effects of components
 import Tree from 'react-d3-tree'; //Uses react-d3-tree package for visual representation of tree structure
 import axios from 'axios'; //used to fetch api data through making http requests
-import Tippy from '@tippyjs/react'; //uses tippyjs package to customise tooltip
-//displays cake icon for birthday celebration
+import Tippy from '@tippyjs/react'; //uses tippyjs package to customise tooltip - https://github.com/atomiks/tippyjs
+//displays cake icon for birthday celebration - https://lucide.dev/icons/cake 
 import { Cake } from 'lucide-react';
-//displays country flags based on birth location
+//displays country flags based on birth location - https://github.com/lazicnemanja/react-country-flags
 import ReactCountryFlag from 'react-country-flag';
 //imports necessary tooltip styling
 import 'tippy.js/dist/tippy.css';

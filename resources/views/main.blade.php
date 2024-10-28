@@ -155,7 +155,7 @@
         }
 
         .footer {
-            background-color: #00796b;
+            background-color: #004d40;
             padding: 10px;
             width: 100%;
             box-sizing: border-box;
@@ -287,6 +287,7 @@
                 <a href="{{ route('feedback.create') }}">Submit Feedback</a>
                 <span class="tooltip-text">Share your thoughts and suggestions to help us improve</span>
             </span>
+            | Designed by <a href="http://www.freepik.com/">FreePik</a>
         </p>
     </footer>
         </div>

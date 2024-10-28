@@ -248,16 +248,20 @@
 
     .home-button.import-gedcom {
         left: 210px;
+        top: 2.5px;
+        height: 37.5px;
     }
 
     .home-button.export-gedcom {
         left: 335px;
-        top: -80px;
+        top: -75px;
+        height: 37.5px;
     }
 
     .home-button.import-gedcom img, .home-button.export-gedcom img {
         width: 30px;
         height: 30px;
+        opacity: 0.5;
     }
 </style>
 </head>

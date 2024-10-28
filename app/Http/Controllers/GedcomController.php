@@ -17,7 +17,7 @@ class GedcomController extends Controller
      * Handles the uploading of GEDCOM files, allowing them to be validated and parsed.
      * 
      * @param Request $request - HTTP request object containing the uploaded GEDCOM file.
-     * @return \Illuminate\Http\RedirectResponse - Redirects back with success message if the uploading and parsing are complete without issues.
+     * @return \Illuminate\Http\RedirectResponse - redirects back with success message if the uploading and parsing are complete without issues.
      */
     public function upload(Request $request) 
     {
@@ -49,7 +49,7 @@ class GedcomController extends Controller
      */
     public function showUploadForm()
     {
-    return view('import'); //view which contains GEDCOM file upload form
+        return view('import'); //view which contains GEDCOM file upload form
     }
 
     /**
@@ -59,32 +59,43 @@ class GedcomController extends Controller
      */
     public function index()
     {
-    //obtain user ID
-    $userId = auth()->user()->id;
-    //find family tree corresponding to user ID
-    $familyTree = FamilyTree::where('user_id', $userId)->first();
-    //returns the view for the homepage and passes the user's family tree ID if it exists to allow for appropriate searching
-    return view('homepage', [
-        'familyTreeId' => $familyTree ? $familyTree->id : null,
+        //obtain user ID
+        $userId = auth()->user()->id;
+        //find family tree corresponding to user ID
+        $familyTree = FamilyTree::where('user_id', $userId)->first();
+        //returns the view for the homepage and passes the user's family tree ID if it exists to allow for appropriate searching
+        return view('homepage', [
+            'familyTreeId' => $familyTree ? $familyTree->id : null,
         ]);
     }
 
+    /**
+     * Exports the user's family tree as a GEDCOM file.
+     * 
+     * @return \Symfony\Component\HttpFoundation\Response - returns the GEDCOM file as a downloadable response.
+     */
     public function export()
     {
-    $userId = auth()->user()->id;
-    $familyTree = FamilyTree::where('user_id', $userId)->first();
+        //obtain user ID
+        $userId = auth()->user()->id;
+        //find family tree corresponding to user ID
+        $familyTree = FamilyTree::where('user_id', $userId)->first();
 
-    if (!$familyTree) {
-        return redirect()->back()->with('error', 'No family tree found for export.');
-    }
+        //if no family tree is found, redirect back with an error message
+        if (!$familyTree) {
+            return redirect()->back()->with('error', 'No family tree found for export.');
+        }
 
-    $exporter = new GedcomExporter();
-    $gedcomContent = $exporter->export($familyTree->id);
+        //create new instance of GedcomExporter and export the family tree
+        $exporter = new GedcomExporter();
+        $gedcomContent = $exporter->export($familyTree->id);
 
-    $filename = 'family_tree_' . $userId . '.ged';
+        //generate filename for the exported GEDCOM file
+        $filename = 'family_tree_' . $userId . '.ged';
 
-    return response($gedcomContent)
-        ->header('Content-Type', 'text/x-gedcom')
-        ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        //return the GEDCOM content as a downloadable file
+        return response($gedcomContent)
+            ->header('Content-Type', 'text/x-gedcom')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 }

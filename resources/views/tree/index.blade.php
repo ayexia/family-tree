@@ -9,9 +9,15 @@
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
 </head>
 <style>
+    .header {
+        font-family: "Inika", serif;
+    }
+
     .profile-button {
         text-decoration: none;
         color: #EDECD7;
+        right:-30px;
+        height: 42.5px;
     }
 
     .home-button {
@@ -20,7 +26,7 @@
         background-color: #00796b;
         color: #EDECD7;
         text-decoration: none;
-        padding: 10px 20px;
+        padding: 10px 25px;
         border-radius: 50px;
         font-size: 0.7em;
         font-weight: bold;
@@ -28,14 +34,17 @@
         margin: 10px;
         font-family: "Inika", serif;
         position: absolute;
-        top: 161.67px;
+        top: 0px;
         left: 12%;
+        width: 120px;
+        height: 40px;
     }
 
     .home-button img {
-        width: 30px;
-        height: 30px;
+        width: 35px;
+        height: 35px;
         margin-right: 20px;
+        opacity: 0.5;
     }
 
     .home-button:hover {
@@ -98,7 +107,7 @@
 
     .search-container p {
         font-family: "Inika", serif;
-        font-size: 0.9em;
+        font-size: 1em;
         color: #EDECD7;
         left: -50px;
         position: relative;
@@ -109,6 +118,7 @@
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
+        font-size: 50px;
     }
 
     .search-input {
@@ -211,7 +221,7 @@
                     <span class="tooltip-text">Edit your profile, logout or delete your account</span>
                 </a>
             </div>
-            <a href="{{ route('home') }}" class="profile-button home-button">
+            <a href="{{ route('home') }}" class="home-button">
                 <img src="{{ asset('images/home.png') }}" alt="Home">
                 Home
             </a>
@@ -221,7 +231,7 @@
     <p>Search for a family member whose information you'd like to see in greater detail.</p>
         <div class="search-input-container">
             <form method="GET" action="{{ route('family.tree', ['familyTreeId' => $familyTreeId ?? '']) }}">
-        <input type="text" id="desiredName" name="desiredName" value="{{ request('desiredName') }}" class="search-input" placeholder="Search">
+        <input type="text" id="desiredName" name="desiredName" value="{{ request('desiredName') }}" class="search-input" placeholder="Search for a family member">
         <button type="submit" class="search-button">
             <img src="{{ asset('images/search.png') }}" alt="Search">
         </button>

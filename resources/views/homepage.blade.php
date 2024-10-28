@@ -10,6 +10,8 @@
     .profile-button {
         text-decoration: none;
         color: #EDECD7;
+        right: -30px;
+        height: 42.5px;
     }
 
     .circle .tooltip {
@@ -65,7 +67,7 @@
         font-family: "Inika", serif;
         text-decoration: none;
         position: absolute;
-        left: -450px;
+        left: -470px;
         top: -112px;
     }
     .admin-button:hover {

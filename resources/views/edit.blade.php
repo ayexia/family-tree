@@ -6,20 +6,21 @@
 <style>
     .profile {
         position: absolute;
-        right: -35%;
-        top: -15%;
+        right: -250px;
+        top: -20%;
     }
 
     .home-button {
         position: absolute;
-        left: -17%;
-        top: 15%;
+        left: -100px;
+        top: -30px;
+        height: 60px;
     }
 
     .back-to-tree-button {
         position: absolute;
-        left: 5%;
-        top: 20%;
+        left: 75px;
+        top: 12.5%;
         background-color: #00796b;
         color: #EDECD7;
         font-family: "Inika", serif;
@@ -38,7 +39,7 @@
     .back-to-tree-button img {
         width: 35px;
         height: 35px;
-        opacity: 0.3;
+        opacity: 0.5;
         margin-right: 10px;
     }
 

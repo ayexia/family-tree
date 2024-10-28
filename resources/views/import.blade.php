@@ -11,13 +11,7 @@
     .profile {
         position: fixed;
         right: 2%;
-        top: 65px;
-    }
-    
-    .home-button {
-        position: fixed;
-        left: 15%;
-        top: 71px;
+        top: 10px;
     }
 
     .custom-background {
@@ -83,10 +77,17 @@
         font-family: "Inika", serif;
     }
 
+    .home-button {
+        position: fixed;
+        left: 180px;
+        top: 8px;
+        height: 60px;
+    }
+
     .back-to-tree-button {
         position: fixed;
-        left: 7.5%;
-        bottom: 100px;
+        left: 80px;
+        top: 80%;
         background-color: #00796b;
         color: #EDECD7;
         font-family: "Inika", serif;
@@ -105,7 +106,7 @@
     .back-to-tree-button img {
         width: 35px;
         height: 35px;
-        opacity: 0.3;
+        opacity: 0.5;
         margin-right: 10px;
     }
 

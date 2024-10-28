@@ -6,20 +6,21 @@
 <style>
     .profile {
         position: absolute;
-        right: -60%;
-        top: -15%;
+        right: -315px;
+        top: -30px;
     }
 
     .home-button {
         position: absolute;
-        left: -35%;
-        top: 15%;
+        left: -160px;
+        top: -30px;
+        height: 60px;
     }
 
     .back-to-tree-button {
         position: absolute;
-        left: 5%;
-        top: 20%;
+        left: 85px;
+        top: 12.5%;
         background-color: #00796b;
         color: #EDECD7;
         font-family: "Inika", serif;
@@ -38,7 +39,7 @@
     .back-to-tree-button img {
         width: 35px;
         height: 35px;
-        opacity: 0.3;
+        opacity: 0.5;
         margin-right: 10px;
     }
 
@@ -268,7 +269,7 @@
             @if($person->image)
                 <img src="{{ asset('storage/' . $person->image) }}" alt="{{ $person->name }}" class="profile-image">
             @else
-                <img src="{{ asset('images/user-profile.png') }}" alt="{{ $person->name }}" class="profile-image">
+                <img src="{{ asset('images/user.png') }}" alt="{{ $person->name }}" class="profile-image">
             @endif
             <a href="{{ route('person.edit', ['id' => $person->id]) }}" class="edit-profile-link">Edit Profile</a>
 

@@ -29,11 +29,19 @@ const GraphSidebar = ({ node, onClose, setImages, images }) => {
     }
   };
 
-  const edit = () => {
+  const handleEdit = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     window.location.href = `/person/${node.id}/edit`;
   };
 
-  const viewProfile = () => {
+  const handleViewProfile = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     window.location.href = `/member/profile/${node.id}`;
   };
 
@@ -110,25 +118,38 @@ const GraphSidebar = ({ node, onClose, setImages, images }) => {
         <h3 style={{ color: '#edecd7' }}>{node.data.name || 'Unknown'}</h3>
         <p><img src={images[node.id] || node.data.image || '/images/user.png'} height={250} width={250} /></p>  
         <div style={{ display: 'flex', flexWrap: 'nowrap', marginTop: '10px', justifyContent: 'space-between' }}>
-          <Tippy content="Upload a new image">
-            <label htmlFor="upload-button" style={buttonStyle}>
-              Upload Image
-            </label>
-          </Tippy>
-          <input id="upload-button" type="file" onChange={uploadImage} style={{ display: 'none' }} />
+        <Tippy content="Upload a new image">
+          <label htmlFor="upload-button" style={buttonStyle}>
+            Upload Image
+          </label>
+        </Tippy>
+        <input 
+          id="upload-button" 
+          type="file" 
+          onChange={uploadImage} 
+          style={{ display: 'none' }} 
+        />
 
-          <Tippy content="Edit details for this person">
-            <button onClick={edit} style={buttonStyle}>
-              Edit Details
-            </button>
+        <Tippy content="Edit details for this person">
+          <button 
+            type="button"
+            onClick={handleEdit}
+            style={buttonStyle}
+          >
+            Edit Details
+          </button>
           </Tippy>
 
-          <Tippy content="View the full profile of this person">
-            <button onClick={viewProfile} style={buttonStyle}>
-              View Profile
-            </button>
-          </Tippy>
-        </div>
+        <Tippy content="View the full profile of this person">
+          <button 
+            type="button"
+            onClick={handleViewProfile}
+            style={buttonStyle}
+          >
+            View Profile
+          </button>
+        </Tippy>
+      </div>
 
         <p style={{ color: '#edecd7' }}>Date of birth: {node.data.birth_date || 'Unknown date'}</p>
         <p style={{ color: '#edecd7' }}>Birthplace: {node.data.birth_place || 'Unknown'}</p>

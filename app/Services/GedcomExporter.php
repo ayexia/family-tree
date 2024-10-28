@@ -17,7 +17,7 @@ class GedcomExporter
     //retrieve all people associated with specified family tree
         $people = Person::where('family_tree_id', $familyTreeId)->get();
         foreach ($people as $person) {
-            $gedcom .= $this->exportPerson($person);//export each person
+            $gedcom .= $this->exportPerson($person); //export each person
         }
 
         //retrieve all families within family tree

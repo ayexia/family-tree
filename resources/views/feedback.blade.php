@@ -6,14 +6,39 @@
 <style>
     .profile {
         position: absolute;
-        right: -35%;
-        top: -15%;
+        right: -310px;
+        top: -30px;
+    }
+    .profile-button {
+        text-decoration: none;
+        color: #EDECD7;
     }
 
     .home-button {
+        display: flex;
+        align-items: center;
+        background-color: #00796b;
+        color: #EDECD7;
+        text-decoration: none;
+        padding: 10px 25px;
+        border-radius: 50px;
+        font-size: 1.5em;
+        font-weight: bold;
+        transition: background-color 0.3s;
+        margin: 10px;
+        font-family: "Inika", serif;
         position: absolute;
-        left: -17%;
-        top: 15%;
+        top: -42px;
+        left: -165px;
+        height: 60px;
+        width: 175px;
+    }
+
+    .home-button img {
+        width: 35px;
+        height: 35px;
+        margin-right: 20px;
+        opacity: 0.5;
     }
 
     .custom-background {
@@ -183,7 +208,7 @@
             </a>
         </div>
     </div>
-    <a href="{{ route('home') }}" class="profile-button home-button">
+    <a href="{{ route('home') }}" class="home-button">
         <img src="{{ asset('images/home.png') }}" alt="Home">
         Home
     </a>

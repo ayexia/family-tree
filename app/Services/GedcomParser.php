@@ -1,12 +1,11 @@
 <?php
 /**
  * php-gedcom is a library for parsing, manipulating, importing and exporting
- * GEDCOM 5.5 files in PHP 5.3+, used for parsing aspects of GEDCOM files in this project.
+ * GEDCOM files in PHP 8.3+, used for parsing aspects of GEDCOM files in this project.
  *
- * @copyright       Copyright (c) 2010-2013, Kristopher Wilson
  * @license         MIT
  *
- * @link            http://github.com/mrkrstphr/php-gedcom
+ * @link            https://github.com/liberu-genealogy/php-gedcom
  */
 namespace App\Services;
 

@@ -29,12 +29,24 @@ const [errorMessage, setErrorMessage] = useState('');
     }
   };
 
-  const edit = () => {
-    window.location.href = `/person/${node.id}/edit`;
+  const handleEdit = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setTimeout(() => {
+      window.location.href = `/person/${node.id}/edit`;
+    }, 0);
   };
 
-  const viewProfile = () => {
-    window.location.href = `/member/profile/${node.id}`;
+  const handleViewProfile = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setTimeout(() => {
+      window.location.href = `/member/profile/${node.id}`;
+    }, 0);
   };
 
   const isBirthday = (birthDate) => {
@@ -77,20 +89,28 @@ const [errorMessage, setErrorMessage] = useState('');
       overflowY: 'auto',
       transition: 'transform .3s',
       transform: 'translate(0px)',
-      zIndex: '500',
+      zIndex: 500,
     }}>
-      <button onClick={onClose} style={{
-        backgroundColor: '#004d40',
-        color: '#edecd7',
-        border: 'none',
-        padding: '10px',
-        cursor: 'pointer',
-        position: 'absolute',
-        top: '10px',
-        right: '10px',
-        borderRadius: '5px',
-        zIndex: 1,
-      }}>
+      <button 
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onClose();
+        }} 
+        style={{
+          backgroundColor: '#004d40',
+          color: '#edecd7',
+          border: 'none',
+          padding: '10px',
+          cursor: 'pointer',
+          position: 'absolute',
+          top: '10px',
+          right: '10px',
+          borderRadius: '5px',
+          zIndex: 1,
+        }}
+      >
         &times;
       </button>
       <div style={{ padding: '20px' }}>
@@ -116,16 +136,29 @@ const [errorMessage, setErrorMessage] = useState('');
               Upload Image
             </label>
           </Tippy>
-          <input id="upload-button" type="file" onChange={uploadImage} style={{ display: 'none' }} />
+          <input 
+            id="upload-button" 
+            type="file" 
+            onChange={uploadImage} 
+            style={{ display: 'none' }} 
+          />
 
           <Tippy content="Edit details for this person">
-            <button onClick={edit} style={buttonStyle}>
+            <button 
+              type="button"
+              onClick={handleEdit}
+              style={buttonStyle}
+            >
               Edit Details
             </button>
           </Tippy>
 
           <Tippy content="View the full profile of this person">
-            <button onClick={viewProfile} style={buttonStyle}>
+            <button 
+              type="button"
+              onClick={handleViewProfile}
+              style={buttonStyle}
+            >
               View Profile
             </button>
           </Tippy>

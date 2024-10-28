@@ -101,7 +101,7 @@ const App = () => {
     const imgStyle = {
         width: '18px',
         height: '18px',
-        opacity: 0.8,
+        opacity: 0.5,
     };
 
     const controlsContainer = {

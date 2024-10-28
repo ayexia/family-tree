@@ -15,6 +15,8 @@
     .profile-button {
         text-decoration: none;
         color: #EDECD7;
+        height: 40px;
+        right: -40px;
     }
 
     .home-button {
@@ -23,7 +25,7 @@
         background-color: #00796b;
         color: #EDECD7;
         text-decoration: none;
-        padding: 10px 20px;
+        padding: 10px 25px;
         border-radius: 50px;
         font-size: 0.7em;
         font-weight: bold;
@@ -32,13 +34,16 @@
         font-family: "Inika", serif;
         position: absolute;
         top: 0px;
-        left: 100px;
+        left: 130px;
+        height: 40px;
+        width: 120px;
     }
 
     .home-button img {
-        width: 30px;
-        height: 30px;
+        width: 35px;
+        height: 35px;
         margin-right: 20px;
+        opacity: 0.5;
     }
 
     .home-button:hover {
@@ -223,7 +228,7 @@
         font-weight: bold;
         cursor: pointer;
         position: absolute;
-        left: 200px;
+        left: 230px;
         top: 5px;
         transition: none;
         z-index: 1000;
@@ -300,6 +305,7 @@
         bottom: 100%;
         top: auto;
         margin-bottom: 5px;
+        font-size: 0.8em;
     }
 
     .tooltip-trigger .tooltip-text::after {
@@ -333,7 +339,7 @@
                     <span class="tooltip-text">Edit your profile, logout or delete your account</span>
                 </a>
             </div>
-            <a href="{{ route('home') }}" class="profile-button home-button">
+            <a href="{{ route('home') }}" class="home-button">
                 <img src="{{ asset('images/home.png') }}" alt="Home">
                 Home
             </a>

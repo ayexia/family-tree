@@ -97,10 +97,8 @@ class GedcomParser
             }
         }
         //Alternative manual parsing for relationships
-        $counter = 0;
             $fileContent = file_get_contents($filePath); //reads file into string
             $lines = explode("\n", $fileContent); //splits string via delimiter "\n" (new line)
-            $counter++;
         //for loop going through each split line
             foreach ($lines as $line) {
                 $line = trim($line); //removes whitespaces from beginning and end of line

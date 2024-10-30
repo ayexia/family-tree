@@ -17,7 +17,7 @@ const DEFAULT_LINE_STYLES = {
     adopted: { color: '#FFA500', width: 5, dashArray: '10,5' },     //dashed orange line for adopted
     nodeMale: { color: '#97EBE6' },    //light blue for male nodes
     nodeFemale: { color: '#EB97CF' },  //pink for female nodes
-    nodeOther: { color: '#EBC097' }    //neutral color for other gender
+    nodeOther: { color: '#EBC097' }    //neutral colour for other gender
 };
 
 //main application component
@@ -161,7 +161,7 @@ const App = () => {
         width: '90%'
     };
 
-    //style for line style customization container
+    //style for line style customisation container
 const lineStyleContainer = {
     display: 'flex',
     flexDirection: 'column',
@@ -326,7 +326,7 @@ const lineStyleContainer = {
                            }[key];
                            const style = lineStyles[key];
                            return (
-                               //container for each line style customization
+                               //container for each line style customisation
                                <div key={key} style={{...lineStyleContainer, marginBottom: '1px'}}>
                                    <label style={{fontSize: '0.65em'}}>{type}</label>
                                    <div style={lineStyleInputs}>

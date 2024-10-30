@@ -268,7 +268,7 @@
     <div class="bg-white dark:bg-gray-800 overflow-hidden" style="box-shadow: none; padding: 2rem;">
         <div class="profile-info">
             @if($person->image)
-                <img src="{{ asset('storage/' . $person->image) }}" alt="{{ $person->name }}" class="profile-image">
+                <img src="{{ asset('storage/app/public/' . $person->image) }}" alt="{{ $person->name }}" class="profile-image">
             @else
                 <img src="{{ asset('images/user.png') }}" alt="{{ $person->name }}" class="profile-image">
             @endif

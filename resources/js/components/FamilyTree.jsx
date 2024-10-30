@@ -326,12 +326,26 @@ const FamilyTree = ({ generations, lineStyles, desiredName }) => {
                   //container for spouse nodes
                   <g>
                       {spouses.map((spouse, index) => {
-                          //calculates positioning for multiple spouses
-                          const isFirstRow = index < 2;
-                          const isLeft = index % 2 === 0;
-                          const row = isFirstRow ? 0 : Math.floor((index - 2) / 2) + 1;
-                          const horizontalPosition = isFirstRow ? (isLeft ? -spouseSpacing : spouseSpacing) : (isLeft ? -spouseSpacing : spouseSpacing);
-                          const verticalPosition = isFirstRow ? 0 : row * verticalSpacing;
+                          // Position Calculation:
+                            const isFirstRow = index < 2;  // First two spouses go in first row
+                            const isLeft = index % 2 === 0;  // Alternates between left and right
+                            const row = isFirstRow ? 0 : Math.floor((index - 2) / 2) + 1;  // Calculates which row for 3+ spouses
+
+                            // Example:
+                            // Spouse 0: First row, left  (-spaceSpacing, 0)
+                            // Spouse 1: First row, right (+spaceSpacing, 0)
+                            // Spouse 3: Second row, left (-spaceSpacing, verticalSpacing)
+                            // Spouse 4: Second row, right (+spaceSpacing, verticalSpacing)
+
+                            // Position Calculation:
+                            const horizontalPosition = isFirstRow 
+                                ? (isLeft ? -spouseSpacing : spouseSpacing)  // First row: alternate left/right
+                                : (isLeft ? -spouseSpacing : spaceSpacing);  // Other rows: same pattern
+
+                            const verticalPosition = isFirstRow 
+                                ? 0  // First row: no vertical offset
+                                : row * verticalSpacing;  // Other rows: offset based on row number
+
                           //checks if spouse matches search term
                           const isSpouseHighlighted = highlightedPerson && spouse.name.toLowerCase().includes(highlightedPerson);
                           //determines line style based on marriage status
@@ -362,13 +376,16 @@ const FamilyTree = ({ generations, lineStyles, desiredName }) => {
                                 }}
                             >
                                 <line
+                                    // Starting point of line
                                     x1={isFirstRow ? (isLeft ? (spouseSpacing - line) : (-spouseSpacing + line)) : 0}
                                     y1={0}
+                                    // Ending point of line
                                     x2={isFirstRow ? (isLeft ? (line) : (-line)) : 0}
                                     y2={-verticalPosition}
-                                    stroke={spouseLineStyle.color}
+                                    // Line styling based on relationship
+                                    stroke={spouseLineStyle.color}  // Red for current, Grey for divorced
                                     strokeWidth={spouseLineStyle.width}
-                                    strokestrokeDasharray={spouseLineStyle.dashArray}
+                                    strokestrokeDasharray={spouseLineStyle.dashArray}  // Solid or dashed
                                 />
                                 {spouseNodeShape === 'circle' ? (
                                     //renders circular node for non-adopted spouses

@@ -33,6 +33,7 @@ const cityToCountryCode = {
   'New York': 'US',
   'Stratford-upon-Avon': 'GB',
   'Shottery, Warwickshire': 'GB',
+  'Aston': 'GB',
   'Paris': 'FR',
 };
 
